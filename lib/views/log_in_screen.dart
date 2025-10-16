@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/widgets/healix_text_field.dart';
 import 'package:test_splash/widgets/social_button.dart';
+import 'package:test_splash/widgets/healix_primary_button.dart';
 import 'package:test_splash/views/sign_up_screen.dart';
 
 class LogInScreen extends StatefulWidget {
@@ -96,26 +97,12 @@ class _LogInScreenState extends State<LogInScreen> {
               Gap(50 * h),
 
               // 🟣 Log In Button
-              SizedBox(
-                width: double.infinity,
+              HealixPrimaryButton(
+                text: "Log In",
+                onPressed: () {}, // TODO: Add login logic
                 height: 60 * h,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primarayColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(80 * scale),
-                    ),
-                  ),
-                  onPressed: () {},
-                  child: Text(
-                    "Log In",
-                    style: GoogleFonts.inriaSans(
-                      fontSize: 20 * scale,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                fontSize: 20 * scale,
+                borderRadius: 80 * scale,
               ),
 
               Gap(30 * h),
