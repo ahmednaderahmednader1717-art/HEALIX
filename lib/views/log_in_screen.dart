@@ -76,7 +76,6 @@ class _LogInScreenState extends State<LogInScreen> {
               Gap(10 * h),
               const SizedBox(height: 0),
               HealixTextField(controller: _emailController, hint: "Username"),
-
               Gap(25 * h),
 
               // 🟣 Password
@@ -92,6 +91,20 @@ class _LogInScreenState extends State<LogInScreen> {
                 controller: _passwordController,
                 hint: "Password",
                 isPassword: true,
+              ),
+              Gap(10 * h),
+              Align( //FORGOT PASSWORD? TEXT BTN
+                alignment: AlignmentGeometry.centerRight,
+                child: TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    "Forgot Password?",
+                    style: GoogleFonts.inriaSans(
+                      fontSize: 17 * scale,
+                      color: const Color.fromARGB(255, 169, 169, 169),
+                    ),
+                  )
+                ),
               ),
 
               Gap(50 * h),
@@ -138,7 +151,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 size: scale,
                 backgroundColor: Colors.white.withOpacity(0.08),
                 onPressed: () {
-                  debugPrint("Google Sign In Clicked");
+                  // TODO SIGN IN WITH GOOGLE LOGIC HERE
                 },
               ),
 
@@ -151,7 +164,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 size: scale,
                 backgroundColor: Colors.white.withOpacity(0.08),
                 onPressed: () {
-                  debugPrint("Apple Sign In Clicked");
+                  // TODO SIGN IN WITH APPLE LOGIC HERE
                 },
               ),
 
@@ -195,6 +208,4 @@ class _LogInScreenState extends State<LogInScreen> {
       ),
     );
   }
-
-  // الويدجتات المخصصة تم نقلها إلى lib/widgets
 }
