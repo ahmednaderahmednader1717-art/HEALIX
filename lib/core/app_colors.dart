@@ -2,4 +2,5 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   static const primarayColor = Color(0xFF0083B0);
+  static const secondaryColor = Color.fromARGB(255, 97, 97, 97);
 }
