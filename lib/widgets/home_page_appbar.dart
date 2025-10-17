@@ -5,16 +5,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
 
 class HomePageAppBar extends StatelessWidget {
+  final double toolbarHeight;
+  final double w;
+  final double scale;
+  final String userName; // <--- الاسم هنا
+
   const HomePageAppBar({
     super.key,
     required this.toolbarHeight,
     required this.w,
     required this.scale,
+    required this.userName,
   });
-
-  final double toolbarHeight;
-  final double w;
-  final double scale;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +47,7 @@ class HomePageAppBar extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Hi Ahmed",
+                          "Hi $userName", // <--- عرض الاسم
                           style: GoogleFonts.inriaSans(
                             color: Colors.white,
                             fontSize: 18 * scale,

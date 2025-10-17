@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-// ignore: unused_import
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/nutrient.dart';
@@ -10,7 +9,9 @@ import 'package:test_splash/widgets/charts_widget.dart';
 import 'package:test_splash/widgets/home_page_appbar.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String userName; // الاسم الكامل من الـ API
+
+  const HomeScreen({super.key, required this.userName});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -18,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _showAllGoals = false;
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -49,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Gap(24 * h),
                 _SectionTitle(
-                  title: "Welcome Back!",
+                  title: "Welcome Back!", // عرض الاسم هنا
                   subtitle: "Track your day smartly",
                   scale: scale,
                 ),
@@ -118,7 +120,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          HomePageAppBar(toolbarHeight: toolbarHeight, w: w, scale: scale),
+          HomePageAppBar(
+            toolbarHeight: toolbarHeight,
+            w: w,
+            scale: scale,
+            userName: widget.userName, // عرض الاسم في AppBar
+          ),
         ],
       ),
     );

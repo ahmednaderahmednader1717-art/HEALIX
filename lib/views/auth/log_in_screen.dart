@@ -43,19 +43,20 @@ class _LogInScreenState extends State<LogInScreen> {
       );
 
       if (response.statusCode == 200) {
-        // نجاح تسجيل الدخول
+        // استخراج الاسم الكامل من البيانات
+        final fullName =
+            response.data['user']['fullName'] ?? _emailController.text.trim();
+
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => HomeScreen(userName: fullName)),
         );
       } else {
-        // فشل تسجيل الدخول
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("Login failed")));
       }
     } catch (e) {
-      // خطأ بالشبكة أو السيرفر
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error: $e")));
@@ -151,7 +152,7 @@ class _LogInScreenState extends State<LogInScreen> {
               // Log In Button
               HealixPrimaryButton(
                 text: _loading ? "Logging In..." : "Log In",
-                onPressed: () => login(),
+                onPressed: login,
                 height: 60 * h,
                 fontSize: 20 * scale,
                 borderRadius: 80 * scale,
