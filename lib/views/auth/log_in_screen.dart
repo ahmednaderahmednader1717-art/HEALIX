@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:dio/dio.dart';
 import 'package:test_splash/core/app_colors.dart';
+import 'package:test_splash/views/home/home_screen.dart';
 import 'package:test_splash/widgets/healix_text_field.dart';
 import 'package:test_splash/widgets/social_button.dart';
 import 'package:test_splash/widgets/healix_primary_button.dart';
-import 'package:test_splash/views/sign_up_screen.dart';
+import 'package:test_splash/views/auth/sign_up_screen.dart';
 
 class LogInScreen extends StatefulWidget {
   const LogInScreen({super.key});
@@ -19,6 +21,48 @@ class LogInScreen extends StatefulWidget {
 class _LogInScreenState extends State<LogInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _loading = false;
+
+  // Dio instance
+  final Dio dio = Dio(
+    BaseOptions(
+      baseUrl: "https://unimmaculately-roentgenologic-darrell.ngrok-free.dev",
+      headers: {"Content-Type": "application/json"},
+    ),
+  );
+
+  Future<void> login() async {
+    setState(() => _loading = true);
+    try {
+      final response = await dio.post(
+        "/api/Auth/signin",
+        data: {
+          "username": _emailController.text.trim(),
+          "password": _passwordController.text.trim(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // نجاح تسجيل الدخول
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      } else {
+        // فشل تسجيل الدخول
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Login failed")));
+      }
+    } catch (e) {
+      // خطأ بالشبكة أو السيرفر
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +108,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
               ),
               Gap(40 * h),
-
-              // 🟣 Username
+              // Username
               Text(
                 "Enter Your Username",
                 style: GoogleFonts.inriaSans(
@@ -74,11 +117,9 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
               ),
               Gap(10 * h),
-              const SizedBox(height: 0),
               HealixTextField(controller: _emailController, hint: "Username"),
               Gap(25 * h),
-
-              // 🟣 Password
+              // Password
               Text(
                 "Enter Your Password",
                 style: GoogleFonts.inriaSans(
@@ -93,8 +134,8 @@ class _LogInScreenState extends State<LogInScreen> {
                 isPassword: true,
               ),
               Gap(10 * h),
-              Align( //FORGOT PASSWORD? TEXT BTN
-                alignment: AlignmentGeometry.centerRight,
+              Align(
+                alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {},
                   child: Text(
@@ -103,23 +144,19 @@ class _LogInScreenState extends State<LogInScreen> {
                       fontSize: 17 * scale,
                       color: const Color.fromARGB(255, 169, 169, 169),
                     ),
-                  )
+                  ),
                 ),
               ),
-
               Gap(50 * h),
-
-              // 🟣 Log In Button
+              // Log In Button
               HealixPrimaryButton(
-                text: "Log In",
-                onPressed: () {}, // TODO: Add login logic
+                text: _loading ? "Logging In..." : "Log In",
+                onPressed: () => login(),
                 height: 60 * h,
                 fontSize: 20 * scale,
                 borderRadius: 80 * scale,
               ),
-
               Gap(30 * h),
-
               // Divider
               Row(
                 children: [
@@ -141,36 +178,26 @@ class _LogInScreenState extends State<LogInScreen> {
                   ),
                 ],
               ),
-
               Gap(25 * h),
-
-              // 🟢 Google Sign In Button
+              // Google Sign In
               SocialElevatedButton(
                 text: "Sign in with Google",
                 imagePath: "assets/icons/google.png",
                 size: scale,
                 backgroundColor: Colors.white.withOpacity(0.08),
-                onPressed: () {
-                  // TODO SIGN IN WITH GOOGLE LOGIC HERE
-                },
+                onPressed: () {},
               ),
-
               Gap(15 * h),
-
-              // ⚪ Apple Sign In Button
+              // Apple Sign In
               SocialElevatedButton(
                 text: "Sign in with Apple",
                 imagePath: "assets/icons/apple.png",
                 size: scale,
                 backgroundColor: Colors.white.withOpacity(0.08),
-                onPressed: () {
-                  // TODO SIGN IN WITH APPLE LOGIC HERE
-                },
+                onPressed: () {},
               ),
-
               Gap(40 * h),
-
-              // 🟣 Sign Up Text
+              // Sign Up Text
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

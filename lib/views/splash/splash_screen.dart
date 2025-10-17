@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/widgets/healix_logo.dart';
-import 'package:test_splash/views/welcome_screen.dart';
+import 'package:test_splash/views/splash/welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
