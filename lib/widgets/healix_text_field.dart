@@ -50,7 +50,7 @@ class _HealixTextFieldState extends State<HealixTextField> {
           borderRadius: BorderRadius.all(Radius.circular(15)),
           borderSide: BorderSide(color: AppColors.primarayColor, width: 1.2),
         ),
-        // تحسين مكان الأيقونة
+        // ايقونة العين
         suffixIcon: widget.isPassword
             ? Padding(
                 padding: const EdgeInsets.only(right: 12.0),

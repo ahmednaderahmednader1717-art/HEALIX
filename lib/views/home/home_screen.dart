@@ -150,7 +150,7 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: GoogleFonts.inriaSans(
             color: Colors.white,
             fontSize: 24 * scale,
             fontWeight: FontWeight.bold,
@@ -228,7 +228,7 @@ class _RowHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: GoogleFonts.inriaSans(
             color: Colors.white,
             fontSize: 18 * scale,
             fontWeight: FontWeight.w700,
