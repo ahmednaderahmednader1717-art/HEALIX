@@ -7,9 +7,14 @@ import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/widgets/healix_primary_button.dart';
 import 'package:test_splash/widgets/social_button.dart';
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -44,96 +49,98 @@ class SignUpScreen extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25),
-        child: Column(
-          children: [
-            Gap(250 * h),
-            Text(
-              "Welcome! Let's customize\nHEALIX for your goals.",
-              style: GoogleFonts.inriaSans(
-                color: Colors.white,
-                fontSize: 30 * scale,
-                fontWeight: FontWeight.bold,
+        padding: EdgeInsets.symmetric(horizontal: 25 * w),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Gap(240 * h),
+              Text(
+                "Welcome! Let's customize\nHEALIX for your goals.",
+                style: GoogleFonts.inriaSans(
+                  color: Colors.white,
+                  fontSize: 30 * scale,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Gap(h * 20),
-            HealixPrimaryButton(
-              text: "Continue",
-              borderRadius: scale * 5,
-              onPressed: () {},
-            ),
-            Gap(h * 20),
-            Text(
-              "OR",
-              style: GoogleFonts.inriaSans(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: scale * 20,
+              Gap(h * 20),
+              HealixPrimaryButton(
+                text: "Continue",
+                borderRadius: scale * 5,
+                onPressed: () {},
               ),
-            ),
-            Gap(h * 20),
-            SocialElevatedButton(
-              text: "Continue with Google",
-              imagePath: "assets/icons/google.png",
-              size: scale,
-              backgroundColor: Colors.white.withOpacity(0.08),
-              onPressed: () {
-                // TODO SIGN IN WITH GOOGLE LOGIC HERE
-              },
-            ),
-            Gap(h * 10),
-            SocialElevatedButton(
-              text: "Sign in with Apple",
-              imagePath: "assets/icons/apple.png",
-              size: scale,
-              backgroundColor: Colors.white.withOpacity(0.08),
-              onPressed: () {
-                // TODO SIGN IN WITH APPLE LOGIC HERE
-              },
-            ),
-            Gap(50 * h),
-            Column(
-              children: [
-                Text(
-                  "We will collect personal information from and about\n you and use it for various purposes, including to\n customize your HEALIX experience. Read more\nabout the purposes, our practices, your choices, and",
-                  style: GoogleFonts.inriaSans(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15 * scale,
-                  ),
+              Gap(h * 20),
+              Text(
+                "OR",
+                style: GoogleFonts.inriaSans(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: scale * 20,
                 ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "your rights in our ",
-                  style: GoogleFonts.inriaSans(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15 * scale,
+              ),
+              Gap(h * 20),
+              SocialElevatedButton(
+                text: "Continue with Google",
+                imagePath: "assets/icons/google.png",
+                size: scale,
+                backgroundColor: Colors.white.withOpacity(0.08),
+                onPressed: () {
+                  // TODO SIGN IN WITH GOOGLE LOGIC HERE
+                },
+              ),
+              Gap(h * 10),
+              SocialElevatedButton(
+                text: "Sign in with Apple",
+                imagePath: "assets/icons/apple.png",
+                size: scale,
+                backgroundColor: Colors.white.withOpacity(0.08),
+                onPressed: () {
+                  // TODO SIGN IN WITH APPLE LOGIC HERE
+                },
+              ),
+              Gap(50 * h),
+              Column(
+                children: [
+                  Text(
+                    "We will collect personal information from and about\n you and use it for various purposes, including to\n customize your HEALIX experience. Read more\nabout the purposes, our practices, your choices, and",
+                    style: GoogleFonts.inriaSans(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15 * scale,
+                    ),
                   ),
-                ),
-                Text(
-                  "Privacy Policy",
-                  style: GoogleFonts.inriaSans(
-                    color: AppColors.primarayColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15 * scale,
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "your rights in our ",
+                    style: GoogleFonts.inriaSans(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15 * scale,
+                    ),
                   ),
-                ),
-                Text(
-                  ".",
-                  style: GoogleFonts.inriaSans(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15 * scale,
+                  Text(
+                    "Privacy Policy",
+                    style: GoogleFonts.inriaSans(
+                      color: AppColors.primarayColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15 * scale,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  Text(
+                    ".",
+                    style: GoogleFonts.inriaSans(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15 * scale,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
