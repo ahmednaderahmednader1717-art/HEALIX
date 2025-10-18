@@ -46,10 +46,9 @@ class _LogInScreenState extends State<LogInScreen> {
         // استخراج الاسم الكامل من البيانات
         final fullName =
             response.data['user']['fullName'] ?? _emailController.text.trim();
-
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => HomeScreen(userName: fullName)),
+          MaterialPageRoute(builder: (_) => HomeScreen(fullName)),
         );
       } else {
         ScaffoldMessenger.of(
@@ -59,7 +58,7 @@ class _LogInScreenState extends State<LogInScreen> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ).showSnackBar(SnackBar(content: Text("Error: Wrong Username Or Password")));
     } finally {
       setState(() => _loading = false);
     }
@@ -150,6 +149,20 @@ class _LogInScreenState extends State<LogInScreen> {
               ),
               Gap(50 * h),
               // Log In Button
+              // HealixPrimaryButton(
+              //   text: _loading ? "Logging In..." : "Log In",
+              //   onPressed: () {
+              //     Navigator.pushReplacement(
+              //         context,
+              //       MaterialPageRoute(
+              //         builder: (_) =>  HomeScreen(""),
+              //       ),
+              //     );
+              //   },
+              //   height: 60 * h,
+              //   fontSize: 20 * scale,
+              //   borderRadius: 80 * scale,
+              // ),
               HealixPrimaryButton(
                 text: _loading ? "Logging In..." : "Log In",
                 onPressed: login,

@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AppleRingCard extends StatelessWidget {
+class AppleRingCard extends StatefulWidget {
   final String title;
   final double value;
   final Color color;
-  final double width; // legacy (ignored for layout, kept for backward compat)
-  final double height; // legacy (ignored for layout, kept for backward compat)
   final double scale;
 
   const AppleRingCard({
@@ -16,10 +14,51 @@ class AppleRingCard extends StatelessWidget {
     required this.title,
     required this.value,
     required this.color,
-    this.width = 180,
-    this.height = 220,
     this.scale = 1.0,
   });
+
+  @override
+  State<AppleRingCard> createState() => _AppleRingCardState();
+}
+
+class _AppleRingCardState extends State<AppleRingCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    );
+
+    _animation = Tween<double>(
+      begin: 0,
+      end: widget.value,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant AppleRingCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _animation = Tween<double>(begin: 0, end: widget.value).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+      );
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +66,12 @@ class AppleRingCard extends StatelessWidget {
       builder: (context, constraints) {
         final cardWidth = constraints.maxWidth;
         final cardHeight = constraints.maxHeight;
-        // اضبط scale داخلي خفيف حسب العرض المتاح للحفاظ على التوازن
         final internalScale = (cardWidth / 180).clamp(0.75, 1.1);
 
         return Container(
           decoration: BoxDecoration(
             color: const Color(0xFF2C2C2E),
-            borderRadius: BorderRadius.circular(22 * scale),
+            borderRadius: BorderRadius.circular(22 * widget.scale),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.3),
@@ -45,22 +83,27 @@ class AppleRingCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Gap(15 * scale),
-              CustomPaint(
-                size: Size(
-                  cardWidth * (0.60 * internalScale),
-                  cardHeight * (0.24 * internalScale),
-                ),
-                painter: AppleBottomLabelRingPainter(
-                  progress: value,
-                  color: color,
-                ),
+              Gap(15 * widget.scale),
+              AnimatedBuilder(
+                animation: _animation,
+                builder: (context, _) {
+                  return CustomPaint(
+                    size: Size(
+                      cardWidth * (0.60 * internalScale),
+                      cardHeight * (0.24 * internalScale),
+                    ),
+                    painter: AppleBottomLabelRingPainter(
+                      progress: _animation.value,
+                      color: widget.color,
+                    ),
+                  );
+                },
               ),
               SizedBox(height: cardHeight * 0.012),
               Column(
                 children: [
                   Text(
-                    title,
+                    widget.title,
                     style: GoogleFonts.inriaSans(
                       color: Colors.white,
                       fontSize: cardHeight * 0.090 * internalScale,
@@ -68,11 +111,14 @@ class AppleRingCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: cardHeight * 0.005),
-                  Text(
-                    "${(value * 100).toInt()}%",
-                    style: GoogleFonts.inriaSans(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: cardHeight * 0.085 * internalScale,
+                  AnimatedBuilder(
+                    animation: _animation,
+                    builder: (context, _) => Text(
+                      "${(_animation.value * 100).toInt()}%",
+                      style: GoogleFonts.inriaSans(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: cardHeight * 0.085 * internalScale,
+                      ),
                     ),
                   ),
                 ],
@@ -93,13 +139,12 @@ class AppleBottomLabelRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final strokeWidth = 22.0; // سمك أكبر كما طلبت
+    final strokeWidth = 22.0;
     final center = Offset(size.width / 2, size.height);
     final radius = size.width / 2 - strokeWidth / 2;
 
-    const totalAngle = 4 * pi / 3; // 240° تقريباً
+    const totalAngle = 4 * pi / 3;
 
-    // الخلفية الرمادية
     final backgroundPaint = Paint()
       ..color = Colors.grey.shade700
       ..style = PaintingStyle.stroke
@@ -114,7 +159,6 @@ class AppleBottomLabelRingPainter extends CustomPainter {
       backgroundPaint,
     );
 
-    // Gradient للحلقة الملونة
     final gradient = SweepGradient(
       startAngle: pi + (pi - totalAngle) / 2,
       endAngle: pi + (pi - totalAngle) / 2 + totalAngle,
@@ -130,7 +174,6 @@ class AppleBottomLabelRingPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    // Glow أقوى حول الحلقة
     final glowPaint = Paint()
       ..color = color.withOpacity(0.55)
       ..style = PaintingStyle.stroke
@@ -139,7 +182,6 @@ class AppleBottomLabelRingPainter extends CustomPainter {
 
     final sweepFilled = totalAngle * progress;
 
-    // ارسم التوهج
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       pi + (pi - totalAngle) / 2,
@@ -148,7 +190,6 @@ class AppleBottomLabelRingPainter extends CustomPainter {
       glowPaint,
     );
 
-    // ارسم الحلقة الملونة
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       pi + (pi - totalAngle) / 2,
