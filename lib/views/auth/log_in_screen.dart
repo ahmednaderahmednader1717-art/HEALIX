@@ -149,27 +149,27 @@ class _LogInScreenState extends State<LogInScreen> {
               ),
               Gap(50 * h),
               // Log In Button
-              // HealixPrimaryButton(
-              //   text: _loading ? "Logging In..." : "Log In",
-              //   onPressed: () {
-              //     Navigator.pushReplacement(
-              //         context,
-              //       MaterialPageRoute(
-              //         builder: (_) =>  HomeScreen(""),
-              //       ),
-              //     );
-              //   },
-              //   height: 60 * h,
-              //   fontSize: 20 * scale,
-              //   borderRadius: 80 * scale,
-              // ),
               HealixPrimaryButton(
                 text: _loading ? "Logging In..." : "Log In",
-                onPressed: login,
+                onPressed: () {
+                  Navigator.pushReplacement(
+                      context,
+                    MaterialPageRoute(
+                      builder: (_) =>  HomeScreen(""),
+                    ),
+                  );
+                },
                 height: 60 * h,
                 fontSize: 20 * scale,
                 borderRadius: 80 * scale,
               ),
+              // HealixPrimaryButton(
+              //   text: _loading ? "Logging In..." : "Log In",
+              //   onPressed: login,
+              //   height: 60 * h,
+              //   fontSize: 20 * scale,
+              //   borderRadius: 80 * scale,
+              // ),
               Gap(30 * h),
               // Divider
               Row(

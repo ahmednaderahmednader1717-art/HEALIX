@@ -59,10 +59,12 @@ late final List<Widget> _pages = [
 
       // شريط التنقل السفلي
       bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Colors.transparent,
+        iconPadding: 8,
+        backgroundColor: const Color.fromARGB(153, 0, 0, 0).withValues(alpha: 0.60),
         color: AppColors.ContainerColor,
         buttonBackgroundColor: AppColors.primarayColor,
-        height: 60,
+        animationDuration: Duration(milliseconds: 400),
+        height: 80,
         items: [
           CurvedNavigationBarItem(
             child: const Icon(Icons.home, color: Colors.white, size: 35),

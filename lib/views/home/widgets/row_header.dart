@@ -4,7 +4,7 @@ import 'package:test_splash/core/app_colors.dart';
 class RowHeader extends StatelessWidget {
   final String title;
   final String actionText;
-  final VoidCallback onAction;
+  final VoidCallback? onAction;
   final double scale;
   const RowHeader({
     required this.title,

@@ -106,7 +106,7 @@ class _AppleRingCardState extends State<AppleRingCard>
                     widget.title,
                     style: GoogleFonts.inriaSans(
                       color: Colors.white,
-                      fontSize: cardHeight * 0.090 * internalScale,
+                      fontSize: cardHeight * 0.080 * internalScale,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

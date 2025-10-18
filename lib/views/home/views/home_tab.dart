@@ -9,7 +9,7 @@ import 'package:test_splash/views/home/widgets/row_header.dart';
 import 'package:test_splash/views/home/widgets/section_tile.dart';
 
 class HomeTab extends StatefulWidget {
-  final void Function(int)? onTabChange; // ✅ callback لتبديل التبويب
+  final void Function(int)? onTabChange;
 
   const HomeTab({super.key, this.onTabChange});
 
@@ -18,7 +18,7 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  bool _showAllGoals = true;
+  bool _showAllGoals = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,31 +31,45 @@ class _HomeTabState extends State<HomeTab> {
     final scale = min(w, h);
     final double toolbarHeight = 80 * h;
 
-    // ✅ إعداد grid responsive
+    // ✅ إعداد الـ Grid حسب حجم الشاشة
     int crossAxisCount;
     double childAspectRatio;
 
     if (screenWidth < 600) {
-      // موبايل
-      crossAxisCount = 2;
+      crossAxisCount = 2; // موبايل
       childAspectRatio = 1.4;
     } else if (screenWidth < 900) {
-      // تابلت صغير
-      crossAxisCount = 3;
+      crossAxisCount = 3; // تابلت صغير
       childAspectRatio = 1.2;
     } else if (screenWidth < 1200) {
-      // تابلت كبير / شاشة متوسطة
+      crossAxisCount = 4;
+      childAspectRatio = 1.5;
+    } else {
       crossAxisCount = 4;
       childAspectRatio = 1.3;
-    } else {
-      // شاشة كبيرة جدًا
-      crossAxisCount = 5;
-      childAspectRatio = 1.4;
     }
 
+    // ✅ عدد العناصر المبدئية حسب حجم الشاشة
+    int defaultGoals;
+    if (screenWidth < 600) {
+      defaultGoals = 2; // موبايل
+    } else if (screenWidth < 900) {
+      defaultGoals = 3; // تابلت صغير
+    } else {
+      defaultGoals = Nutrient.nutrients.length; // شاشات كبيرة = الكل
+    }
+
+    // ✅ تحديد عدد العناصر المعروضة
     final goalsToShow = _showAllGoals
         ? Nutrient.nutrients.length
-        : (Nutrient.nutrients.length >= 2 ? 2 : Nutrient.nutrients.length);
+        : (Nutrient.nutrients.length >= defaultGoals
+              ? defaultGoals
+              : Nutrient.nutrients.length);
+
+    // ✅ هل نعرض زر View All؟
+    final bool showActionButton =
+        Nutrient.nutrients.length >
+        defaultGoals; // لو عندي عناصر أكثر من اللي ظاهرين
 
     return Stack(
       children: [
@@ -83,10 +97,14 @@ class _HomeTabState extends State<HomeTab> {
               // ✅ Today's Goals
               RowHeader(
                 title: "Today's Goals",
-                actionText: _showAllGoals ? "Show Less" : "View All",
-                onAction: () {
-                  setState(() => _showAllGoals = !_showAllGoals);
-                },
+                actionText: showActionButton
+                    ? (_showAllGoals ? "Show Less" : "View All")
+                    : "", // 🔥 لو مفيش حاجة تتعرض، اخفي الزر
+                onAction: showActionButton
+                    ? () {
+                        setState(() => _showAllGoals = !_showAllGoals);
+                      }
+                    : null,
                 scale: scale,
               ),
               Gap(12 * h),
@@ -118,10 +136,8 @@ class _HomeTabState extends State<HomeTab> {
               // ✅ Recommended Meals section
               RowHeader(
                 title: "Recommended Meals",
-                actionText: "See More",
-                onAction: () {
-                  widget.onTabChange?.call(1); // ✅ انتقل إلى SearchMealTab
-                },
+                actionText: "",
+                onAction: null,
                 scale: scale,
               ),
               Gap(12 * h),
