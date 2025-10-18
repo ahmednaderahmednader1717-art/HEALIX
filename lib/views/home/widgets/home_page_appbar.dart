@@ -8,14 +8,14 @@ class HomePageAppBar extends StatefulWidget {
   final double toolbarHeight;
   final double w;
   final double scale;
-  final String fullName;
+  final String userName;
 
   const HomePageAppBar({
     super.key,
     required this.toolbarHeight,
     required this.w,
     required this.scale,
-    required this.fullName,
+    required this.userName,
   });
 
   @override
@@ -52,7 +52,7 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Hi, ${widget.fullName}",
+                          "Hi, ${widget.userName}",
                           style: GoogleFonts.inriaSans(
                             color: Colors.white,
                             fontSize: 18 * widget.scale,

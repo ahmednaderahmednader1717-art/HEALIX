@@ -48,7 +48,7 @@ class _LogInScreenState extends State<LogInScreen> {
             response.data['user']['fullName'] ?? _emailController.text.trim();
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => HomeScreen(fullName)),
+          MaterialPageRoute(builder: (_) => HomeScreen(userFullName: fullName)),
         );
       } else {
         ScaffoldMessenger.of(
@@ -58,7 +58,7 @@ class _LogInScreenState extends State<LogInScreen> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error: Wrong Username Or Password")));
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     } finally {
       setState(() => _loading = false);
     }
@@ -148,21 +148,8 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
               ),
               Gap(50 * h),
-              // Log In Button
-              HealixPrimaryButton(
-                text: _loading ? "Logging In..." : "Log In",
-                onPressed: () {
-                  Navigator.pushReplacement(
-                      context,
-                    MaterialPageRoute(
-                      builder: (_) =>  HomeScreen(""),
-                    ),
-                  );
-                },
-                height: 60 * h,
-                fontSize: 20 * scale,
-                borderRadius: 80 * scale,
-              ),
+              // Log In Button that actually works
+              
               // HealixPrimaryButton(
               //   text: _loading ? "Logging In..." : "Log In",
               //   onPressed: login,
@@ -170,6 +157,20 @@ class _LogInScreenState extends State<LogInScreen> {
               //   fontSize: 20 * scale,
               //   borderRadius: 80 * scale,
               // ),
+              HealixPrimaryButton(
+                text: _loading ? "Logging In..." : "Log In",
+                onPressed: (){
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => HomeScreen(userFullName: ""),
+                    ),
+                  );
+                },
+                height: 60 * h,
+                fontSize: 20 * scale,
+                borderRadius: 80 * scale,
+              ),
               Gap(30 * h),
               // Divider
               Row(

@@ -10,8 +10,9 @@ import 'package:test_splash/views/home/views/search_meal_tab.dart';
 import 'package:test_splash/views/home/widgets/home_page_appbar.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen( fullName,  {super.key});
+  const HomeScreen(   {super.key, required this.userFullName});
   
+  final String userFullName; 
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -53,7 +54,7 @@ late final List<Widget> _pages = [
           IndexedStack(index: _currentIndex, children: _pages),
 
           // AppBar ثابت لكل الصفحات
-          HomePageAppBar(toolbarHeight: toolbarHeight, w: w, scale: scale, fullName: "",),
+          HomePageAppBar(toolbarHeight: toolbarHeight, w: w, scale: scale, userName: widget.userFullName),
         ],
       ),
 

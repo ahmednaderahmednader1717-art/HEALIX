@@ -77,24 +77,28 @@ class MealTile extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(right: 10 * scale),
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 12 * scale,
-                vertical: 8 * scale,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primarayColor.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12 * scale),
-              ),
-              child: Text(
-                'Add',
-                style: TextStyle(
-                  color: AppColors.primarayColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12 * scale,
+            child:IconButton(onPressed: (){},
+              icon: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 12 * scale,
+                  vertical: 8 * scale,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primarayColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12 * scale),
+                ),
+                child: Text(
+                  'Add',
+                  style: TextStyle(
+                    color: AppColors.primarayColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12 * scale,
+                  ),
                 ),
               ),
-            ),
+              
+              ),
+              
           ),
         ],
       ),
