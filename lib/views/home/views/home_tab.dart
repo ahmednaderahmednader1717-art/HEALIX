@@ -1,4 +1,4 @@
-import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:test_splash/models/nutrient.dart';
@@ -24,20 +24,24 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    // التصميم الأساسي الذي تم التصميم عليه
     const baseWidth = 430.0;
     const baseHeight = 932.0;
+
+    // scale منفصل للعرض والارتفاع
     final w = screenWidth / baseWidth;
     final h = screenHeight / baseHeight;
-    final scale = min(w, h);
+
     final double toolbarHeight = 80 * h;
 
-    // ✅ إعداد الـ Grid حسب حجم الشاشة
+    // إعداد الـ Grid حسب حجم الشاشة
     int crossAxisCount;
     double childAspectRatio;
 
     if (screenWidth < 600) {
       crossAxisCount = 2; // موبايل
-      childAspectRatio = 1.4;
+      childAspectRatio = 1.2;
     } else if (screenWidth < 900) {
       crossAxisCount = 3; // تابلت صغير
       childAspectRatio = 1.2;
@@ -49,27 +53,25 @@ class _HomeTabState extends State<HomeTab> {
       childAspectRatio = 1.3;
     }
 
-    // ✅ عدد العناصر المبدئية حسب حجم الشاشة
+    // عدد العناصر المبدئية حسب حجم الشاشة
     int defaultGoals;
     if (screenWidth < 600) {
-      defaultGoals = 2; // موبايل
+      defaultGoals = 2;
     } else if (screenWidth < 900) {
-      defaultGoals = 3; // تابلت صغير
+      defaultGoals = 3;
     } else {
-      defaultGoals = Nutrient.nutrients.length; // شاشات كبيرة = الكل
+      defaultGoals = Nutrient.nutrients.length;
     }
 
-    // ✅ تحديد عدد العناصر المعروضة
+    // عدد العناصر المعروضة
     final goalsToShow = _showAllGoals
         ? Nutrient.nutrients.length
         : (Nutrient.nutrients.length >= defaultGoals
               ? defaultGoals
               : Nutrient.nutrients.length);
 
-    // ✅ هل نعرض زر View All؟
-    final bool showActionButton =
-        Nutrient.nutrients.length >
-        defaultGoals; // لو عندي عناصر أكثر من اللي ظاهرين
+    // هل نعرض زر View All؟
+    final bool showActionButton = Nutrient.nutrients.length > defaultGoals;
 
     return Stack(
       children: [
@@ -88,28 +90,28 @@ class _HomeTabState extends State<HomeTab> {
               SectionTitle(
                 title: "Welcome Back!",
                 subtitle: "Track your day smartly",
-                scale: scale,
+                scale: h,
               ),
               Gap(16 * h),
-              CustomSearchBar(scale: scale),
+              CustomSearchBar(scale: w),
               Gap(24 * h),
 
-              // ✅ Today's Goals
+              // Today's Goals
               RowHeader(
                 title: "Today's Goals",
                 actionText: showActionButton
                     ? (_showAllGoals ? "Show Less" : "View All")
-                    : "", // 🔥 لو مفيش حاجة تتعرض، اخفي الزر
+                    : "",
                 onAction: showActionButton
                     ? () {
                         setState(() => _showAllGoals = !_showAllGoals);
                       }
                     : null,
-                scale: scale,
+                scale: w,
               ),
               Gap(12 * h),
 
-              // ✅ GridView responsive
+              // GridView responsive
               GridView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
@@ -126,23 +128,22 @@ class _HomeTabState extends State<HomeTab> {
                     title: nutrient.name,
                     value: nutrient.value,
                     color: nutrient.color,
-                    scale: scale,
+                    scale: h,
                   );
                 },
               ),
-
               Gap(8 * h),
 
-              // ✅ Recommended Meals section
+              // Recommended Meals section
               RowHeader(
                 title: "Recommended Meals",
                 actionText: "",
                 onAction: null,
-                scale: scale,
+                scale: w,
               ),
               Gap(12 * h),
 
-              // ✅ Meals list
+              // Meals list
               ListView.separated(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
@@ -156,7 +157,7 @@ class _HomeTabState extends State<HomeTab> {
                     imagePath: image,
                     title: "High Protein Bowl",
                     calories: 420,
-                    scale: scale,
+                    scale: h,
                   );
                 },
               ),

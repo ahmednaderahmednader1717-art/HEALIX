@@ -89,8 +89,8 @@ class _AppleRingCardState extends State<AppleRingCard>
                 builder: (context, _) {
                   return CustomPaint(
                     size: Size(
-                      cardWidth * (0.60 * internalScale),
-                      cardHeight * (0.24 * internalScale),
+                      cardWidth * (0.80 * internalScale), // زودنا العرض
+                      cardHeight * (0.40 * internalScale), // زودنا الطول
                     ),
                     painter: AppleBottomLabelRingPainter(
                       progress: _animation.value,
@@ -139,7 +139,7 @@ class AppleBottomLabelRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final strokeWidth = 22.0;
+    final strokeWidth = 28.0; // زودنا السمك
     final center = Offset(size.width / 2, size.height);
     final radius = size.width / 2 - strokeWidth / 2;
 

@@ -49,19 +49,22 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.black,
 
       // 👇 Stack عشان نضيف AppBar ثابت فوق كل التابات
-      body: Stack(
-        children: [
-          // محتوى التابات
-          IndexedStack(index: _currentIndex, children: _pages),
-
-          // AppBar ثابت لكل الصفحات
-          HomePageAppBar(
-            toolbarHeight: toolbarHeight,
-            w: w,
-            scale: scale,
-            userName: widget.user.fullName,
-          ),
-        ],
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // محتوى التابات
+            IndexedStack(index: _currentIndex, children: _pages),
+        
+            // AppBar ثابت لكل الصفحات
+            HomePageAppBar(
+              toolbarHeight: toolbarHeight,
+              w: w,
+              scale: scale,
+              userName: widget.user.fullName,
+              
+            ),
+          ],
+        ),
       ),
 
       // شريط التنقل السفلي
