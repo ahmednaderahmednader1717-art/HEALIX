@@ -10,7 +10,9 @@ import 'package:test_splash/widgets/healix_text_field.dart';
 import 'package:test_splash/widgets/social_button.dart';
 import 'package:test_splash/widgets/healix_primary_button.dart';
 import 'package:test_splash/views/auth/sign_up_screen.dart';
+import 'package:test_splash/models/user_info_model.dart';
 
+// ===== LogInScreen =====
 class LogInScreen extends StatefulWidget {
   const LogInScreen({super.key});
 
@@ -23,20 +25,16 @@ class _LogInScreenState extends State<LogInScreen> {
   final _passwordController = TextEditingController();
   bool _loading = false;
 
-  
-  // ✅ Error variables
   String? _usernameError;
   String? _passwordError;
 
-  // ✅ Correct Dio instance
   final Dio dio = Dio(
     BaseOptions(
-      baseUrl: "http://healix.somee.com/api", // ✅ fixed base URL
+      baseUrl: "http://healix.somee.com/api",
       headers: {"Content-Type": "application/json"},
     ),
   );
 
-    // ====== Validation function ======
   bool _validateFields() {
     bool valid = true;
     setState(() {
@@ -58,7 +56,7 @@ class _LogInScreenState extends State<LogInScreen> {
   }
 
   Future<void> login() async {
-    if (!_validateFields()) return; // ✅ stop if validation fails
+    if (!_validateFields()) return;
 
     setState(() => _loading = true);
     try {
@@ -71,13 +69,18 @@ class _LogInScreenState extends State<LogInScreen> {
       );
 
       if (response.statusCode == 200) {
-        final fullName =
-            response.data['user']?['fullName'] ??
-            _userNameController.text.trim();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => HomeScreen(userFullName: fullName)),
-        );
+        // تحويل بيانات الـ API إلى UserInfo
+        final userJson = response.data['user'];
+        if (userJson != null) {
+          UserInfo user = UserInfo.fromJson(userJson);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
+          );
+        } else {
+          _showDialog("User data not found in response");
+        }
       } else {
         _showDialog("Login failed. Status: ${response.statusCode}");
       }
@@ -103,8 +106,6 @@ class _LogInScreenState extends State<LogInScreen> {
       ),
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +159,11 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
               ),
               Gap(10 * h),
-              HealixTextField(controller: _userNameController, hint: "Username", errorText: _usernameError,),
+              HealixTextField(
+                controller: _userNameController,
+                hint: "Username",
+                errorText: _usernameError,
+              ),
               Gap(25 * h),
               Text(
                 "Enter Your Password",
@@ -191,7 +196,7 @@ class _LogInScreenState extends State<LogInScreen> {
               Gap(50 * h),
               HealixPrimaryButton(
                 text: _loading ? "Logging In..." : "Log In",
-                onPressed:login,
+                onPressed: login,
                 height: 60 * h,
                 fontSize: 20 * scale,
                 borderRadius: 80 * scale,

@@ -5,7 +5,8 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
 import 'package:test_splash/core/app_colors.dart';
-import 'package:test_splash/views/auth/log_in_screen.dart';
+import 'package:test_splash/models/user_info_model.dart';
+import 'package:test_splash/views/home/home_screen.dart';
 import 'package:test_splash/widgets/healix_primary_button.dart';
 import 'package:test_splash/widgets/healix_text_field.dart';
 
@@ -55,7 +56,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     bool valid = true;
     setState(() {
       _fullNameError = null;
-      _phoneError = null; // ✅ reset error
+      _phoneError = null;
     });
 
     if (_fullNameController.text.trim().isEmpty) {
@@ -70,6 +71,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
 
     return valid;
   }
+
   bool _validateStep2() {
     bool valid = true;
     setState(() {
@@ -151,7 +153,6 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         curve: Curves.easeInOut,
       );
     } else {
-      // آخر خطوة، تحقق ثم سجل
       if (!_validateStep4()) return;
       _signUp();
     }
@@ -167,7 +168,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     }
   }
 
-  // ====== رفع البيانات ======
+  // ====== رفع البيانات + تحويلها لكلاس UserInfo ======
   Future<void> _signUp() async {
     setState(() => _isLoading = true);
 
@@ -187,9 +188,22 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       final response = await _dio.post("/Auth/signup", data: data);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // ===== إنشاء كائن UserInfo =====
+        UserInfo user = UserInfo(
+          username: _userNameController.text.trim(),
+          email: _emailController.text.trim(),
+          fullName: _fullNameController.text.trim(),
+          phoneNumber: _phoneController.text.trim().isEmpty
+              ? null
+              : _phoneController.text.trim(),
+          dateOfBirth: _selectedDate,
+          gender: _selectedGender,
+        );
+
+        // ===== الانتقال إلى HomeScreen مع تمرير UserInfo =====
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const LogInScreen()),
+          MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
         );
       } else {
         _showDialog("Unexpected response: ${response.statusCode}");
@@ -237,7 +251,6 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
     const baseWidth = 430.0;
     const baseHeight = 932.0;
     final w = screenWidth / baseWidth;
@@ -372,9 +385,10 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     HealixTextField(
       controller: _phoneController,
       hint: "Phone Number",
-      errorText: _phoneError, // ✅ عرض رسالة الخطأ
+      errorText: _phoneError,
     ),
   ]);
+
   Widget _buildStep2() => _stepTemplate("Create Your Account Details", [
     const Gap(30),
     HealixTextField(
@@ -492,7 +506,6 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     return GestureDetector(
       onTap: () async {
         FocusScope.of(context).unfocus();
-
         DateTime initial = _selectedDate ?? DateTime(2000, 1, 1);
         DateTime tempPicked = initial;
 
