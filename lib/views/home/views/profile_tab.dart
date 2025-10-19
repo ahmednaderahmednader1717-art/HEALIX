@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:test_splash/views/auth/log_in_screen.dart';
+import 'package:test_splash/views/splash/welcome_screen.dart';
 import 'package:test_splash/widgets/healix_primary_button.dart';
 
 class ProfileTab extends StatelessWidget {
@@ -40,7 +40,7 @@ class ProfileTab extends StatelessWidget {
                 {
                   Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (_) => const LogInScreen()),
+                      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
                     );
                 }
                 )

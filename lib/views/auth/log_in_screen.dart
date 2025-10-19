@@ -23,6 +23,11 @@ class _LogInScreenState extends State<LogInScreen> {
   final _passwordController = TextEditingController();
   bool _loading = false;
 
+  
+  // ✅ Error variables
+  String? _usernameError;
+  String? _passwordError;
+
   // ✅ Correct Dio instance
   final Dio dio = Dio(
     BaseOptions(
@@ -31,7 +36,30 @@ class _LogInScreenState extends State<LogInScreen> {
     ),
   );
 
+    // ====== Validation function ======
+  bool _validateFields() {
+    bool valid = true;
+    setState(() {
+      _usernameError = null;
+      _passwordError = null;
+    });
+
+    if (_userNameController.text.trim().isEmpty) {
+      setState(() => _usernameError = "Username is required");
+      valid = false;
+    }
+
+    if (_passwordController.text.trim().isEmpty) {
+      setState(() => _passwordError = "Password is required");
+      valid = false;
+    }
+
+    return valid;
+  }
+
   Future<void> login() async {
+    if (!_validateFields()) return; // ✅ stop if validation fails
+
     setState(() => _loading = true);
     try {
       final response = await dio.post(
@@ -44,24 +72,39 @@ class _LogInScreenState extends State<LogInScreen> {
 
       if (response.statusCode == 200) {
         final fullName =
-            response.data['user']?['fullName'] ?? _userNameController.text.trim();
+            response.data['user']?['fullName'] ??
+            _userNameController.text.trim();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => HomeScreen(userFullName: fullName)),
         );
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Login failed")));
+        _showDialog("Login failed. Status: ${response.statusCode}");
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      _showDialog("Error: $e");
     } finally {
       setState(() => _loading = false);
     }
   }
+
+  void _showDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Attention"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +158,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
               ),
               Gap(10 * h),
-              HealixTextField(controller: _userNameController, hint: "Username"),
+              HealixTextField(controller: _userNameController, hint: "Username", errorText: _usernameError,),
               Gap(25 * h),
               Text(
                 "Enter Your Password",
@@ -129,6 +172,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 controller: _passwordController,
                 hint: "Password",
                 isPassword: true,
+                errorText: _passwordError,
               ),
               Gap(10 * h),
               Align(

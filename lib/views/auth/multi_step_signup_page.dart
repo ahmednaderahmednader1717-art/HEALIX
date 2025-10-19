@@ -33,115 +33,127 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   DateTime? _selectedDate;
   bool _isLoading = false;
 
-  // ✅ تحقق من توافر username و email
-  Future<bool> _checkUsernameEmailAvailability() async {
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: "http://healix.somee.com/api",
-        headers: {"Content-Type": "application/json"},
-      ),
-    );
+  // ✅ متغيرات الأخطاء لكل حقل
+  String? _fullNameError;
+  String? _phoneError;
+  String? _emailError;
+  String? _usernameError;
+  String? _passwordError;
+  String? _confirmPasswordError;
+  String? _genderError;
+  String? _dobError;
 
-    try {
-      final response = await dio.post(
-        "/Auth/signup",
-        data: {
-          "username": _userNameController.text.trim(),
-          "email": _emailController.text.trim(),
-          "password": "Temp@1234",
-          "fullName": "Temp User",
-        },
-      );
+  final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: "http://healix.somee.com/api",
+      headers: {"Content-Type": "application/json"},
+    ),
+  );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return true;
-      }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        final data = e.response?.data;
-        if (data is Map && data.containsKey("message")) {
-          final msg = data["message"].toString().toLowerCase();
+  // ====== Validation لكل خطوة ======
+  bool _validateStep1() {
+    bool valid = true;
+    setState(() {
+      _fullNameError = null;
+      _phoneError = null; // ✅ reset error
+    });
 
-          if (msg.contains("username") && msg.contains("exists")) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Username already exists")),
-            );
-            return false;
-          } else if (msg.contains("email") && msg.contains("exists")) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Email already exists")),
-            );
-            return false;
-          }
-        }
-      }
+    if (_fullNameController.text.trim().isEmpty) {
+      setState(() => _fullNameError = "Full name is required");
+      valid = false;
     }
-    return true;
+
+    if (_phoneController.text.trim().isEmpty) {
+      setState(() => _phoneError = "Phone number is required");
+      valid = false;
+    }
+
+    return valid;
+  }
+  bool _validateStep2() {
+    bool valid = true;
+    setState(() {
+      _emailError = null;
+      _usernameError = null;
+    });
+
+    if (_emailController.text.trim().isEmpty ||
+        !_emailController.text.contains("@")) {
+      setState(() => _emailError = "Enter a valid email");
+      valid = false;
+    }
+
+    if (_userNameController.text.trim().isEmpty) {
+      setState(() => _usernameError = "Username is required");
+      valid = false;
+    }
+
+    return valid;
   }
 
-  // ✅ الانتقال للخطوة التالية مع التحقق من المدخلات
+  bool _validateStep3() {
+    bool valid = true;
+    setState(() {
+      _passwordError = null;
+      _confirmPasswordError = null;
+    });
+
+    if (_passwordController.text.isEmpty) {
+      setState(() => _passwordError = "Password is required");
+      valid = false;
+    }
+
+    if (_confirmPasswordController.text.isEmpty) {
+      setState(() => _confirmPasswordError = "Please re-enter password");
+      valid = false;
+    }
+
+    if (_passwordController.text.isNotEmpty &&
+        _confirmPasswordController.text.isNotEmpty &&
+        _passwordController.text != _confirmPasswordController.text) {
+      setState(() => _confirmPasswordError = "Passwords do not match");
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  bool _validateStep4() {
+    bool valid = true;
+    setState(() {
+      _genderError = null;
+      _dobError = null;
+    });
+
+    if (_selectedGender == null) {
+      setState(() => _genderError = "Select your gender");
+      valid = false;
+    }
+
+    if (_selectedDate == null) {
+      setState(() => _dobError = "Select your birth date");
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  // ========= التنقل بين الصفحات =========
   void _nextPage() async {
-    // الخطوة 1
-    if (_currentStep == 0) {
-      if (_fullNameController.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please enter your full name")),
-        );
-        return;
-      }
-    }
+    if (_currentStep == 0 && !_validateStep1()) return;
+    if (_currentStep == 1 && !_validateStep2()) return;
+    if (_currentStep == 2 && !_validateStep3()) return;
 
-    // الخطوة 2
-    if (_currentStep == 1) {
-      if (_emailController.text.trim().isEmpty ||
-          _userNameController.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please fill all required fields")),
-        );
-        return;
-      }
-
-      bool available = await _checkUsernameEmailAvailability();
-      if (!available) return;
-    }
-
-    // الخطوة 3
-    if (_currentStep == 2) {
-      if (_passwordController.text.trim().isEmpty ||
-          _confirmPasswordController.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Please enter and confirm your password"),
-          ),
-        );
-        return;
-      }
-
-      if (_passwordController.text != _confirmPasswordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Passwords do not match!")),
-        );
-        return;
-      }
-    }
-
-    // الخطوة 4
-    if (_currentStep == 3) {
-      if (_selectedGender == null || _selectedDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please complete all required fields")),
-        );
-        return;
-      }
-    }
-
-    // الانتقال للخطوة التالية فقط لو كله تمام
     if (_currentStep < _totalSteps - 1) {
       setState(() => _currentStep++);
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+    } else {
+      // آخر خطوة، تحقق ثم سجل
+      if (!_validateStep4()) return;
+      _signUp();
     }
   }
 
@@ -155,19 +167,9 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     }
   }
 
-  // ✅ تنفيذ التسجيل الفعلي
+  // ====== رفع البيانات ======
   Future<void> _signUp() async {
     setState(() => _isLoading = true);
-
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: "http://healix.somee.com/api",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      ),
-    );
 
     final data = {
       "username": _userNameController.text.trim(),
@@ -182,39 +184,41 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     };
 
     try {
-      final response = await dio.post("/Auth/signup", data: data);
+      final response = await _dio.post("/Auth/signup", data: data);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Account created successfully!")),
-        );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const LogInScreen()),
+          MaterialPageRoute(builder: (_) => const LogInScreen()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Unexpected response: ${response.statusCode}"),
-          ),
-        );
+        _showDialog("Unexpected response: ${response.statusCode}");
       }
     } on DioException catch (e) {
       String message = "Something went wrong";
-
-      if (e.response != null) {
-        message =
-            e.response?.data["message"] ??
-            e.response?.data.toString() ??
-            "Server error";
+      if (e.response != null && e.response?.data is Map) {
+        message = e.response?.data["message"] ?? message;
       }
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      _showDialog(message);
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _showDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Attention"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -297,9 +301,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
                       text: _currentStep == _totalSteps - 1
                           ? "Finish"
                           : "Next Step",
-                      onPressed: _currentStep == _totalSteps - 1
-                          ? _signUp
-                          : _nextPage,
+                      onPressed: _nextPage,
                     ),
                   ],
                 ),
@@ -328,7 +330,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     );
   }
 
-  // Progress Bar
+  // ====== Progress Bar ======
   Widget _buildSegmentedProgressBar() {
     return Row(
       children: List.generate(_totalSteps, (index) {
@@ -350,7 +352,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     );
   }
 
-  // Step 1
+  // ====== Steps مع Error Messages ======
   Widget _buildStep1() => _stepTemplate("First, What Can We Call You", [
     Text(
       "We'd Like To Get To Know You",
@@ -361,39 +363,50 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       ),
     ),
     const Gap(30),
-    HealixTextField(controller: _fullNameController, hint: "Full Name"),
+    HealixTextField(
+      controller: _fullNameController,
+      hint: "Full Name",
+      errorText: _fullNameError,
+    ),
     const Gap(16),
     HealixTextField(
       controller: _phoneController,
-      hint: "Phone Number (optional)",
+      hint: "Phone Number",
+      errorText: _phoneError, // ✅ عرض رسالة الخطأ
+    ),
+  ]);
+  Widget _buildStep2() => _stepTemplate("Create Your Account Details", [
+    const Gap(30),
+    HealixTextField(
+      controller: _emailController,
+      hint: "Email Address",
+      errorText: _emailError,
+    ),
+    const Gap(16),
+    HealixTextField(
+      controller: _userNameController,
+      hint: "Username",
+      errorText: _usernameError,
     ),
   ]);
 
-  // Step 2
-  Widget _buildStep2() => _stepTemplate("Create Your Account Details", [
-    const Gap(30),
-    HealixTextField(controller: _emailController, hint: "Email Address"),
-    const Gap(16),
-    HealixTextField(controller: _userNameController, hint: "Username"),
-  ]);
-
-  // Step 3
   Widget _buildStep3() => _stepTemplate("Secure Your Account", [
     const Gap(30),
     HealixTextField(
       controller: _passwordController,
       hint: "Enter your password",
       isPassword: true,
+      errorText: _passwordError,
     ),
     const Gap(16),
     HealixTextField(
       controller: _confirmPasswordController,
       hint: "Re-enter your password",
       isPassword: true,
+      errorText: _confirmPasswordError,
     ),
   ]);
 
-  // Step 4
   Widget _buildStep4() => _stepTemplate("A Few More Details", [
     const Gap(30),
     Text(
@@ -404,25 +417,35 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         fontSize: 14,
       ),
     ),
-    const Gap(12),
+    const Gap(4),
+    if (_genderError != null)
+      Text(
+        _genderError!,
+        style: const TextStyle(color: Colors.red, fontSize: 12),
+      ),
+    const Gap(8),
     Row(
       children: [
         Expanded(
           child: GestureDetector(
-            onTap: () => setState(() => _selectedGender = "Male"),
+            onTap: () {
+              setState(() => _selectedGender = "Male");
+            },
             child: _genderBox("Male"),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: GestureDetector(
-            onTap: () => setState(() => _selectedGender = "Female"),
+            onTap: () {
+              setState(() => _selectedGender = "Female");
+            },
             child: _genderBox("Female"),
           ),
         ),
       ],
     ),
-    const SizedBox(height: 30),
+    const Gap(16),
     Text(
       "Date of Birth",
       style: GoogleFonts.inriaSans(
@@ -431,7 +454,9 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         fontSize: 14,
       ),
     ),
-    const Gap(10),
+    if (_dobError != null)
+      Text(_dobError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+    const Gap(8),
     _datePickerField(),
   ]);
 
@@ -511,9 +536,9 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
                   ),
                   Expanded(
                     child: CupertinoTheme(
-                      data: CupertinoThemeData(
+                      data: const CupertinoThemeData(
                         textTheme: CupertinoTextThemeData(
-                          dateTimePickerTextStyle: const TextStyle(
+                          dateTimePickerTextStyle: TextStyle(
                             color: Colors.white,
                             fontSize: 20,
                           ),
@@ -525,9 +550,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
                         maximumYear: DateTime.now().year,
                         minimumYear: 1900,
                         initialDateTime: initial,
-                        onDateTimeChanged: (DateTime newDate) {
-                          tempPicked = newDate;
-                        },
+                        onDateTimeChanged: (newDate) => tempPicked = newDate,
                       ),
                     ),
                   ),
