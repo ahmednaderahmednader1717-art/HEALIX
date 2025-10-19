@@ -154,7 +154,7 @@ class _HomeTabState extends State<HomeTab> {
                       : "assets/covers/IMG_1050.PNG";
                   return MealTile(
                     imagePath: image,
-                    title: "High Protein Bow",
+                    title: "High Protein Bowl",
                     calories: 420,
                     scale: h,
                   );
