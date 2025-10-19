@@ -1,6 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+import 'package:test_splash/views/auth/log_in_screen.dart';
+import 'package:test_splash/widgets/healix_primary_button.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -20,6 +23,7 @@ class ProfileTab extends StatelessWidget {
     return Stack(
       children: [
         SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
           padding: EdgeInsets.only(
             left: 16 * w,
             right: 16 * w,
@@ -28,8 +32,18 @@ class ProfileTab extends StatelessWidget {
           ),
           child: Center(
             child: Column(
+              mainAxisSize: MainAxisSize.max,
               children: [
                 Text("Profile Page", style: TextStyle(color: Colors.white)),
+                Gap(640),
+                HealixPrimaryButton(text: "LOG OUT", onPressed: ()
+                {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LogInScreen()),
+                    );
+                }
+                )
               ],
             ),
           ),

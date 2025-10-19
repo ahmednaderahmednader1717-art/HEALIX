@@ -19,14 +19,14 @@ class LogInScreen extends StatefulWidget {
 }
 
 class _LogInScreenState extends State<LogInScreen> {
-  final _emailController = TextEditingController();
+  final _userNameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _loading = false;
 
-  // Dio instance
+  // ✅ Correct Dio instance
   final Dio dio = Dio(
     BaseOptions(
-      baseUrl: "https://unimmaculately-roentgenologic-darrell.ngrok-free.dev",
+      baseUrl: "http://healix.somee.com/api", // ✅ fixed base URL
       headers: {"Content-Type": "application/json"},
     ),
   );
@@ -35,17 +35,16 @@ class _LogInScreenState extends State<LogInScreen> {
     setState(() => _loading = true);
     try {
       final response = await dio.post(
-        "/api/Auth/signin",
+        "/Auth/signin",
         data: {
-          "username": _emailController.text.trim(),
+          "username": _userNameController.text.trim(),
           "password": _passwordController.text.trim(),
         },
       );
 
       if (response.statusCode == 200) {
-        // استخراج الاسم الكامل من البيانات
         final fullName =
-            response.data['user']['fullName'] ?? _emailController.text.trim();
+            response.data['user']?['fullName'] ?? _userNameController.text.trim();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => HomeScreen(userFullName: fullName)),
@@ -108,7 +107,6 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
               ),
               Gap(40 * h),
-              // Username
               Text(
                 "Enter Your Username",
                 style: GoogleFonts.inriaSans(
@@ -117,9 +115,8 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
               ),
               Gap(10 * h),
-              HealixTextField(controller: _emailController, hint: "Username"),
+              HealixTextField(controller: _userNameController, hint: "Username"),
               Gap(25 * h),
-              // Password
               Text(
                 "Enter Your Password",
                 style: GoogleFonts.inriaSans(
@@ -148,31 +145,14 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
               ),
               Gap(50 * h),
-              // Log In Button that actually works
-              
-              // HealixPrimaryButton(
-              //   text: _loading ? "Logging In..." : "Log In",
-              //   onPressed: login,
-              //   height: 60 * h,
-              //   fontSize: 20 * scale,
-              //   borderRadius: 80 * scale,
-              // ),
               HealixPrimaryButton(
                 text: _loading ? "Logging In..." : "Log In",
-                onPressed: (){
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => HomeScreen(userFullName: ""),
-                    ),
-                  );
-                },
+                onPressed:login,
                 height: 60 * h,
                 fontSize: 20 * scale,
                 borderRadius: 80 * scale,
               ),
               Gap(30 * h),
-              // Divider
               Row(
                 children: [
                   const Expanded(
@@ -194,7 +174,6 @@ class _LogInScreenState extends State<LogInScreen> {
                 ],
               ),
               Gap(25 * h),
-              // Google Sign In
               SocialElevatedButton(
                 text: "Sign in with Google",
                 imagePath: "assets/icons/google.png",
@@ -203,7 +182,6 @@ class _LogInScreenState extends State<LogInScreen> {
                 onPressed: () {},
               ),
               Gap(15 * h),
-              // Apple Sign In
               SocialElevatedButton(
                 text: "Sign in with Apple",
                 imagePath: "assets/icons/apple.png",
@@ -212,7 +190,6 @@ class _LogInScreenState extends State<LogInScreen> {
                 onPressed: () {},
               ),
               Gap(40 * h),
-              // Sign Up Text
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

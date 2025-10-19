@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
+import 'package:test_splash/views/auth/multi_step_signup_page.dart';
 import 'package:test_splash/widgets/healix_primary_button.dart';
 import 'package:test_splash/widgets/social_button.dart';
 
@@ -59,7 +60,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Gap(30 * h),
               HealixPrimaryButton(
                 text: "Continue",
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MultiStepSignUpPage(),
+                    ),
+                  );
+
+                },
                 borderRadius: 10,
               ),
               Gap(20 * h),
