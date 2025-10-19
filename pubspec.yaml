@@ -27,6 +27,15 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path_android: "assets/appicon/playstore.png"
+  image_path_ios: "assets/appicon/appstore.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/appicon/playstore.png"
 flutter:
   uses-material-design: true
 
@@ -36,6 +45,7 @@ flutter:
     - assets/SVGs/
     - assets/covers/
     - assets/icons/
+    - assets/appicon/
 
   # fonts:
   #   - family: Schyler
