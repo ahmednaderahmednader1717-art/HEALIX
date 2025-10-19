@@ -118,8 +118,9 @@ class _XIntegratedPainter extends CustomPainter {
 
     // توهج عند التقاطع
     if (t > 0.7) {
+      final glowOpacity = ((t - 0.7) / 0.3).clamp(0.0, 1.0);
       final glow = Paint()
-        ..color = color.withOpacity((t - 0.7) * 5)
+        ..color = color.withOpacity(glowOpacity)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
       canvas.drawCircle(center, 5 + (t - 0.7) * 10, glow);
     }

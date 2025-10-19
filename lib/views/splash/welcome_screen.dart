@@ -6,8 +6,8 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/cover_model.dart';
-import 'package:test_splash/views/log_in_screen.dart';
-import 'package:test_splash/views/sign_up_screen.dart';
+import 'package:test_splash/views/auth/log_in_screen.dart';
+import 'package:test_splash/views/auth/sign_up_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});

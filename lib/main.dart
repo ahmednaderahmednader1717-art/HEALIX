@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:test_splash/views/splash_screen.dart';
-import 'package:test_splash/views/log_in_screen.dart';
-import 'package:test_splash/views/welcome_screen.dart';
+import 'package:test_splash/views/splash/splash_screen.dart';
+import 'package:test_splash/views/auth/log_in_screen.dart';
+import 'package:test_splash/views/splash/welcome_screen.dart';
 
 void main() => runApp(const HealixApp());
 

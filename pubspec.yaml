@@ -1,8 +1,7 @@
 name: test_splash
 description: "A new Flutter project."
 
-publish_to: 'none' 
-
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -13,7 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.2.1
   path_provider: ^2.1.5
@@ -21,13 +19,15 @@ dependencies:
   google_fonts: ^6.3.2
   carousel_slider: ^5.1.1
   skeletonizer: ^2.1.0+1
+  dio: ^5.9.0
+  curved_labeled_navigation_bar: ^2.0.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
   flutter_lints: ^5.0.0
+<<<<<<< HEAD
   flutter_launcher_icons: ^0.14.4
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -37,8 +37,10 @@ flutter_launcher_icons:
   min_sdk_android: 21
   adaptive_icon_background: "#000000"
   adaptive_icon_foreground: "assets/appicon/playstore.png"
-flutter:
+=======
 
+>>>>>>> main
+flutter:
   uses-material-design: true
 
   assets:
@@ -47,7 +49,6 @@ flutter:
     - assets/SVGs/
     - assets/covers/
     - assets/icons/
-
 
   # fonts:
   #   - family: Schyler
