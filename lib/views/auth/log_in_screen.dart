@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
@@ -69,38 +70,36 @@ class _LogInScreenState extends State<LogInScreen> {
       );
 
       if (response.statusCode == 200) {
-        // تحويل بيانات الـ API إلى UserInfo
         final userJson = response.data['user'];
         if (userJson != null) {
           UserInfo user = UserInfo.fromJson(userJson);
-
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
           );
         } else {
-          _showDialog("User data not found in response");
+          _showCupertinoDialog("User data not found in response");
         }
       } else {
-        _showDialog("Login failed. Status: ${response.statusCode}");
+        _showCupertinoDialog("Login failed. Status: ${response.statusCode}");
       }
     } catch (e) {
-      _showDialog("Error: $e");
+      _showCupertinoDialog("Wrong username or password");
     } finally {
       setState(() => _loading = false);
     }
   }
 
-  void _showDialog(String message) {
-    showDialog(
+  void _showCupertinoDialog(String message) {
+    showCupertinoDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Attention"),
-        content: Text(message),
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text("Attention", style: TextStyle(color: Color.fromARGB(255, 0, 0, 0))),
+        content: Text(message, style: const TextStyle(color: Color.fromARGB(179, 0, 0, 0))),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
+            child: const Text("OK", style: TextStyle(color: Colors.blueAccent)),
           ),
         ],
       ),
@@ -118,162 +117,175 @@ class _LogInScreenState extends State<LogInScreen> {
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: SvgPicture.asset(
-          "assets/logo/HEALIX.svg",
-          width: 60 * scale,
-          height: 40 * scale,
-        ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 30 * w),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 60 * h),
-              Text(
-                "Log In",
-                style: GoogleFonts.inriaSans(
-                  color: Colors.white,
-                  fontSize: 40 * scale,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Gap(40 * h),
-              Text(
-                "Enter Your Username",
-                style: GoogleFonts.inriaSans(
-                  fontSize: 17 * scale,
-                  color: const Color.fromARGB(255, 169, 169, 169),
-                ),
-              ),
-              Gap(10 * h),
-              HealixTextField(
-                controller: _userNameController,
-                hint: "Username",
-                errorText: _usernameError,
-              ),
-              Gap(25 * h),
-              Text(
-                "Enter Your Password",
-                style: GoogleFonts.inriaSans(
-                  fontSize: 17 * scale,
-                  color: const Color.fromARGB(255, 169, 169, 169),
-                ),
-              ),
-              Gap(10 * h),
-              HealixTextField(
-                controller: _passwordController,
-                hint: "Password",
-                isPassword: true,
-                errorText: _passwordError,
-              ),
-              Gap(10 * h),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    "Forgot Password?",
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            title: SvgPicture.asset(
+              "assets/logo/HEALIX.svg",
+              width: 60 * scale,
+              height: 40 * scale,
+            ),
+            centerTitle: true,
+            iconTheme: const IconThemeData(color: Colors.white),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          body: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30 * w),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 60 * h),
+                  Text(
+                    "Log In",
+                    style: GoogleFonts.inriaSans(
+                      color: Colors.white,
+                      fontSize: 40 * scale,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Gap(40 * h),
+                  Text(
+                    "Enter Your Username",
                     style: GoogleFonts.inriaSans(
                       fontSize: 17 * scale,
                       color: const Color.fromARGB(255, 169, 169, 169),
                     ),
                   ),
-                ),
-              ),
-              Gap(50 * h),
-              HealixPrimaryButton(
-                text: _loading ? "Logging In..." : "Log In",
-                onPressed: login,
-                height: 60 * h,
-                fontSize: 20 * scale,
-                borderRadius: 80 * scale,
-              ),
-              Gap(30 * h),
-              Row(
-                children: [
-                  const Expanded(
-                    child: Divider(color: Colors.white24, thickness: 1),
+                  Gap(10 * h),
+                  HealixTextField(
+                    controller: _userNameController,
+                    hint: "Username",
+                    errorText: _usernameError,
                   ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10 * w),
-                    child: Text(
-                      "Or continue with",
-                      style: GoogleFonts.inriaSans(
-                        color: Colors.white54,
-                        fontSize: 14 * scale,
-                      ),
-                    ),
-                  ),
-                  const Expanded(
-                    child: Divider(color: Colors.white24, thickness: 1),
-                  ),
-                ],
-              ),
-              Gap(25 * h),
-              SocialElevatedButton(
-                text: "Sign in with Google",
-                imagePath: "assets/icons/google.png",
-                size: scale,
-                backgroundColor: Colors.white.withOpacity(0.08),
-                onPressed: () {},
-              ),
-              Gap(15 * h),
-              SocialElevatedButton(
-                text: "Sign in with Apple",
-                imagePath: "assets/icons/apple.png",
-                size: scale,
-                backgroundColor: Colors.white.withOpacity(0.08),
-                onPressed: () {},
-              ),
-              Gap(40 * h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                  Gap(25 * h),
                   Text(
-                    "Don’t have an account?",
+                    "Enter Your Password",
                     style: GoogleFonts.inriaSans(
-                      fontSize: 16 * scale,
-                      color: Colors.white70,
+                      fontSize: 17 * scale,
+                      color: const Color.fromARGB(255, 169, 169, 169),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignUpScreen(),
+                  Gap(10 * h),
+                  HealixTextField(
+                    controller: _passwordController,
+                    hint: "Password",
+                    isPassword: true,
+                    errorText: _passwordError,
+                  ),
+                  Gap(10 * h),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "Forgot Password?",
+                        style: GoogleFonts.inriaSans(
+                          fontSize: 17 * scale,
+                          color: const Color.fromARGB(255, 169, 169, 169),
                         ),
-                      );
-                    },
-                    child: Text(
-                      "Sign Up",
-                      style: GoogleFonts.inriaSans(
-                        fontSize: 16 * scale,
-                        color: AppColors.primarayColor,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
+                  Gap(50 * h),
+                  HealixPrimaryButton(
+                    text: _loading ? "Logging In..." : "Log In",
+                    onPressed: login,
+                    height: 60 * h,
+                    fontSize: 20 * scale,
+                    borderRadius: 80 * scale,
+                  ),
+                  Gap(30 * h),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Divider(color: Colors.white24, thickness: 1),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10 * w),
+                        child: Text(
+                          "Or continue with",
+                          style: GoogleFonts.inriaSans(
+                            color: Colors.white54,
+                            fontSize: 14 * scale,
+                          ),
+                        ),
+                      ),
+                      const Expanded(
+                        child: Divider(color: Colors.white24, thickness: 1),
+                      ),
+                    ],
+                  ),
+                  Gap(25 * h),
+                  SocialElevatedButton(
+                    text: "Sign in with Google",
+                    imagePath: "assets/icons/google.png",
+                    size: scale,
+                    backgroundColor: Colors.white.withOpacity(0.08),
+                    onPressed: () {},
+                  ),
+                  Gap(15 * h),
+                  SocialElevatedButton(
+                    text: "Sign in with Apple",
+                    imagePath: "assets/icons/apple.png",
+                    size: scale,
+                    backgroundColor: Colors.white.withOpacity(0.08),
+                    onPressed: () {},
+                  ),
+                  Gap(40 * h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don’t have an account?",
+                        style: GoogleFonts.inriaSans(
+                          fontSize: 16 * scale,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => const SignUpScreen(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "Sign Up",
+                          style: GoogleFonts.inriaSans(
+                            fontSize: 16 * scale,
+                            color: AppColors.primarayColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Gap(40 * h),
                 ],
               ),
-              Gap(40 * h),
-            ],
+            ),
           ),
         ),
-      ),
+
+        // Loading overlay
+        if (_loading)
+          Container(
+            color: Colors.black.withOpacity(0.7),
+            child: const Center(
+              child: CupertinoActivityIndicator(radius: 15),
+            ),
+          ),
+      ],
     );
   }
 }

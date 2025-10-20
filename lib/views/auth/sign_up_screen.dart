@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -63,8 +64,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => MultiStepSignUpPage(),
+                    CupertinoPageRoute(
+                      builder: (context) => const MultiStepSignUpPage(),
                     ),
                   );
 

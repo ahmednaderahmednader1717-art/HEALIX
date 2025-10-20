@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
@@ -162,7 +163,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
+                        CupertinoPageRoute(
                           builder: (context) => const SignUpScreen(),
                         ),
                       );
@@ -194,7 +195,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          CupertinoPageRoute(
                             builder: (context) => const LogInScreen(),
                           ),
                         );

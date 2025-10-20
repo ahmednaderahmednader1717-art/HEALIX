@@ -219,21 +219,38 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     }
   }
 
-  void _showDialog(String message) {
-    showDialog(
+void _showDialog(String message) {
+    showCupertinoDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Attention"),
-        content: Text(message),
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text(
+          "Attention",
+          style: TextStyle(
+            color: CupertinoColors.label, // يتغير تلقائياً Light/Dark
+          ),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: CupertinoColors.label, // يتغير تلقائياً Light/Dark
+          ),
+        ),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
+            child: const Text(
+              "OK",
+              style: TextStyle(
+                color: CupertinoColors.activeBlue, // أزرق iOS أصلي
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+
+
 
   @override
   void dispose() {
@@ -326,19 +343,10 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
           Container(
             color: Colors.black.withOpacity(0.7),
             child: const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(color: Colors.white),
-                  SizedBox(height: 16),
-                  Text(
-                    "Creating your account...",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ],
-              ),
+              child: CupertinoActivityIndicator(radius: 15),
             ),
           ),
+
       ],
     );
   }
@@ -378,13 +386,13 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     const Gap(30),
     HealixTextField(
       controller: _fullNameController,
-      hint: "Full Name",
+      hint: "Enter Your Name",
       errorText: _fullNameError,
     ),
     const Gap(16),
     HealixTextField(
       controller: _phoneController,
-      hint: "Phone Number",
+      hint: "Enter Your Phone Number",
       errorText: _phoneError,
     ),
   ]);
