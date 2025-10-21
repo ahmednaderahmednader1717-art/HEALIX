@@ -1,4 +1,4 @@
-# test_splash
+# healix_fixed
 
 A new Flutter project.
 

@@ -20,6 +20,10 @@ dependencies:
   carousel_slider: ^5.1.1
   skeletonizer: ^2.1.0+1
   dio: ^5.9.0
+  google_sign_in: ^6.2.1
+  shared_preferences: ^2.3.2
+  shelf_proxy: ^1.0.1
+  curved_navigation_bar: ^1.0.6
   curved_labeled_navigation_bar: ^2.0.6
 
 dev_dependencies:
@@ -27,15 +31,7 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^5.0.0
-  flutter_launcher_icons: ^0.14.4
-flutter_launcher_icons:
-  android: "launcher_icon"
-  ios: true
-  image_path_android: "assets/appicon/playstore.png"
-  image_path_ios: "assets/appicon/appstore.png"
-  min_sdk_android: 21
-  adaptive_icon_background: "#000000"
-  adaptive_icon_foreground: "assets/appicon/playstore.png"
+
 flutter:
   uses-material-design: true
 
@@ -45,7 +41,6 @@ flutter:
     - assets/SVGs/
     - assets/covers/
     - assets/icons/
-    - assets/appicon/
 
   # fonts:
   #   - family: Schyler
