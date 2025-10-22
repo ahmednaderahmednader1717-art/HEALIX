@@ -1,4 +1,4 @@
-# HWALIX
+# HEALIX
 
 A new Flutter project.
 
