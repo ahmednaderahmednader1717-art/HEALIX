@@ -7,7 +7,7 @@ class MealTile extends StatelessWidget {
   final int calories;
   final double scale;
 
-  const MealTile({
+  const MealTile({super.key, 
     required this.imagePath,
     required this.title,
     required this.calories,

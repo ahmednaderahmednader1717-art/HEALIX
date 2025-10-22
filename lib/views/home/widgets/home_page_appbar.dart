@@ -29,7 +29,7 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
       top: 0,
       left: 0,
       right: 0,
-      child: Container(
+      child: SizedBox(
         height: widget.toolbarHeight,
         child: ClipRRect(
           child: BackdropFilter(

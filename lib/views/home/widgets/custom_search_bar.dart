@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CustomSearchBar extends StatelessWidget {
   final double scale;
-  const CustomSearchBar({required this.scale});
+  const CustomSearchBar({super.key, required this.scale});
 
   @override
   Widget build(BuildContext context) {

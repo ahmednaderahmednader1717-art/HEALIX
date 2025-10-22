@@ -6,7 +6,7 @@ class RowHeader extends StatelessWidget {
   final String actionText;
   final VoidCallback? onAction;
   final double scale;
-  const RowHeader({
+  const RowHeader({super.key, 
     required this.title,
     required this.actionText,
     required this.onAction,

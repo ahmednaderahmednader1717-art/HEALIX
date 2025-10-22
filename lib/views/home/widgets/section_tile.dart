@@ -7,7 +7,7 @@ class SectionTitle extends StatelessWidget {
   final String subtitle;
   final double scale;
 
-  const SectionTitle({
+  const SectionTitle({super.key, 
     required this.title,
     required this.subtitle,
     required this.scale,
