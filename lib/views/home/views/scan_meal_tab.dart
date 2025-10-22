@@ -8,7 +8,6 @@ class ScanMealTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     const baseWidth = 430.0;
@@ -18,24 +17,29 @@ class ScanMealTab extends StatelessWidget {
     final scale = min(w, h);
     final double toolbarHeight = 80 * h;
 
-
     return Stack(
       children: [
         SingleChildScrollView(
           padding: EdgeInsets.only(
             left: 16 * w,
             right: 16 * w,
-            top: toolbarHeight+10*h,
+            top: toolbarHeight + 10 * h,
             bottom: 120 * h,
           ),
           child: Center(
             child: Column(
               children: [
-                    Text("Scan Meal Page", style: GoogleFonts.inriaSans(color: Colors.white, fontSize: 18*scale)),
+                Text(
+                  "Scan Meal Page",
+                  style: GoogleFonts.inriaSans(
+                    color: Colors.white,
+                    fontSize: 18 * scale,
+                  ),
+                ),
               ],
             ),
           ),
-          ),
+        ),
       ],
     );
   }

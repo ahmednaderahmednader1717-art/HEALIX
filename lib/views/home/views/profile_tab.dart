@@ -9,7 +9,7 @@ class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
 
   @override
- Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     const baseWidth = 430.0;
@@ -36,14 +36,15 @@ class ProfileTab extends StatelessWidget {
               children: [
                 Text("Profile Page", style: TextStyle(color: Colors.white)),
                 Gap(640),
-                HealixPrimaryButton(text: "LOG OUT", onPressed: ()
-                {
-                  Navigator.pushReplacement(
+                HealixPrimaryButton(
+                  text: "LOG OUT",
+                  onPressed: () {
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (_) => const WelcomeScreen()),
                     );
-                }
-                )
+                  },
+                ),
               ],
             ),
           ),

@@ -54,14 +54,13 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // محتوى التابات
             IndexedStack(index: _currentIndex, children: _pages),
-        
+
             // AppBar ثابت لكل الصفحات
             HomePageAppBar(
               toolbarHeight: toolbarHeight,
               w: w,
               scale: scale,
               userName: widget.user.fullName,
-              
             ),
           ],
         ),
