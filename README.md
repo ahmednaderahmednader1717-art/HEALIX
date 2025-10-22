@@ -1,4 +1,4 @@
-# healix_fixed
+# HWALIX
 
 A new Flutter project.
 
