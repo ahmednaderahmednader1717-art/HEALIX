@@ -117,9 +117,10 @@ class _LogInScreenState extends State<LogInScreen> {
 
         await _saveTokens(token, refreshToken);
 
+        // حمّل المستخدم من الرد
         UserInfo userObj = UserInfo.fromJson(userJson);
 
-        // ✅ هنا ترفع الصورة من Google إلى السيرفر وتستبدل الرابط
+        // إذا كانت صورة Google متاحة وليست محلية، قم بتحميلها ورفعها للسيرفر
         if (userObj.profilePictureUrl != null &&
             userObj.profilePictureUrl!.startsWith(
               'https://lh3.googleusercontent.com',
@@ -127,23 +128,30 @@ class _LogInScreenState extends State<LogInScreen> {
           final file = await UserInfo.downloadProfileImage(
             userObj.profilePictureUrl!,
           );
-          if (file != null) {
-            await userObj.uploadProfilePicture(file, token);
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString(
-              'profilePictureUrl',
-              userObj.profilePictureUrl ?? '',
+
+          if (file != null && file.existsSync()) {
+            // ارفعها للسيرفر الخاص بك وسيتم تعيين الرابط الجديد في كائن userObj
+            final newUrl = await userObj.uploadProfilePicture(
+              file,
+              token: token,
             );
+
+            // خزنه محلي إذا أردت استخدامه لاحقاً
+            final prefs = await SharedPreferences.getInstance();
+            if (newUrl != null) {
+              await prefs.setString('profilePictureUrl', newUrl);
+            }
           }
         }
 
+        // انتقل للواجهة الرئيسية
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => HomeScreen(user: userObj)),
         );
       } else {
         _showCupertinoDialog(
-          "Google Sign-In failed. Status: ${response.statusCode}",
+          "Google Sign-In failed. Status: ${response.statusCode}\nResponse: ${response.data}",
         );
       }
     } catch (e) {

@@ -8,6 +8,11 @@ class StepDietType extends StatelessWidget {
   final Function(String) onSelect;
 
   static final Map<String, Map<String, dynamic>> dietTypes = {
+    "Standard": {
+      "desc": "No diet restrictions.",
+      "icon": Icons.restaurant, // أو asset
+      "color": Colors.orangeAccent,
+    },
     "Vegetarian": {
       "desc": "No meat or fish.",
       "icon": Icons.eco, // أو استخدم asset: "assets/icons/vegetarian.svg"
@@ -22,11 +27,6 @@ class StepDietType extends StatelessWidget {
       "desc": "Fish okay, but no other meat.",
       "icon": Icons.set_meal, // أو asset
       "color": Colors.teal,
-    },
-    "Standard": {
-      "desc": "No diet restrictions.",
-      "icon": Icons.restaurant, // أو asset
-      "color": Colors.orangeAccent,
     },
   };
 

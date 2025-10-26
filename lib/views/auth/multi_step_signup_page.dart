@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
@@ -26,9 +27,8 @@ class MultiStepSignUpPage extends StatefulWidget {
 class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
-  final int _totalSteps = 7; // أضفنا خطوة الصورة الجديدة
+  final int _totalSteps = 7;
 
-  // Text Controllers
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -37,7 +37,6 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  // State variables
   String? _selectedGender;
   DateTime? _selectedDate;
   int? _selectedHeight;
@@ -46,131 +45,28 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   String? _selectedBodyType;
   String? _selectedDietType;
   File? _profileImage;
-
+  String? _uploadedProfileUrl;
   bool _isLoading = false;
 
-  // Error messages
-  String? _fullNameError;
-  String? _phoneError;
-  String? _emailError;
-  String? _usernameError;
-  String? _passwordError;
-  String? _confirmPasswordError;
-  String? _genderError;
-  String? _dobError;
-  String? _heightError;
-  String? _weightError;
-  String? _goalWeightError;
-  String? _bodyTypeError;
-  String? _dietTypeError;
+  final Dio _dio = Dio(BaseOptions(baseUrl: "http://healix.somee.com/api"));
 
-  final Dio _dio = Dio(
-    BaseOptions(
-      baseUrl: "http://healix.somee.com/api",
-      headers: {"Content-Type": "application/json"},
-    ),
-  );
-
-  // Validation methods
-  bool _validateStep1() {
-    setState(() {
-      _fullNameError = null;
-      _phoneError = null;
-    });
-    if (_fullNameController.text.trim().isEmpty) {
-      _fullNameError = "Full name is required";
-      return false;
-    }
-    if (_phoneController.text.trim().isEmpty) {
-      _phoneError = "Phone number is required";
-      return false;
-    }
-    return true;
-  }
-
-  bool _validateStep2() {
-    setState(() {
-      _emailError = null;
-      _usernameError = null;
-    });
-    if (_emailController.text.trim().isEmpty ||
-        !_emailController.text.contains("@")) {
-      _emailError = "Enter a valid email";
-      return false;
-    }
-    if (_userNameController.text.trim().isEmpty) {
-      _usernameError = "Username is required";
-      return false;
-    }
-    return true;
-  }
-
-  bool _validateStep3() {
-    setState(() {
-      _passwordError = null;
-      _confirmPasswordError = null;
-    });
-    if (_passwordController.text.isEmpty) {
-      _passwordError = "Password is required";
-      return false;
-    }
-    if (_confirmPasswordController.text.isEmpty) {
-      _confirmPasswordError = "Please re-enter password";
-      return false;
-    }
-    if (_passwordController.text != _confirmPasswordController.text) {
-      _confirmPasswordError = "Passwords do not match";
-      return false;
-    }
-    return true;
-  }
-
-  bool _validateStep4() {
-    setState(() {
-      _genderError = null;
-      _dobError = null;
-      _heightError = null;
-      _weightError = null;
-      _goalWeightError = null;
-    });
-    if (_selectedGender == null) {
-      _genderError = "Select your gender";
-      return false;
-    }
-    if (_selectedDate == null) {
-      _dobError = "Select your birth date";
-      return false;
-    }
-    if (_selectedHeight == null) {
-      _heightError = "Select your height";
-      return false;
-    }
-    if (_selectedWeight == null) {
-      _weightError = "Select your weight";
-      return false;
-    }
-    if (_selectedGoalWeight == null) {
-      _goalWeightError = "Select your goal weight";
-      return false;
-    }
-    return true;
-  }
-
-  bool _validateStepBodyType() {
-    if (_selectedBodyType == null || _selectedBodyType!.isEmpty) {
-      _bodyTypeError = "Please select your body type";
-      return false;
-    }
-    return true;
-  }
-
-  bool _validateStepDietType() {
-    if (_selectedDietType == null || _selectedDietType!.isEmpty) {
-      _dietTypeError = "Please select your diet type";
-      return false;
-    }
-    return true;
-  }
+  bool _validateStep1() =>
+      _fullNameController.text.trim().isNotEmpty &&
+      _phoneController.text.trim().isNotEmpty;
+  bool _validateStep2() =>
+      _emailController.text.contains("@") &&
+      _userNameController.text.trim().isNotEmpty;
+  bool _validateStep3() =>
+      _passwordController.text.isNotEmpty &&
+      _confirmPasswordController.text == _passwordController.text;
+  bool _validateStep4() =>
+      _selectedGender != null &&
+      _selectedDate != null &&
+      _selectedHeight != null &&
+      _selectedWeight != null &&
+      _selectedGoalWeight != null;
+  bool _validateStepBodyType() => _selectedBodyType != null;
+  bool _validateStepDietType() => _selectedDietType != null;
 
   void _nextPage() async {
     if (_currentStep == 0 && !_validateStep1()) return;
@@ -187,7 +83,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         curve: Curves.easeInOut,
       );
     } else {
-      _signUp();
+      await _signUpWithProfileImage();
     }
   }
 
@@ -201,10 +97,12 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     }
   }
 
-  Future<void> _signUp() async {
+  Future<void> _signUpWithProfileImage() async {
     setState(() => _isLoading = true);
+    String? uploadedProfileUrl;
     try {
-      final formData = FormData.fromMap({
+      // 1. تسجيل المستخدم بدون صورة
+      final signupData = {
         "username": _userNameController.text.trim(),
         "email": _emailController.text.trim(),
         "password": _passwordController.text.trim(),
@@ -217,16 +115,28 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         "height": _selectedHeight,
         "weight": _selectedWeight,
         "goalWeight": _selectedGoalWeight,
-        if (_profileImage != null)
-          "profilePictureUrl": await MultipartFile.fromFile(
-            _profileImage!.path,
-            filename: _profileImage!.path.split('/').last,
-          ),
-      });
+        "profilePictureUrl": null,
+      };
+      final signupResp = await _dio.post("/Auth/signup", data: signupData);
 
-      final response = await _dio.post("/Auth/signup", data: formData);
+      if (signupResp.statusCode == 200 || signupResp.statusCode == 201) {
+        // 2. رفع الصورة (اختياري)
+        if (_profileImage != null && _profileImage!.existsSync()) {
+          final fd = FormData.fromMap({
+            "file": await MultipartFile.fromFile(_profileImage!.path),
+          });
+          final resp = await _dio.post(
+            "/User/upload-profile-picture",
+            data: fd,
+          );
+          uploadedProfileUrl = _extractUrlFromResponse(resp.data);
+          setState(() {
+            _uploadedProfileUrl =
+                uploadedProfileUrl; // لاستخدامها في HomeScreen
+          });
+        }
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+        // 3. الذهاب إلى HomeScreen وتمرير رابط الصورة
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -238,163 +148,72 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
                 phoneNumber: _phoneController.text.trim(),
                 dateOfBirth: _selectedDate,
                 gender: _selectedGender,
+                bodyType: _selectedBodyType,
+                userHeight: _selectedHeight,
+                userWeight: _selectedWeight,
+                userGoalWeight: _selectedGoalWeight,
+                profilePictureUrl: uploadedProfileUrl,
               ),
             ),
           ),
         );
       } else {
-        _showDialog("Unexpected server response: ${response.statusCode}");
+        _showDialog(
+          "Unexpected error: ${signupResp.statusCode}\n${signupResp.data}",
+        );
       }
     } on DioException catch (e) {
-      String message = "Something went wrong";
-      if (e.response?.data is Map && e.response?.data["message"] != null) {
-        message = e.response?.data["message"];
-      }
-      _showDialog(message);
+      String msg = e.response?.data.toString() ?? e.toString();
+      _showDialog(msg);
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  void _showDialog(String message) {
+  String? _extractUrlFromResponse(dynamic responseBody) {
+    try {
+      if (responseBody is Map<String, dynamic>) {
+        return responseBody['url'] ?? responseBody['profilePictureUrl'];
+      }
+      if (responseBody is String) {
+        final decoded = jsonDecode(responseBody);
+        return decoded['url'] ?? decoded['profilePictureUrl'];
+      }
+      return null;
+    } catch (e) {
+      print('⚠️ تحليل الرد فشل: $e');
+      return null;
+    }
+  }
+
+  void _showDialog(String msg) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text("Attention"),
-        content: Text(message),
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text("Error"),
+        content: Text(msg),
         actions: [
           CupertinoDialogAction(
-            onPressed: () => Navigator.pop(context),
             child: const Text("OK"),
+            onPressed: () => Navigator.pop(ctx),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _pickDate(BuildContext context) async {
-    DateTime initial = _selectedDate ?? DateTime(2000, 1, 1);
-    DateTime tempPicked = initial;
-    await showCupertinoModalPopup(
-      context: context,
-      builder: (_) => _buildCupertinoPickerContainer(
-        child: CupertinoDatePicker(
-          backgroundColor: Colors.black,
-          mode: CupertinoDatePickerMode.date,
-          initialDateTime: initial,
-          maximumYear: DateTime.now().year,
-          minimumYear: 1900,
-          onDateTimeChanged: (newDate) => tempPicked = newDate,
-        ),
-        onDone: () => setState(() => _selectedDate = tempPicked),
-      ),
-    );
-  }
-
-  Future<void> _pickIntValue(
-    BuildContext context,
-    String label,
-    int min,
-    int max,
-    int? initialValue,
-    Function(int) onSelected,
-  ) async {
-    int tempValue = initialValue ?? min;
-    await showCupertinoModalPopup(
-      context: context,
-      builder: (_) => _buildCupertinoPickerContainer(
-        child: CupertinoPicker(
-          itemExtent: 45,
-          backgroundColor: Colors.black,
-          scrollController: FixedExtentScrollController(
-            initialItem: (initialValue ?? min) - min,
-          ),
-          onSelectedItemChanged: (index) {
-            tempValue = min + index;
-          },
-          children: List.generate(
-            max - min + 1,
-            (i) => Center(
-              child: Text(
-                "${min + i}",
-                style: const TextStyle(color: Colors.white, fontSize: 22),
-              ),
-            ),
-          ),
-        ),
-        onDone: () => onSelected(tempValue),
-      ),
-    );
-  }
-
-  Widget _buildCupertinoPickerContainer({
-    required Widget child,
-    required VoidCallback onDone,
-  }) {
-    return Container(
-      height: 320,
-      color: Colors.black,
-      child: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            Container(
-              color: Colors.grey[900],
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      "Cancel",
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      onDone();
-                    },
-                    child: Text(
-                      "Done",
-                      style: TextStyle(color: AppColors.primarayColor),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: CupertinoTheme(
-                data: const CupertinoThemeData(
-                  textTheme: CupertinoTextThemeData(
-                    dateTimePickerTextStyle: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
-                child: child,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width / 430;
-    final h = MediaQuery.of(context).size.height / 932;
-    final scale = min(w, h);
-
+    final scale = min(
+      MediaQuery.of(context).size.width / 430,
+      MediaQuery.of(context).size.height / 932,
+    );
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
-          centerTitle: true,
           backgroundColor: Colors.black,
+          centerTitle: true,
           title: const Text(
             "Complete Sign Up",
             style: TextStyle(color: Colors.white),
@@ -405,45 +224,18 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
           children: [
             Column(
               children: [
-                Gap(20 * h),
-                _progressBar(),
+                _buildProgressBar(),
                 Expanded(child: _buildPages()),
-                _navigationButtons(scale, w, h),
+                _buildNavigationButtons(scale),
               ],
             ),
             if (_isLoading)
               Container(
                 color: Colors.black.withOpacity(0.7),
-                child: const Center(
-                  child: CupertinoActivityIndicator(radius: 15),
-                ),
+                child: const Center(child: CupertinoActivityIndicator()),
               ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _progressBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: List.generate(_totalSteps, (index) {
-          bool isActive = index <= _currentStep;
-          return Expanded(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              height: 8,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? AppColors.primarayColor
-                    : AppColors.secondaryColor,
-                borderRadius: BorderRadius.circular(5),
-              ),
-            ),
-          );
-        }),
       ),
     );
   }
@@ -456,32 +248,32 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         StepPersonalInfo(
           nameController: _fullNameController,
           phoneController: _phoneController,
-          nameError: _fullNameError,
-          phoneError: _phoneError,
+          nameError: null,
+          phoneError: null,
         ),
         StepAccountInfo(
           emailController: _emailController,
           usernameController: _userNameController,
-          emailError: _emailError,
-          usernameError: _usernameError,
+          emailError: null,
+          usernameError: null,
         ),
         StepPassword(
           passwordController: _passwordController,
           confirmController: _confirmPasswordController,
-          passwordError: _passwordError,
-          confirmError: _confirmPasswordError,
+          passwordError: null,
+          confirmError: null,
         ),
         StepExtraDetails(
           selectedGender: _selectedGender,
-          genderError: _genderError,
+          genderError: null,
           selectedDate: _selectedDate,
-          dobError: _dobError,
+          dobError: null,
           selectedHeight: _selectedHeight,
-          heightError: _heightError,
+          heightError: null,
           selectedWeight: _selectedWeight,
-          weightError: _weightError,
+          weightError: null,
           selectedGoalWeight: _selectedGoalWeight,
-          goalWeightError: _goalWeightError,
+          goalWeightError: null,
           onSelectGender: (g) => setState(() => _selectedGender = g),
           onSelectDate: (ctx) async => await _pickDate(ctx),
           onSelectHeight: (ctx) async => await _pickIntValue(
@@ -511,12 +303,12 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         ),
         StepBodyType(
           selectedBodyType: _selectedBodyType,
-          errorText: _bodyTypeError,
+          errorText: null,
           onSelect: (bt) => setState(() => _selectedBodyType = bt),
         ),
         StepDietType(
           selectedDietType: _selectedDietType,
-          errorText: _dietTypeError,
+          errorText: null,
           onSelect: (dt) => setState(() => _selectedDietType = dt),
         ),
         StepProfilePhoto(
@@ -527,33 +319,198 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     );
   }
 
-  Widget _navigationButtons(double scale, double w, double h) {
+  Widget _buildProgressBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      child: Row(
+        children: List.generate(_totalSteps, (index) {
+          bool isActive = index <= _currentStep;
+          return Expanded(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              height: 8,
+              decoration: BoxDecoration(
+                color: isActive ? AppColors.primarayColor : Colors.grey[700],
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildNavigationButtons(double scale) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Gap(20 * w),
           HealixPrimaryButton.iconOnly(
             leading: Icon(
-              _currentStep > 0 ? Icons.arrow_back : Icons.close,
+              _currentStep > 0 ? Icons.arrow_back_ios : Icons.close,
               color: Colors.white,
-              size: 30 * scale,
+              size: 28 * scale,
             ),
             onPressed: _currentStep > 0
                 ? _previousPage
                 : () => Navigator.pop(context),
-            width: 60 * w,
-            height: 60 * h,
+            width: 55,
+            height: 55,
             borderRadius: 999,
-            backgroundColor: AppColors.primarayColor.withOpacity(0.4),
+            backgroundColor: AppColors.primarayColor.withOpacity(0.35),
           ),
-          Gap(20 * w),
+          const Gap(24),
           HealixPrimaryButton(
-            height: 60,
-            width: 300 * w,
+            height: 55,
+            width: 270,
             text: _currentStep == _totalSteps - 1 ? "Finish" : "Next Step",
             onPressed: _nextPage,
           ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickDate(BuildContext context) async {
+    DateTime initial = _selectedDate ?? DateTime(2000, 1, 1);
+    DateTime tempPicked = initial;
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (_) => Container(
+        height: 320,
+        color: Colors.black,
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              Container(
+                color: Colors.grey[900],
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setState(() => _selectedDate = tempPicked);
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        "Done",
+                        style: TextStyle(color: AppColors.primarayColor),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoTheme(
+                  data: const CupertinoThemeData(
+                    brightness: Brightness.dark,
+                    textTheme: CupertinoTextThemeData(
+                      dateTimePickerTextStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                      ),
+                    ),
+                  ),
+                  child: CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.date,
+                    backgroundColor: Colors.black,
+                    initialDateTime: initial,
+                    minimumYear: 1900,
+                    maximumYear: DateTime.now().year,
+                    onDateTimeChanged: (newDate) => tempPicked = newDate,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickIntValue(
+    BuildContext context,
+    String label,
+    int min,
+    int max,
+    int? value,
+    Function(int) onSelected,
+  ) async {
+    int tempValue = value ?? min;
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (_) => _buildCupertinoPickerContainer(
+        onDone: () => onSelected(tempValue),
+        child: CupertinoPicker(
+          itemExtent: 40,
+          backgroundColor: Colors.black,
+          scrollController: FixedExtentScrollController(
+            initialItem: (value ?? min) - min,
+          ),
+          onSelectedItemChanged: (i) => tempValue = min + i,
+          children: List.generate(
+            max - min + 1,
+            (i) => Center(
+              child: Text(
+                "${min + i}",
+                style: const TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCupertinoPickerContainer({
+    required Widget child,
+    required VoidCallback onDone,
+  }) {
+    return Container(
+      height: 320,
+      color: Colors.black,
+      child: Column(
+        children: [
+          Container(
+            color: Colors.grey[900],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CupertinoButton(
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                CupertinoButton(
+                  child: Text(
+                    "Done",
+                    style: TextStyle(color: AppColors.primarayColor),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    onDone();
+                  },
+                ),
+              ],
+            ),
+          ),
+          Expanded(child: child),
         ],
       ),
     );

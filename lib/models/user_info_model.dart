@@ -12,6 +12,9 @@ class UserInfo {
   DateTime? dateOfBirth;
   String? gender;
   String? bodyType;
+  int? userHeight;
+  int? userWeight;
+  int? userGoalWeight;
 
   UserInfo({
     required this.username,
@@ -22,14 +25,17 @@ class UserInfo {
     this.dateOfBirth,
     this.gender,
     this.bodyType,
+    this.userHeight,
+    this.userWeight,
+    this.userGoalWeight,
   });
 
-  // ⬇️ تحويل JSON إلى كائن
+  // تحويل JSON إلى كائن
   factory UserInfo.fromJson(Map<String, dynamic> json) {
     return UserInfo(
-      username: json['username'],
-      email: json['email'],
-      fullName: json['fullName'],
+      username: json['username'] ?? "",
+      email: json['email'] ?? "",
+      fullName: json['fullName'] ?? "",
       phoneNumber: json['phoneNumber'],
       dateOfBirth: json['dateOfBirth'] != null
           ? DateTime.tryParse(json['dateOfBirth'])
@@ -37,10 +43,12 @@ class UserInfo {
       gender: json['gender'],
       profilePictureUrl: json['profilePictureUrl'],
       bodyType: json['bodyType'],
+      userHeight: json['height'], // متوافق مع الـ backend الحالي
+      userWeight: json['weight'],
+      userGoalWeight: json['goalWeight'],
     );
   }
 
-  // ⬇️ تحويل كائن إلى JSON
   Map<String, dynamic> toJson() {
     return {
       'username': username,
@@ -51,10 +59,13 @@ class UserInfo {
       'gender': gender,
       'profilePictureUrl': profilePictureUrl,
       'bodyType': bodyType,
+      'height': userHeight,
+      'weight': userWeight,
+      'goalWeight': userGoalWeight,
     };
   }
 
-  // ⬇️ تحميل الصورة مؤقتاً من Google
+  // تحميل أي صورة من الإنترنت بشكل مؤقت (اختياري)
   static Future<File?> downloadProfileImage(String imageUrl) async {
     try {
       final dio = Dio();
@@ -62,7 +73,6 @@ class UserInfo {
         imageUrl,
         options: Options(responseType: ResponseType.bytes),
       );
-
       final tempDir = await getTemporaryDirectory();
       final file = File(
         '${tempDir.path}/profile_${DateTime.now().millisecondsSinceEpoch}.jpg',
@@ -70,13 +80,13 @@ class UserInfo {
       await file.writeAsBytes(response.data!);
       return file;
     } catch (e) {
-      print("❌ خطأ أثناء تحميل الصورة من Google: $e");
+      print("❌ خطأ أثناء تحميل الصورة: $e");
       return null;
     }
   }
 
-  // ⬇️ رفع الصورة إلى السيرفر وتحديث رابطها الجديد
-  Future<void> uploadProfilePicture(File imageFile, String token) async {
+  // رفع صورة البروفايل للإندبوينت الصحيح + تحديث الرابط تلقائياً
+  Future<String?> uploadProfilePicture(File imageFile, {String? token}) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://healix.somee.com/api'));
     try {
       final formData = FormData.fromMap({
@@ -86,26 +96,33 @@ class UserInfo {
       final response = await dio.post(
         '/User/upload-profile-picture',
         data: formData,
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        options: Options(
+          headers: {if (token != null) 'Authorization': 'Bearer $token'},
+        ),
       );
 
       if (response.statusCode == 200) {
         final newUrl = _extractUrlFromResponse(response.data);
         if (newUrl != null) {
           profilePictureUrl = newUrl;
-          print('✅ تم رفع الصورة بنجاح: $newUrl');
-        } else {
-          print('⚠️ لم يتم العثور على رابط الصورة في الرد.');
+          print('✅ تم رفع الصورة: $newUrl');
+          return newUrl;
         }
+        print('⚠️ لم يتم إيجاد رابط الصورة في الرد.');
+        return null;
       } else {
-        print('❌ فشل رفع الصورة. كود الخطأ: ${response.statusCode}');
+        print(
+          '❌ فشل رفع الصورة. Status: ${response.statusCode} Data: ${response.data}',
+        );
+        return null;
       }
     } catch (e) {
-      print('❌ خطأ أثناء رفع الصورة: $e');
+      print('❌ Exception رفع الصورة: $e');
+      return null;
     }
   }
 
-  // ⬇️ استخراج رابط الصورة من الرد
+  // استخراج الرابط من الرد (يدعم Map أو String JSON)
   String? _extractUrlFromResponse(dynamic responseBody) {
     try {
       if (responseBody is Map<String, dynamic>) {
@@ -117,7 +134,7 @@ class UserInfo {
       }
       return null;
     } catch (e) {
-      print('⚠️ خطأ أثناء تحليل الرد: $e');
+      print('⚠️ تحليل الرد فشل: $e');
       return null;
     }
   }
