@@ -5,7 +5,8 @@ class HealixTextField extends StatefulWidget {
   final TextEditingController controller;
   final String hint;
   final bool isPassword;
-  final String? errorText; // ✅ أضفنا دعم رسالة الخطأ
+  final String? errorText;
+  final TextInputType? keyboardType; // ✅
 
   const HealixTextField({
     super.key,
@@ -13,6 +14,7 @@ class HealixTextField extends StatefulWidget {
     required this.hint,
     this.isPassword = false,
     this.errorText,
+    this.keyboardType, // ✅
   });
 
   @override
@@ -38,6 +40,7 @@ class _HealixTextFieldState extends State<HealixTextField> {
         TextField(
           controller: widget.controller,
           obscureText: _obscureText,
+          keyboardType: widget.keyboardType, // ✅
           style: const TextStyle(color: Colors.white),
           cursorColor: Colors.white,
           decoration: InputDecoration(
@@ -52,9 +55,7 @@ class _HealixTextFieldState extends State<HealixTextField> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
               borderSide: BorderSide(
-                color: hasError
-                    ? Colors.red
-                    : Colors.white.withOpacity(0.3), // لون أحمر عند الخطأ
+                color: hasError ? Colors.red : Colors.white.withOpacity(0.3),
                 width: hasError ? 1.5 : 1,
               ),
             ),
@@ -65,7 +66,6 @@ class _HealixTextFieldState extends State<HealixTextField> {
                 width: 1.5,
               ),
             ),
-            // ايقونة العين
             suffixIcon: widget.isPassword
                 ? Padding(
                     padding: const EdgeInsets.only(right: 12.0),
@@ -102,3 +102,4 @@ class _HealixTextFieldState extends State<HealixTextField> {
     );
   }
 }
+

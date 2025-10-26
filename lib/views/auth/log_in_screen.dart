@@ -15,7 +15,6 @@ import 'package:test_splash/widgets/social_button.dart';
 import 'package:test_splash/widgets/healix_primary_button.dart';
 import 'package:test_splash/views/auth/sign_up_screen.dart';
 import 'package:test_splash/models/user_info_model.dart';
-
 import 'package:test_splash/src/web_wrapper.dart' as web;
 
 // ===== LogInScreen =====
@@ -108,13 +107,36 @@ class _LogInScreenState extends State<LogInScreen> {
         "fullName": user.displayName ?? "Unknown",
         "profilePictureUrl": user.photoUrl ?? "",
       };
+
       final response = await dio.post('/Auth/external-login', data: payload);
+
       if (response.statusCode == 200 && response.data['user'] != null) {
         final userJson = response.data['user'];
         final token = response.data['token'] ?? "";
         final refreshToken = response.data['refreshToken'] ?? "";
+
         await _saveTokens(token, refreshToken);
+
         UserInfo userObj = UserInfo.fromJson(userJson);
+
+        // ✅ هنا ترفع الصورة من Google إلى السيرفر وتستبدل الرابط
+        if (userObj.profilePictureUrl != null &&
+            userObj.profilePictureUrl!.startsWith(
+              'https://lh3.googleusercontent.com',
+            )) {
+          final file = await UserInfo.downloadProfileImage(
+            userObj.profilePictureUrl!,
+          );
+          if (file != null) {
+            await userObj.uploadProfilePicture(file, token);
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString(
+              'profilePictureUrl',
+              userObj.profilePictureUrl ?? '',
+            );
+          }
+        }
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => HomeScreen(user: userObj)),
@@ -184,21 +206,12 @@ class _LogInScreenState extends State<LogInScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text(
-          "تنبيه",
-          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-        ),
-        content: Text(
-          message,
-          style: const TextStyle(color: Color.fromARGB(179, 0, 0, 0)),
-        ),
+        title: const Text("Attention"),
+        content: Text(message),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              "موافق",
-              style: TextStyle(color: Colors.blueAccent),
-            ),
+            child: const Text("Ok", style: TextStyle(color: Colors.blueAccent)),
           ),
         ],
       ),

@@ -10,9 +10,9 @@ class HealixApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
+      locale: const Locale('en'),
+      supportedLocales: const [Locale('en'), Locale('ar')],
       home: SplashScreen(),
     );
   }
 }
-
-/// SplashScreen مستقلة للوجو
