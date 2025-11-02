@@ -1,9 +1,14 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
 
 class StepExtraDetails extends StatelessWidget {
+
+  
+
   final String? selectedGender;
   final String? genderError;
   final DateTime? selectedDate;
@@ -42,94 +47,105 @@ class StepExtraDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Gap(20),
-          Text(
-            "A Few More Details",
-            style: GoogleFonts.inriaSans(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          Gap(20),
-          _sectionTitle("Gender"),
-          if (genderError != null) _errorText(genderError!),
-          Gap(8),
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => onSelectGender("Male"),
-                  child: genderBox("Male", selectedGender == "Male"),
-                ),
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    const baseWidth = 430.0;
+    const baseHeight = 932.0;
+    final w = screenWidth / baseWidth;
+    final h = screenHeight / baseHeight;
+    final scale = min(w, h);
+    final double toolbarHeight = 80 * h;
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16*w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Gap(20*h),
+            Text(
+              "A Few More Details",
+              style: GoogleFonts.inriaSans(
+                fontSize: 22*scale,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-              Gap(16),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => onSelectGender("Female"),
-                  child: genderBox("Female", selectedGender == "Female"),
+            ),
+            Gap(20*h),
+            _sectionTitle("Gender"),
+            if (genderError != null) _errorText(genderError!),
+            Gap(8*h),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => onSelectGender("Male"),
+                    child: genderBox("Male", selectedGender == "Male"),
+                  ),
                 ),
+                Gap(16*h),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => onSelectGender("Female"),
+                    child: genderBox("Female", selectedGender == "Female"),
+                  ),
+                ),
+              ],
+            ),
+            Gap(20*h),
+            _sectionTitle("Date of Birth"),
+            if (dobError != null) _errorText(dobError!),
+            Gap(8*h),
+            GestureDetector(
+              onTap: () => onSelectDate(context),
+              child: pickerBox(
+                selectedDate == null
+                    ? "Select your birth date"
+                    : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                selectedDate != null,
               ),
-            ],
-          ),
-          Gap(20),
-          _sectionTitle("Date of Birth"),
-          if (dobError != null) _errorText(dobError!),
-          Gap(8),
-          GestureDetector(
-            onTap: () => onSelectDate(context),
-            child: pickerBox(
-              selectedDate == null
-                  ? "Select your birth date"
-                  : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
-              selectedDate != null,
             ),
-          ),
-          Gap(20),
-          _sectionTitle("Height (cm)"),
-          if (heightError != null) _errorText(heightError!),
-          Gap(8),
-          GestureDetector(
-            onTap: () => onSelectHeight(context),
-            child: pickerBox(
-              selectedHeight == null
-                  ? "Select your height"
-                  : "$selectedHeight cm",
-              selectedHeight != null,
+            Gap(20*h),
+            _sectionTitle("Height (cm)"),
+            if (heightError != null) _errorText(heightError!),
+            Gap(8*h),
+            GestureDetector(
+              onTap: () => onSelectHeight(context),
+              child: pickerBox(
+                selectedHeight == null
+                    ? "Select your height"
+                    : "$selectedHeight cm",
+                selectedHeight != null,
+              ),
             ),
-          ),
-          Gap(20),
-          _sectionTitle("Weight (kg)"),
-          if (weightError != null) _errorText(weightError!),
-          Gap(8),
-          GestureDetector(
-            onTap: () => onSelectWeight(context),
-            child: pickerBox(
-              selectedWeight == null
-                  ? "Select your weight"
-                  : "$selectedWeight kg",
-              selectedWeight != null,
+            Gap(20*h),
+            _sectionTitle("Weight (kg)"),
+            if (weightError != null) _errorText(weightError!),
+            Gap(8*h),
+            GestureDetector(
+              onTap: () => onSelectWeight(context),
+              child: pickerBox(
+                selectedWeight == null
+                    ? "Select your weight"
+                    : "$selectedWeight kg",
+                selectedWeight != null,
+              ),
             ),
-          ),
-          Gap(20),
-          _sectionTitle("Goal Weight (kg)"),
-          if (goalWeightError != null) _errorText(goalWeightError!),
-          Gap(8),
-          GestureDetector(
-            onTap: () => onSelectGoalWeight(context),
-            child: pickerBox(
-              selectedGoalWeight == null
-                  ? "Select your goal weight"
-                  : "$selectedGoalWeight kg",
-              selectedGoalWeight != null,
+            Gap(20*h),
+            _sectionTitle("Goal Weight (kg)"),
+            if (goalWeightError != null) _errorText(goalWeightError!),
+            Gap(8*h),
+            GestureDetector(
+              onTap: () => onSelectGoalWeight(context),
+              child: pickerBox(
+                selectedGoalWeight == null
+                    ? "Select your goal weight"
+                    : "$selectedGoalWeight kg",
+                selectedGoalWeight != null,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -150,6 +166,8 @@ class StepExtraDetails extends StatelessWidget {
   }
 
   Widget pickerBox(String text, bool selected) {
+
+
     return Container(
       height: 55,
       decoration: BoxDecoration(

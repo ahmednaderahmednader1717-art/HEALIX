@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
@@ -44,7 +45,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   int? _selectedGoalWeight;
   String? _selectedBodyType;
   String? _selectedDietType;
-  File? _profileImage;
+  dynamic _profileImage; // File (mobile) أو Uint8List (web)
   String? _uploadedProfileUrl;
   bool _isLoading = false;
 
@@ -122,16 +123,45 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
 
       // ✅ التحقق من النتيجة
       if (signupResp.statusCode == 200 || signupResp.statusCode == 201) {
+        // 👇 استخراج التوكن من رد التسجيل
+        String? accessToken;
+        if (signupResp.data is Map && signupResp.data['accessToken'] != null) {
+          accessToken = signupResp.data['accessToken'];
+        }
+
         // 2. رفع الصورة (اختياري)
-        if (_profileImage != null && _profileImage!.existsSync()) {
+        if (_profileImage != null) {
           try {
-            final fd = FormData.fromMap({
-              "file": await MultipartFile.fromFile(_profileImage!.path),
-            });
+            FormData fd;
+            if (_profileImage is File) {
+              fd = FormData.fromMap({
+                "file": await MultipartFile.fromFile(
+                  (_profileImage as File).path,
+                ),
+              });
+            } else if (_profileImage is Uint8List) {
+              fd = FormData.fromMap({
+                "file": MultipartFile.fromBytes(
+                  (_profileImage as Uint8List),
+                  filename: "profile.jpg",
+                ),
+              });
+            } else {
+              throw Exception("الصورة غير مدعومة");
+            }
+
+            // 👇 إضافة التوكن في الهيدر
             final resp = await _dio.post(
               "/User/upload-profile-picture",
               data: fd,
+              options: Options(
+                headers: {
+                  if (accessToken != null)
+                    'Authorization': 'Bearer $accessToken',
+                },
+              ),
             );
+
             uploadedProfileUrl = _extractUrlFromResponse(resp.data);
             if (uploadedProfileUrl != null && uploadedProfileUrl.isNotEmpty) {
               setState(() => _uploadedProfileUrl = uploadedProfileUrl);
@@ -329,7 +359,8 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       ),
       StepProfilePhoto(
         selectedImage: _profileImage,
-        onImageSelected: (file) => setState(() => _profileImage = file),
+        onImageSelected: (fileOrBytes) =>
+            setState(() => _profileImage = fileOrBytes),
       ),
     ],
   );

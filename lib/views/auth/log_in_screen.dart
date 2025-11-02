@@ -230,7 +230,6 @@ class _LogInScreenState extends State<LogInScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
     const baseWidth = 430.0;
     const baseHeight = 932.0;
     final w = screenWidth / baseWidth;
@@ -245,8 +244,8 @@ class _LogInScreenState extends State<LogInScreen> {
             backgroundColor: Colors.black,
             title: SvgPicture.asset(
               "assets/logo/HEALIX.svg",
-              width: 60 * scale,
-              height: 40 * scale,
+              width: 60 * w,
+              height: 40 * h,
             ),
             centerTitle: true,
             iconTheme: const IconThemeData(color: Colors.white),

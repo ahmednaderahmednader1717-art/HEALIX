@@ -124,7 +124,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: const Text(
-          "تنبيه",
+          "Alert",
           style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
         ),
         content: Text(
@@ -135,7 +135,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(context),
             child: const Text(
-              "موافق",
+              "Ok",
               style: TextStyle(color: Colors.blueAccent),
             ),
           ),

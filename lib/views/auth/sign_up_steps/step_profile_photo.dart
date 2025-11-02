@@ -1,14 +1,18 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:test_splash/core/app_colors.dart';
 
 class StepProfilePhoto extends StatefulWidget {
-  final Function(File?) onImageSelected;
-  final File? selectedImage;
+  final Function(dynamic)
+  onImageSelected; // dynamic: File (mobile) أو Uint8List (web)
+  final dynamic selectedImage; // File أو Uint8List
 
   const StepProfilePhoto({
     super.key,
@@ -22,28 +26,37 @@ class StepProfilePhoto extends StatefulWidget {
 
 class _StepProfilePhotoState extends State<StepProfilePhoto> {
   File? _imageFile;
+  Uint8List? _imageBytes;
   final picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _imageFile = widget.selectedImage;
+    if (UniversalPlatform.isWeb &&
+        widget.selectedImage != null &&
+        widget.selectedImage is Uint8List) {
+      _imageBytes = widget.selectedImage;
+    } else if (widget.selectedImage != null && widget.selectedImage is File) {
+      _imageFile = widget.selectedImage;
+    }
   }
 
   @override
   void didUpdateWidget(covariant StepProfilePhoto oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.selectedImage?.path != oldWidget.selectedImage?.path) {
+    if (UniversalPlatform.isWeb &&
+        widget.selectedImage != null &&
+        widget.selectedImage is Uint8List) {
+      setState(() => _imageBytes = widget.selectedImage);
+    } else if (widget.selectedImage != null && widget.selectedImage is File) {
       setState(() => _imageFile = widget.selectedImage);
     }
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final picker = ImagePicker();
+  Future<void> _pickImageMobile(ImageSource source) async {
     final picked = await picker.pickImage(source: source, imageQuality: 80);
     if (picked != null) {
       final file = File(picked.path);
-      print("Picked image path: ${file.path} - Exists: ${file.existsSync()}");
       if (file.existsSync()) {
         setState(() => _imageFile = file);
         widget.onImageSelected(file);
@@ -53,9 +66,26 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
     }
   }
 
+  Future<void> _pickImageWeb() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result != null && result.files.isNotEmpty) {
+      Uint8List? imageBytes = result.files.first.bytes;
+      if (imageBytes != null) {
+        setState(() => _imageBytes = imageBytes);
+        widget.onImageSelected(imageBytes);
+      } else {
+        _showErrorDialog('No image bytes found!');
+      }
+    } else {
+      _showErrorDialog('No image selected!');
+    }
+  }
 
   void _removeImage() {
-    setState(() => _imageFile = null);
+    setState(() {
+      _imageFile = null;
+      _imageBytes = null;
+    });
     widget.onImageSelected(null);
   }
 
@@ -77,6 +107,29 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
 
   @override
   Widget build(BuildContext context) {
+    Widget? avatarChild;
+    ImageProvider? avatarBG;
+
+    if (UniversalPlatform.isWeb) {
+      // web
+      if (_imageBytes != null) {
+        avatarBG = MemoryImage(_imageBytes!);
+        avatarChild = null;
+      } else {
+        avatarBG = null;
+        avatarChild = Icon(Icons.person, color: Colors.grey[400], size: 60);
+      }
+    } else {
+      // mobile
+      if (_imageFile != null && _imageFile!.existsSync()) {
+        avatarBG = FileImage(_imageFile!);
+        avatarChild = null;
+      } else {
+        avatarBG = null;
+        avatarChild = Icon(Icons.person, color: Colors.grey[400], size: 60);
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Column(
@@ -102,32 +155,32 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
             child: CircleAvatar(
               radius: 70,
               backgroundColor: Colors.grey[800],
-              backgroundImage: (_imageFile != null && _imageFile!.existsSync())
-                  ? FileImage(_imageFile!)
-                  : null,
-              child: (_imageFile == null || !_imageFile!.existsSync())
-                  ? Icon(Icons.person, color: Colors.grey[400], size: 60)
-                  : null,
+              backgroundImage: avatarBG,
+              child: avatarChild,
             ),
           ),
           const Gap(40),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _imageButton(
-                Icons.camera_alt,
-                "Camera",
-                () => _pickImage(ImageSource.camera),
-              ),
+              _imageButton(Icons.camera_alt, "Camera", () {
+                if (UniversalPlatform.isWeb) {
+                  _pickImageWeb();
+                } else {
+                  _pickImageMobile(ImageSource.camera);
+                }
+              }),
               Gap(30),
-              _imageButton(
-                Icons.photo_library,
-                "Gallery",
-                () => _pickImage(ImageSource.gallery),
-              ),
+              _imageButton(Icons.photo_library, "Gallery", () {
+                if (UniversalPlatform.isWeb) {
+                  _pickImageWeb();
+                } else {
+                  _pickImageMobile(ImageSource.gallery);
+                }
+              }),
             ],
           ),
-          if (_imageFile != null)
+          if (_imageFile != null || _imageBytes != null)
             Padding(
               padding: const EdgeInsets.only(top: 40.0),
               child: TextButton(
