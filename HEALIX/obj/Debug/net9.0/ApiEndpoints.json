@@ -1,6 +1,22 @@
 [
   {
     "ContainingType": "HEALIX.API.Controllers.AuthController",
+    "Method": "ExternalLogin",
+    "RelativePath": "api/Auth/external-login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HEALIX.Models.DTOs.ExternalLoginRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HEALIX.API.Controllers.AuthController",
     "Method": "ForgotPassword",
     "RelativePath": "api/Auth/forgot-password",
     "HttpMethod": "POST",
@@ -97,8 +113,40 @@
   },
   {
     "ContainingType": "HEALIX.API.Controllers.AuthController",
+    "Method": "UpdateHealthProfile",
+    "RelativePath": "api/Auth/update-health-profile",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HEALIX.Models.DTOs.UpdateHealthProfileDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HEALIX.API.Controllers.AuthController",
+    "Method": "UpdateProfilePicture",
+    "RelativePath": "api/Auth/update-profile-picture",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HEALIX.Models.DTOs.UpdateProfilePictureDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HEALIX.API.Controllers.AuthController",
     "Method": "VerifyToken",
-    "RelativePath": "api/Auth/verify",
+    "RelativePath": "api/Auth/verify-token",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -115,7 +163,7 @@
     "Parameters": [],
     "ReturnTypes": [
       {
-        "Type": "\u003C\u003Ef__AnonymousType6\u00604[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.DateTime, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "\u003C\u003Ef__AnonymousType11\u00604[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.DateTime, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -125,6 +173,22 @@
     "Tags": [
       "Health"
     ]
+  },
+  {
+    "ContainingType": "HEALIX.API.Controllers.UserController",
+    "Method": "UploadProfilePicture",
+    "RelativePath": "api/User/upload-profile-picture",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "HEALIX.Controllers.WeatherForecastController",

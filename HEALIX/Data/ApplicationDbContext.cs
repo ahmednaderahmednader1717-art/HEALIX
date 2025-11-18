@@ -27,6 +27,40 @@ namespace HEALIX.API.Data
 
                 entity.HasKey(e => e.Id);
 
+                // 🆕 NEW: Health & Fitness Fields Configuration
+
+                entity.Property(e => e.Height)
+                      .HasColumnType("decimal(5,2)"); // 999.99 cm max
+                                                      // مثال: 175.50
+
+                entity.Property(e => e.Weight)
+                      .HasColumnType("decimal(5,2)"); // 999.99 kg max
+                                                      // مثال: 75.30
+
+                entity.Property(e => e.BodyType)
+                      .HasMaxLength(20);
+
+                entity.Property(e => e.DietType)
+                      .HasMaxLength(20);
+
+                entity.Property(e => e.Goal)
+                      .HasMaxLength(20);
+
+                entity.Property(e => e.GoalWeight)
+                      .HasColumnType("decimal(5,2)");
+
+                // 🆕 Check Constraints (قيود للتأكد من القيم الصحيحة)
+
+                entity.HasCheckConstraint("CK_User_BodyType",
+                    "BodyType IS NULL OR BodyType IN ('Ectomorph', 'Mesomorph', 'Endomorph')");
+
+                entity.HasCheckConstraint("CK_User_DietType",
+                    "DietType IS NULL OR DietType IN ('Vegan', 'Vegetarian', 'Pescatarian', 'Standard')");
+
+                entity.HasCheckConstraint("CK_User_Goal",
+                    "Goal IS NULL OR Goal IN ('GainWeight', 'MaintainWeight', 'LoseWeight')");
+
+
                 // Username
                 entity.Property(e => e.Username)
                       .IsRequired()
@@ -44,7 +78,6 @@ namespace HEALIX.API.Data
                       .IsUnique();
 
                 entity.Property(e => e.PasswordHash)
-                      .IsRequired()
                       .HasMaxLength(500);
 
                 entity.Property(e => e.FullName)
@@ -56,6 +89,17 @@ namespace HEALIX.API.Data
 
                 entity.Property(e => e.Gender)
                       .HasMaxLength(10);
+
+                entity.Property(e => e.LoginProvider)
+                       .HasMaxLength(20);
+
+                entity.Property(e => e.ExternalId)
+                      .HasMaxLength(500);
+
+                entity.Property(e => e.ProfilePictureUrl)
+                      .HasMaxLength(500);
+
+                entity.HasIndex(e => new { e.LoginProvider, e.ExternalId });
 
                 entity.Property(e => e.IsEmailVerified)
                       .HasDefaultValue(false);

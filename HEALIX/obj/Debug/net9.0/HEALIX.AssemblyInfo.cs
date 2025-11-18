@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HEALIX")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e40044313f8910a8d69e625d721461ee3acab7d3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+128fb8130707bb0a46193c940d66d35b9d7baa79")]
 [assembly: System.Reflection.AssemblyProductAttribute("HEALIX")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HEALIX")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

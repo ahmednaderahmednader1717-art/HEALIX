@@ -192,7 +192,100 @@
         }
       }
     },
-    "/api/Auth/verify": {
+    "/api/Auth/external-login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalLoginRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalLoginRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalLoginRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Auth/update-profile-picture": {
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfilePictureDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfilePictureDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfilePictureDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Auth/update-health-profile": {
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHealthProfileDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHealthProfileDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHealthProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Auth/verify-token": {
       "get": {
         "tags": [
           "Auth"
@@ -215,10 +308,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StringStringDateTimeString<>f__AnonymousType6"
+                  "$ref": "#/components/schemas/StringStringDateTimeString<>f__AnonymousType11"
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/User/upload-profile-picture": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -265,6 +390,74 @@
   },
   "components": {
     "schemas": {
+      "ExternalLoginRequestDto": {
+        "required": [
+          "email",
+          "externalId",
+          "fullName",
+          "provider"
+        ],
+        "type": "object",
+        "properties": {
+          "provider": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "externalId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "email": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "fullName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "profilePictureUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "height": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "weight": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "bodyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "dietType": {
+            "type": "string",
+            "nullable": true
+          },
+          "goal": {
+            "type": "string",
+            "nullable": true
+          },
+          "goalWeight": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ForgotPasswordRequestDto": {
         "required": [
           "email"
@@ -361,6 +554,48 @@
             "format": "tel",
             "nullable": true
           },
+          "profilePictureUrl": {
+            "maxLength": 500,
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "height": {
+            "maximum": 300,
+            "minimum": 50,
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "weight": {
+            "maximum": 500,
+            "minimum": 20,
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "bodyType": {
+            "maxLength": 20,
+            "type": "string",
+            "nullable": true
+          },
+          "dietType": {
+            "maxLength": 20,
+            "type": "string",
+            "nullable": true
+          },
+          "goal": {
+            "maxLength": 20,
+            "type": "string",
+            "nullable": true
+          },
+          "goalWeight": {
+            "maximum": 500,
+            "minimum": 20,
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
           "dateOfBirth": {
             "type": "string",
             "format": "date-time",
@@ -373,7 +608,7 @@
         },
         "additionalProperties": false
       },
-      "StringStringDateTimeString<>f__AnonymousType6": {
+      "StringStringDateTimeString<>f__AnonymousType11": {
         "type": "object",
         "properties": {
           "status": {
@@ -391,6 +626,63 @@
           "environment": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateHealthProfileDto": {
+        "type": "object",
+        "properties": {
+          "height": {
+            "maximum": 300,
+            "minimum": 50,
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "weight": {
+            "maximum": 500,
+            "minimum": 20,
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "bodyType": {
+            "maxLength": 20,
+            "type": "string",
+            "nullable": true
+          },
+          "dietType": {
+            "maxLength": 20,
+            "type": "string",
+            "nullable": true
+          },
+          "goal": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "goalWeight": {
+            "maximum": 500,
+            "minimum": 20,
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateProfilePictureDto": {
+        "required": [
+          "profilePictureUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "profilePictureUrl": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string",
+            "format": "uri"
           }
         },
         "additionalProperties": false

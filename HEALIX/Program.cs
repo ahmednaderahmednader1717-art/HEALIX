@@ -9,6 +9,8 @@ using HEALIX.API.Services.Implementations;
 var builder = WebApplication.CreateBuilder(args);
 
 
+
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -137,5 +139,7 @@ app.MapGet("/api/health", () => new
 })
 .WithTags("Health")
 .WithOpenApi();
+app.UseStaticFiles(); 
+
 
 app.Run();

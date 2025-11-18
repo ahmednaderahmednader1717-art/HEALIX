@@ -193,6 +193,10 @@ namespace HEALIX.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BodyType")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -201,10 +205,18 @@ namespace HEALIX.Migrations
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DietType")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -214,6 +226,16 @@ namespace HEALIX.Migrations
                     b.Property<string>("Gender")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Goal")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal?>("GoalWeight")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Height")
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -228,14 +250,21 @@ namespace HEALIX.Migrations
                     b.Property<DateTime?>("LastLogin")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("LoginProvider")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -247,6 +276,9 @@ namespace HEALIX.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<decimal?>("Weight")
+                        .HasColumnType("decimal(5,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
@@ -255,9 +287,17 @@ namespace HEALIX.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
+                    b.HasIndex("LoginProvider", "ExternalId");
+
                     b.ToTable("Users", null, t =>
                         {
+                            t.HasCheckConstraint("CK_User_BodyType", "BodyType IS NULL OR BodyType IN ('Ectomorph', 'Mesomorph', 'Endomorph')");
+
+                            t.HasCheckConstraint("CK_User_DietType", "DietType IS NULL OR DietType IN ('Vegan', 'Vegetarian', 'Pescatarian', 'Standard')");
+
                             t.HasCheckConstraint("CK_User_Gender", "Gender IS NULL OR Gender IN ('Male', 'Female', 'Other')");
+
+                            t.HasCheckConstraint("CK_User_Goal", "Goal IS NULL OR Goal IN ('GainWeight', 'MaintainWeight', 'LoseWeight')");
                         });
                 });
 

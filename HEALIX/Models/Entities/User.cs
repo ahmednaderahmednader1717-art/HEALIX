@@ -21,9 +21,9 @@ namespace HEALIX.Models.Entities
         [EmailAddress]
         public string Email { get; set; }
 
-        [Required]
+        
         [MaxLength(500)]
-        public string PasswordHash { get; set; }
+        public string? PasswordHash { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -36,6 +36,30 @@ namespace HEALIX.Models.Entities
 
         [MaxLength(10)]
         public string? Gender { get; set; }
+
+        [MaxLength(20)]
+        public string? LoginProvider { get; set; }
+
+        [MaxLength(500)]
+        public string? ExternalId { get; set; }
+
+        [MaxLength(500)]
+        public string? ProfilePictureUrl { get; set; }
+
+        public decimal? Height { get; set; }
+
+        public decimal? Weight { get; set; }
+
+        [MaxLength(20)]
+        public string? BodyType { get; set; }
+
+        [MaxLength(20)]
+        public string? DietType { get; set; }
+
+        [MaxLength(50)]
+        public string? Goal { get; set; } //lose or gain or maintain weight
+
+        public decimal? GoalWeight { get; set; }
 
         public bool IsEmailVerified { get; set; } = false;
 

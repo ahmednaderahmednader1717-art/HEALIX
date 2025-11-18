@@ -11,5 +11,6 @@ namespace HEALIX.Models.DTOs
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime? TokenExpiresAt { get; set; }
+        public bool IsProfileComplete { get; set; }
     }
 }
