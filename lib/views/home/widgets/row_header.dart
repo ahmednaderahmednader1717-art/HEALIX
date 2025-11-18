@@ -31,7 +31,7 @@ class RowHeader extends StatelessWidget {
           child: Text(
             actionText,
             style: TextStyle(
-              color: AppColors.primarayColor,
+              color: const Color.fromARGB(255, 255, 255, 255),
               fontSize: 14 * scale,
               fontWeight: FontWeight.w600,
             ),

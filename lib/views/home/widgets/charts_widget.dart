@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:test_splash/core/app_colors.dart';
 
 class AppleRingCard extends StatefulWidget {
   final String title;
@@ -70,7 +71,7 @@ class _AppleRingCardState extends State<AppleRingCard>
 
         return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF2C2C2E),
+            color: AppColors.ContainerColor,
             borderRadius: BorderRadius.circular(22 * widget.scale),
             boxShadow: [
               BoxShadow(

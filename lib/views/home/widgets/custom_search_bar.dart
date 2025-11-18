@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:test_splash/core/app_colors.dart';
 
 class CustomSearchBar extends StatelessWidget {
   final double scale;
@@ -9,7 +10,7 @@ class CustomSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: AppColors.ContainerColor,
         borderRadius: BorderRadius.circular(16 * scale),
         border: Border.all(color: Colors.white12),
       ),

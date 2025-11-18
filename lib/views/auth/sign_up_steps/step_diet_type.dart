@@ -1,8 +1,5 @@
-import 'dart:convert';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // لو عندك SVG icons
 import 'package:gap/gap.dart';
 
 class StepDietType extends StatelessWidget {
@@ -50,7 +47,6 @@ class StepDietType extends StatelessWidget {
     final h = screenHeight / baseHeight;
     // ignore: unused_local_variable
     final scale = min(w, h);
-    final double toolbarHeight = 80 * h;
 
     return SingleChildScrollView(
       child: Padding(

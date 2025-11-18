@@ -1,13 +1,10 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
 
 class StepExtraDetails extends StatelessWidget {
-
-  
 
   final String? selectedGender;
   final String? genderError;
@@ -55,7 +52,7 @@ class StepExtraDetails extends StatelessWidget {
     final w = screenWidth / baseWidth;
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
-    final double toolbarHeight = 80 * h;
+
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16*w),
@@ -149,7 +146,7 @@ class StepExtraDetails extends StatelessWidget {
       ),
     );
   }
-
+  
   Widget _sectionTitle(String title) {
     return Text(
       title,

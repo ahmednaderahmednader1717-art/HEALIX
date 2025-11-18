@@ -1,14 +1,13 @@
 import 'dart:math';
-import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
-import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/views/home/views/home_tab.dart';
 import 'package:test_splash/views/home/views/profile_tab.dart';
+import 'package:test_splash/views/home/views/progress_tab.dart';
 import 'package:test_splash/views/home/views/scan_meal_tab.dart';
 import 'package:test_splash/views/home/views/search_meal_tab.dart';
-import 'package:test_splash/views/home/widgets/home_page_appbar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.user});
@@ -22,7 +21,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  // الصفحات
   late final List<Widget> _pages = [
     HomeTab(
       onTabChange: (index) {
@@ -31,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     const SearchMealTab(),
     const ScanMealTab(),
+    const ProgressTab(),
     const ProfileTab(),
   ];
 
@@ -43,63 +42,99 @@ class _HomeScreenState extends State<HomeScreen> {
     final w = screenWidth / baseWidth;
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
-    final double toolbarHeight = 80 * h;
 
     return Scaffold(
-      backgroundColor: Colors.black,
-
-      // 👇 Stack عشان نضيف AppBar ثابت فوق كل التابات
+      extendBody: true, // مهم للشفافية
       body: Stack(
         children: [
-          // محتوى التابات
-          IndexedStack(index: _currentIndex, children: _pages),
-      
-          // AppBar ثابت لكل الصفحات
-          HomePageAppBar(
-            toolbarHeight: toolbarHeight,
-            w: w,
-            scale: scale,
-            fullName: widget.user.fullName, profilePictureUrl: widget.user.profilePictureUrl,
+          // Gradient Background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 48, 6, 21),
+                  Color.fromARGB(255, 14, 5, 47),
+                  Color.fromARGB(255, 47, 6, 53),
+                ],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+              ),
+            ),
+          ),
+          // محتوى التابات مع padding أسفل BottomNavigationBar
+          IndexedStack(
+            index: _currentIndex,
+            children: _pages.map((page) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).padding.bottom + 90,
+                ),
+                child: page,
+              );
+            }).toList(),
           ),
         ],
       ),
-
-      // شريط التنقل السفلي
-      bottomNavigationBar: CurvedNavigationBar(
-        iconPadding: 8,
-        backgroundColor: const Color.fromARGB(
-          153,
-          0,
-          0,
-          0,
-        ).withValues(alpha: 0.60),
-        color: AppColors.ContainerColor,
-        buttonBackgroundColor: AppColors.primarayColor,
-        animationDuration: Duration(milliseconds: 400),
-        height: 80,
-        items: [
-          CurvedNavigationBarItem(
-            child: const Icon(Icons.home, color: Colors.white, size: 35),
-            label: "Home",
-            labelStyle: TextStyle(fontSize: 12 * scale, color: Colors.white),
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              child: Container(
+                height: 101*h,
+                decoration: BoxDecoration(
+                  color: AppColors.ContainerColor.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: BottomNavigationBar(
+                  
+                  currentIndex: _currentIndex,
+                  onTap: (index) => setState(() => _currentIndex = index),
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  type: BottomNavigationBarType.fixed,
+                  selectedItemColor: Colors.white,
+                  unselectedItemColor: Colors.white54,
+                  showSelectedLabels: true,
+                  showUnselectedLabels: true,
+                  useLegacyColorScheme: false,
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home, size: 30 * scale),
+                      label: "Home",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.search, size: 30 * scale),
+                      label: "Search",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.add_circle, size: 50 * scale),
+                      label: "Add",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.insights_sharp, size: 30 * scale),
+                      label: "Progress",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.person, size: 30 * scale),
+                      label: "Profile",
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-          CurvedNavigationBarItem(
-            child: const Icon(Icons.search, color: Colors.white, size: 35),
-            label: "Search Meals",
-            labelStyle: TextStyle(fontSize: 12 * scale, color: Colors.white),
-          ),
-          CurvedNavigationBarItem(
-            child: Icon(Icons.camera_alt, color: Colors.white, size: 35),
-            label: "Scan Meal",
-            labelStyle: TextStyle(fontSize: 12 * scale, color: Colors.white),
-          ),
-          CurvedNavigationBarItem(
-            child: const Icon(Icons.person, color: Colors.white, size: 35),
-            label: "Profile",
-            labelStyle: TextStyle(fontSize: 12 * scale, color: Colors.white),
-          ),
-        ],
-        onTap: (index) => setState(() => _currentIndex = index),
+        ),
       ),
     );
   }
