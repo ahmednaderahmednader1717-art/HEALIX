@@ -26,8 +26,8 @@ class SearchMealTab extends StatelessWidget {
           padding: EdgeInsets.only(
             left: 16 * w,
             right: 16 * w,
-            top: toolbarHeight+10*h,
             bottom: 120 * h,
+            top: 40*h
           ),
           child: Column(
             children: [

@@ -8,10 +8,10 @@ class Nutrient {
   Nutrient({required this.name, required this.value, required this.color});
 
   static List<Nutrient> nutrients = [
-    Nutrient(name: "Protein", value: 0.65, color: Colors.green),
-    Nutrient(name: "Carbs", value: 0.90, color: Colors.blue),
-    Nutrient(name: "Fats", value: 0.45, color: Colors.orange),
-    Nutrient(name: "Calories", value: 0.78, color: const Color.fromARGB(255, 245, 44, 44)),
+    Nutrient(name: "Calories", value: .75, color: const Color.fromARGB(255, 245, 44, 44)),
+    Nutrient(name: "Protein", value: 0.25, color: Colors.green),
+    Nutrient(name: "Carbs", value: 1.0, color: Colors.blue),
+    Nutrient(name: "Fats", value: 0.50, color: Colors.orange),
   ];
 
 }

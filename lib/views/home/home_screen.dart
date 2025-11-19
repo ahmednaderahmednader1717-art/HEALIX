@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const SearchMealTab(),
     const ScanMealTab(),
     const ProgressTab(),
-    const ProfileTab(),
+    ProfileTab(user: widget.user,),
   ];
 
   @override
@@ -43,58 +43,45 @@ class _HomeScreenState extends State<HomeScreen> {
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
 
-    return Scaffold(
-      extendBody: true, // مهم للشفافية
-      body: Stack(
-        children: [
-          // Gradient Background
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color.fromARGB(255, 48, 6, 21),
-                  Color.fromARGB(255, 14, 5, 47),
-                  Color.fromARGB(255, 47, 6, 53),
-                ],
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
+    return SafeArea(
+      child: Scaffold(
+        extendBody: true, // مهم للشفافية
+        body: Stack(
+          children: [
+            // Gradient Background
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color.fromARGB(255, 48, 6, 21),
+                    Color.fromARGB(255, 14, 5, 47),
+                    Color.fromARGB(255, 47, 6, 53),
+                  ],
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                ),
               ),
             ),
-          ),
-          // محتوى التابات مع padding أسفل BottomNavigationBar
-          IndexedStack(
-            index: _currentIndex,
-            children: _pages.map((page) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).padding.bottom + 90,
-                ),
-                child: page,
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
+            // محتوى التابات مع padding أسفل BottomNavigationBar
+            IndexedStack(
+              index: _currentIndex,
+              children: _pages.map((page) {
+                return page;
+              }).toList(),
+            ),
+          ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
+        bottomNavigationBar: Theme(
+          data: Theme.of(context).copyWith(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+          ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
               child: Container(
-                height: 101*h,
                 decoration: BoxDecoration(
                   color: AppColors.ContainerColor.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
-                    width: 1,
-                  ),
                 ),
                 child: BottomNavigationBar(
                   
@@ -118,8 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: "Search",
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.add_circle, size: 50 * scale),
-                      label: "Add",
+                      icon: Padding(
+                        padding:  EdgeInsets.only(top: 15*h),
+                        child: Icon(Icons.add_circle, size: 55 * scale),
+                      ),
+                      label: "",
                     ),
                     BottomNavigationBarItem(
                       icon: Icon(Icons.insights_sharp, size: 30 * scale),
@@ -139,3 +129,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+

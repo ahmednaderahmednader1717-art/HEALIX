@@ -24,14 +24,13 @@ class CustomSearchBar extends StatelessWidget {
           SizedBox(width: 8 * scale),
           Expanded(
             child: TextField(
-              
               style: GoogleFonts.inriaSans(
                 color: Colors.white,
                 fontSize: 16 * scale,
               ),
               cursorColor: Colors.white,
               decoration: const InputDecoration(
-                hintText: 'Search meals, plans, tips...',
+                hintText: 'Search meals',
                 hintStyle: TextStyle(color: Colors.white54),
                 border: InputBorder.none,
                 isDense: true,
