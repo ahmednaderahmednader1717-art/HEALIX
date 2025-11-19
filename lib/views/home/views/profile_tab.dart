@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ionicons/ionicons.dart';
@@ -5,7 +7,6 @@ import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/views/home/widgets/profile_card_group.dart';
 import 'package:test_splash/views/splash/welcome_screen.dart';
-import 'package:test_splash/widgets/charts_widget.dart';
 
 // مودل الكارت كما لديك
 class ProfileCardItem {
@@ -30,10 +31,13 @@ class ProfileTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
     const baseWidth = 430.0;
     const baseHeight = 932.0;
+
     final w = screenWidth / baseWidth;
     final h = screenHeight / baseHeight;
+    final scale = min(w, h);
 
     return SafeArea(
       top: true,
@@ -55,41 +59,54 @@ class ProfileTab extends StatelessWidget {
             SizedBox(height: 24 * h),
       
             // Profile Card
-            Container(
-              padding: EdgeInsets.all(18 * w),
-              decoration: BoxDecoration(
-                color: AppColors.ContainerColor,
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 30, // غيّر القيمة كما تريد (مثل 64 أو 72)
-                    backgroundImage: user.profilePictureUrl != null && user.profilePictureUrl!.isNotEmpty
-                    ? NetworkImage(user.profilePictureUrl!)
-                    : AssetImage("assets/logo/person_icon.png") as ImageProvider,
-                  ),
-      
-                  SizedBox(width: 16 * w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.fullName ?? "No Name",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20 * w,
-                          fontWeight: FontWeight.bold,
+            GestureDetector(
+              onTap: (){},
+              child: Container(
+                padding: EdgeInsets.all(18 * w),
+                decoration: BoxDecoration(
+                  color: AppColors.ContainerColor,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Row(
+                  children: [
+                    // فحص وجود الرابط من الـUserInfo قبل العرض
+                    CircleAvatar(
+                      radius: 30 * scale,
+                      backgroundImage:
+                          (user.profilePictureUrl != null &&
+                              user.profilePictureUrl!.isNotEmpty)
+                          ? NetworkImage(user.profilePictureUrl!)
+                          : AssetImage("assets/logo/person_icon.png")
+                                as ImageProvider,
+                    ),
+                    
+                    SizedBox(width: 16 * w),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.fullName ?? "No Name",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20 * w,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        " @${user.username}",
-                        style: TextStyle(color: Colors.grey, fontSize: 14 * w),
-                      ),
-                    ],
-                  ),
-                ],
+                        SizedBox(height: 4),
+                        Text(
+                          " @${user.username}",
+                          style: TextStyle(color: Colors.grey, fontSize: 14 * w),
+                        ),
+                      ],
+                    ),
+                    Spacer(),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.grey,
+                      size: 18 * w,
+                    )
+                  ],
+                ),
               ),
             ),
       
@@ -110,17 +127,17 @@ class ProfileTab extends StatelessWidget {
               items: [
                 ProfileCardItem(
                   title: "Personal Details",
-                  icon: Ionicons.person_outline,
+                  icon: Ionicons.person,
                   onTap: () => print("Personal Details clicked"),
                 ),
                 ProfileCardItem(
                   title: "Preferences",
-                  icon: Ionicons.options_outline,
+                  icon: FontAwesomeIcons.gears,
                   onTap: () => print("Preferences clicked"),
                 ),
                 ProfileCardItem(
                   title: "Language",
-                  icon: Ionicons.globe_outline,
+                  icon: FontAwesomeIcons.language,
                   onTap: () => print("Language clicked"),
                 ),
                 ProfileCardItem(

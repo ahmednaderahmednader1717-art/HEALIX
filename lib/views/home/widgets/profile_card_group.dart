@@ -69,7 +69,7 @@ class ProfileCardGroup extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18 * w),
+          Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18 *w),
         ],
       ),
     );

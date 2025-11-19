@@ -21,6 +21,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
+  late UserInfo user; // لإتاحة التحديث إذا تغيرت الصورة لاحقًا
+
+  @override
+  void initState() {
+    super.initState();
+    user = widget.user;
+  }
+
   late final List<Widget> _pages = [
     HomeTab(
       onTabChange: (index) {
@@ -30,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const SearchMealTab(),
     const ScanMealTab(),
     const ProgressTab(),
-    ProfileTab(user: widget.user,),
+    ProfileTab(user: user),
   ];
 
   @override
@@ -45,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return SafeArea(
       child: Scaffold(
-        extendBody: true, // مهم للشفافية
+        extendBody: true,
         body: Stack(
           children: [
             // Gradient Background
@@ -63,12 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             // محتوى التابات مع padding أسفل BottomNavigationBar
-            IndexedStack(
-              index: _currentIndex,
-              children: _pages.map((page) {
-                return page;
-              }).toList(),
-            ),
+            IndexedStack(index: _currentIndex, children: _pages),
           ],
         ),
         bottomNavigationBar: Theme(
@@ -84,7 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: AppColors.ContainerColor.withOpacity(0.4),
                 ),
                 child: BottomNavigationBar(
-                  
                   currentIndex: _currentIndex,
                   onTap: (index) => setState(() => _currentIndex = index),
                   backgroundColor: Colors.transparent,
@@ -106,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     BottomNavigationBarItem(
                       icon: Padding(
-                        padding:  EdgeInsets.only(top: 15*h),
+                        padding: EdgeInsets.only(top: 15 * h),
                         child: Icon(Icons.add_circle, size: 55 * scale),
                       ),
                       label: "",
@@ -116,7 +118,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: "Progress",
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.person, size: 30 * scale),
+                      // CircleAvatar صورة المستخدم في التاب الخامس (Profile)
+                      icon: Container(
+                        padding: EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                        ),
+                        child: CircleAvatar(
+                          radius: 15, // صغير ليتناسب مع navbar
+                          backgroundImage:
+                              user.profilePictureUrl != null &&
+                                  user.profilePictureUrl!.isNotEmpty
+                              ? NetworkImage(user.profilePictureUrl!)
+                              : AssetImage("assets/logo/person_icon.png")
+                                    as ImageProvider,
+                        ),
+                      ),
                       label: "Profile",
                     ),
                   ],
@@ -129,5 +146,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-
