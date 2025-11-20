@@ -197,7 +197,7 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
           ),
           if (_imageFile != null || _imageBytes != null)
             Padding(
-              padding: const EdgeInsets.only(top: 40.0),
+              padding: EdgeInsets.only(top: 40.0*h),
               child: TextButton(
                 onPressed: _removeImage,
                 child: const Text(
