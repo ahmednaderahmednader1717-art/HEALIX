@@ -17,30 +17,26 @@ class ProgressTab extends StatelessWidget {
     final scale = min(w, h);
     final double toolbarHeight = 80 * h;
 
-    return Stack(
-      children: [
-        SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 16 * w,
-            right: 16 * w,
-            top: toolbarHeight + 10 * h,
-            bottom: 120 * h,
-          ),
-          child: Center(
-            child: Column(
-              children: [
-                Text(
-                  "Progress",
-                  style: GoogleFonts.inriaSans(
-                    color: Colors.white,
-                    fontSize: 18 * scale,
-                  ),
-                ),
-              ],
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        left: 16 * w,
+        right: 16 * w,
+        top: toolbarHeight + 10 * h,
+        bottom: 120 * h,
+      ),
+      child: Center(
+        child: Column(
+          children: [
+            Text(
+              "Progress",
+              style: GoogleFonts.inriaSans(
+                color: Colors.white,
+                fontSize: 18 * scale,
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

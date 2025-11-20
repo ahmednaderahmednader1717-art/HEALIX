@@ -17,27 +17,41 @@ class ProfileCardGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: List.generate(items.length, (i) {
-        return InkWell(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(i == 0 ? 20 : 0),
-            bottom: Radius.circular(i == items.length - 1 ? 20 : 0),
-          ),
-          onTap: items[i].onTap,
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.ContainerColor,
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(i == 0 ? 20 : 0),
-                bottom: Radius.circular(i == items.length - 1 ? 20 : 0),
-              ),
+      children: List.generate(items.length * 2 - 1, (i) {
+        // حتى (0, 2, 4, ...) كروت - باقي (1, 3, 5, ...) Dividers
+        if (i.isEven) {
+          final idx = i ~/ 2;
+          return InkWell(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(idx == 0 ? 20 : 0),
+              bottom: Radius.circular(idx == items.length - 1 ? 20 : 0),
             ),
-            child: _buildCard(items[i], w, h),
-          ),
-        );
+            onTap: items[idx].onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.ContainerColor,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(idx == 0 ? 20 : 0),
+                  bottom: Radius.circular(idx == items.length - 1 ? 20 : 0),
+                ),
+              ),
+              child: _buildCard(items[idx], w, h),
+            ),
+          );
+        } else {
+          // Divider بين الكروت فقط
+          return Divider(
+            endIndent: 20,
+            indent: 20,
+            height: 0,
+            thickness: 1 * h,
+            color: Colors.grey.withOpacity(0.35),
+          );
+        }
       }),
     );
   }
+
 
   Widget _buildCard(ProfileCardItem item, double w, double h) {
     return Container(

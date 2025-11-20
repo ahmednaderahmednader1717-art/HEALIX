@@ -40,9 +40,9 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
 
   String? _selectedGender;
   DateTime? _selectedDate;
-  int? _selectedHeight;
-  int? _selectedWeight;
-  int? _selectedGoalWeight;
+  double? _selectedHeight; // was int? -- now double?
+  double? _selectedWeight; // was int? -- now double?
+  double? _selectedGoalWeight; // was int? -- now double?
   String? _selectedBodyType;
   String? _selectedDietType;
   dynamic _profileImage; // File (mobile) أو Uint8List (web)
@@ -102,7 +102,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     setState(() => _isLoading = true);
     String? uploadedProfileUrl;
     try {
-      // 1. إرسال البيانات الأساسية بدون الصورة
+      // إعداد البيانات الأساسية (أرسل القيم الرقمية كـdouble)
       final signupData = {
         "username": _userNameController.text.trim(),
         "email": _emailController.text.trim(),
@@ -315,11 +315,11 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         genderError: null,
         selectedDate: _selectedDate,
         dobError: null,
-        selectedHeight: _selectedHeight,
+        selectedHeight: _selectedHeight?.toInt(), // للـPicker يجب int
         heightError: null,
-        selectedWeight: _selectedWeight,
+        selectedWeight: _selectedWeight?.toInt(),
         weightError: null,
-        selectedGoalWeight: _selectedGoalWeight,
+        selectedGoalWeight: _selectedGoalWeight?.toInt(),
         goalWeightError: null,
         onSelectGender: (g) => setState(() => _selectedGender = g),
         onSelectDate: (ctx) async => await _pickDate(ctx),
@@ -328,24 +328,24 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
           "Height",
           120,
           220,
-          _selectedHeight,
-          (v) => setState(() => _selectedHeight = v),
+          _selectedHeight?.toInt(),
+          (v) => setState(() => _selectedHeight = v.toDouble()),
         ),
         onSelectWeight: (ctx) async => await _pickIntValue(
           ctx,
           "Weight",
           30,
           200,
-          _selectedWeight,
-          (v) => setState(() => _selectedWeight = v),
+          _selectedWeight?.toInt(),
+          (v) => setState(() => _selectedWeight = v.toDouble()),
         ),
         onSelectGoalWeight: (ctx) async => await _pickIntValue(
           ctx,
           "Goal weight",
           30,
           200,
-          _selectedGoalWeight,
-          (v) => setState(() => _selectedGoalWeight = v),
+          _selectedGoalWeight?.toInt(),
+          (v) => setState(() => _selectedGoalWeight = v.toDouble()),
         ),
       ),
       StepBodyType(
@@ -392,26 +392,28 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         HealixPrimaryButton.iconOnly(
-          leading: Icon(
-            _currentStep > 0 ? Icons.arrow_back_ios : Icons.close,
-            color: Colors.white,
-            size: 28 * scale,
-          ),
-          onPressed: _currentStep > 0
-              ? _previousPage
-              : () => Navigator.pop(context),
-          width: 55,
-          height: 55,
-          borderRadius: 999,
-          backgroundColor: AppColors.primarayColor.withOpacity(0.35),
-        ),
-        const Gap(24),
-        HealixPrimaryButton(
-          height: 55,
-          width: 270,
-          text: _currentStep == _totalSteps - 1 ? "Finish" : "Next Step",
-          onPressed: _nextPage,
-        ),
+                      leading: Icon(
+                        _currentStep > 0 ? Icons.arrow_back : Icons.close,
+                        color: Colors.white,
+                        size: 30 * scale,
+                      ),
+                      onPressed: _currentStep > 0
+                          ? _previousPage
+                          : () => Navigator.pop(context),
+                      width: 60 *scale,
+                      height: 60 *scale,
+                      borderRadius: 999,
+                      backgroundColor: AppColors.primarayColor.withOpacity(0.4),
+                    ),
+                    Gap(20 *scale),
+                    HealixPrimaryButton(
+                      height: 60*scale,
+                      width: 300 *scale,
+                      text: _currentStep == _totalSteps - 1
+                          ? "Finish"
+                          : "Next Step",
+                      onPressed: _nextPage,
+                    ),
       ],
     ),
   );

@@ -39,268 +39,265 @@ class ProfileTab extends StatelessWidget {
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
 
-    return SafeArea(
-      top: true,
-      bottom: false,
-      child: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
-        padding: EdgeInsets.symmetric(horizontal: 16 * w, vertical: 16 * h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Profile",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 32 * w,
-                fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 16 * w, vertical: 16 * h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 40*h,),
+          Text(
+            "Profile",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 32 * w,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 24 * h),
+    
+          // Profile Card
+          GestureDetector(
+            onTap: (){},
+            child: Container(
+              padding: EdgeInsets.all(18 * w),
+              decoration: BoxDecoration(
+                color: AppColors.ContainerColor,
+                borderRadius: BorderRadius.circular(22),
               ),
-            ),
-            SizedBox(height: 24 * h),
-      
-            // Profile Card
-            GestureDetector(
-              onTap: (){},
-              child: Container(
-                padding: EdgeInsets.all(18 * w),
-                decoration: BoxDecoration(
-                  color: AppColors.ContainerColor,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: Row(
-                  children: [
-                    // فحص وجود الرابط من الـUserInfo قبل العرض
-                    CircleAvatar(
-                      radius: 30 * scale,
-                      backgroundImage:
-                          (user.profilePictureUrl != null &&
-                              user.profilePictureUrl!.isNotEmpty)
-                          ? NetworkImage(user.profilePictureUrl!)
-                          : AssetImage("assets/logo/person_icon.png")
-                                as ImageProvider,
-                    ),
-                    
-                    SizedBox(width: 16 * w),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.fullName ?? "No Name",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20 * w,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          " @${user.username}",
-                          style: TextStyle(color: Colors.grey, fontSize: 14 * w),
-                        ),
-                      ],
-                    ),
-                    Spacer(),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.grey,
-                      size: 18 * w,
-                    )
-                  ],
-                ),
-              ),
-            ),
-      
-            SizedBox(height: 32 * h),
-      
-            // Account Section
-            Text(
-              "Account",
-              style: TextStyle(
-                color: Colors.grey[300],
-                fontSize: 16 * w,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 12 * h),
-      
-            ProfileCardGroup(
-              items: [
-                ProfileCardItem(
-                  title: "Personal Details",
-                  icon: Ionicons.person,
-                  onTap: () => print("Personal Details clicked"),
-                ),
-                ProfileCardItem(
-                  title: "Preferences",
-                  icon: FontAwesomeIcons.gears,
-                  onTap: () => print("Preferences clicked"),
-                ),
-                ProfileCardItem(
-                  title: "Language",
-                  icon: FontAwesomeIcons.language,
-                  onTap: () => print("Language clicked"),
-                ),
-                ProfileCardItem(
-                  title: "Upgrade to Family Plan",
-                  icon: Ionicons.people_outline,
-                  onTap: () => print("Upgrade clicked"),
-                ),
-              ],
-              w: w,
-              h: h,
-            ),
-      
-            SizedBox(height: 32 * h),
-      
-            // Goals & Tracking
-            Text(
-              "Goals & Tracking",
-              style: TextStyle(
-                color: Colors.grey[300],
-                fontSize: 16 * w,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 12 * h),
-      
-            ProfileCardGroup(
-              items: [
-                ProfileCardItem(
-                  title: "Edit Nutrition Goals",
-                  icon: Ionicons.nutrition_outline,
-                  onTap: () => print("Edit Nutrition Goals clicked"),
-                ),
-                ProfileCardItem(
-                  title: "Track Daily Intake",
-                  icon: Ionicons.trending_up_outline,
-                  onTap: () => print("Track Daily Intake clicked"),
-                ),
-                ProfileCardItem(
-                  title: "Weight History",
-                  icon: Ionicons.barbell_outline,
-                  onTap: () {},
-                ),
-              ],
-              w: w,
-              h: h,
-            ),
-            SizedBox(height: 32 * h),
-      
-            // Support & Legal
-            Text(
-              "Support & Legal",
-              style: TextStyle(
-                color: Colors.grey[300],
-                fontSize: 16 * w,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 12 * h),
-      
-            ProfileCardGroup(
-              items: [
-                ProfileCardItem(
-                  title: "Request a Feature",
-                  icon: Ionicons.bulb_outline,
-                  onTap: () => print("Request Feature clicked"),
-                ),
-                ProfileCardItem(
-                  title: "Support Email",
-                  icon: Ionicons.mail_outline,
-                  onTap: () => print("Support Email clicked"),
-                ),
-                ProfileCardItem(
-                  title: "Sync Data",
-                  icon: Ionicons.sync_outline,
-                  onTap: () {},
-                ),
-                ProfileCardItem(
-                  title: "Terms & Conditions",
-                  icon: Ionicons.document_text_outline,
-                  onTap: () {},
-                ),
-                ProfileCardItem(
-                  title: "Privacy Policy",
-                  icon: Ionicons.lock_closed_outline,
-                  onTap: () {},
-                ),
-              ],
-              w: w,
-              h: h,
-            ),
-      
-            SizedBox(height: 32 * h),
-      
-            // Follow Us
-            Text(
-              "Follow Us",
-              style: TextStyle(
-                color: Colors.grey[300],
-                fontSize: 16 * w,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 12 * h),
-      
-            ProfileCardGroup(
-              items: [
-                ProfileCardItem(
-                  title: "Instagram",
-                  icon: Ionicons.logo_instagram,
-                  onTap: () => print("Edit Nutrition Goals clicked"),
-                ),
-                ProfileCardItem(
-                  title: "TikTok",
-                  icon: Ionicons.logo_tiktok,
-                  onTap: () => print("Track Daily Intake clicked"),
-                ),
-                ProfileCardItem(
-                  title: "X",
-                  icon: FontAwesomeIcons.xTwitter,
-                  onTap: () {},
-                ),
-              ],
-              w: w,
-              h: h,
-            ),
-            SizedBox(height: 32 * h),
-      
-            // Account Actions
-            Text(
-              "Account Actions",
-              style: TextStyle(
-                color: Colors.grey[300],
-                fontSize: 16 * w,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 12 * h),
-      
-            ProfileCardGroup(
-              items: [
-                ProfileCardItem(
-                  title: "Logout",
-                  icon: Ionicons.log_out_outline,
-                  onTap: () => Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+              child: Row(
+                children: [
+                  // فحص وجود الرابط من الـUserInfo قبل العرض
+                  CircleAvatar(
+                    radius: 30 * scale,
+                    backgroundImage:
+                        (user.profilePictureUrl != null &&
+                            user.profilePictureUrl!.isNotEmpty)
+                        ? NetworkImage(user.profilePictureUrl!)
+                        : AssetImage("assets/logo/person_icon.png")
+                              as ImageProvider,
                   ),
-                ),
-                ProfileCardItem(
-                  title: "Delete Account",
-                  icon: Ionicons.person_remove_outline,
-                  onTap: () => print("Track Daily Intake clicked"),
-                ),
-              ],
-              w: w,
-              h: h,
+                  
+                  SizedBox(width: 16 * w),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.fullName ?? "No Name",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20 * w,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        " @${user.username}",
+                        style: TextStyle(color: Colors.grey, fontSize: 14 * w),
+                      ),
+                    ],
+                  ),
+                  Spacer(),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.grey,
+                    size: 18 * w,
+                  )
+                ],
+              ),
             ),
-            SizedBox(
-              height: kBottomNavigationBarHeight + 40,
-            ), // 24 لتعطي مسافة زيادة
-      
-          ],
-        ),
+          ),
+    
+          SizedBox(height: 32 * h),
+    
+          // Account Section
+          Text(
+            "Account",
+            style: TextStyle(
+              color: Colors.grey[300],
+              fontSize: 16 * w,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 12 * h),
+    
+          ProfileCardGroup(
+            items: [
+              ProfileCardItem(
+                title: "Personal Details",
+                icon: Ionicons.person,
+                onTap: () => print("Personal Details clicked"),
+              ),
+              ProfileCardItem(
+                title: "Preferences",
+                icon: FontAwesomeIcons.gears,
+                onTap: () => print("Preferences clicked"),
+              ),
+              ProfileCardItem(
+                title: "Language",
+                icon: FontAwesomeIcons.language,
+                onTap: () => print("Language clicked"),
+              ),
+              ProfileCardItem(
+                title: "Upgrade to Family Plan",
+                icon: Ionicons.people_outline,
+                onTap: () => print("Upgrade clicked"),
+              ),
+            ],
+            w: w,
+            h: h,
+          ),
+    
+          SizedBox(height: 32 * h),
+    
+          // Goals & Tracking
+          Text(
+            "Goals & Tracking",
+            style: TextStyle(
+              color: Colors.grey[300],
+              fontSize: 16 * w,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 12 * h),
+    
+          ProfileCardGroup(
+            items: [
+              ProfileCardItem(
+                title: "Edit Nutrition Goals",
+                icon: Ionicons.nutrition_outline,
+                onTap: () => print("Edit Nutrition Goals clicked"),
+              ),
+              ProfileCardItem(
+                title: "Track Daily Intake",
+                icon: Ionicons.trending_up_outline,
+                onTap: () => print("Track Daily Intake clicked"),
+              ),
+              ProfileCardItem(
+                title: "Weight History",
+                icon: Ionicons.barbell_outline,
+                onTap: () {},
+              ),
+            ],
+            w: w,
+            h: h,
+          ),
+          SizedBox(height: 32 * h),
+    
+          // Support & Legal
+          Text(
+            "Support & Legal",
+            style: TextStyle(
+              color: Colors.grey[300],
+              fontSize: 16 * w,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 12 * h),
+    
+          ProfileCardGroup(
+            items: [
+              ProfileCardItem(
+                title: "Request a Feature",
+                icon: Ionicons.bulb_outline,
+                onTap: () => print("Request Feature clicked"),
+              ),
+              ProfileCardItem(
+                title: "Support Email",
+                icon: Ionicons.mail_outline,
+                onTap: () => print("Support Email clicked"),
+              ),
+              ProfileCardItem(
+                title: "Sync Data",
+                icon: Ionicons.sync_outline,
+                onTap: () {},
+              ),
+              ProfileCardItem(
+                title: "Terms & Conditions",
+                icon: Ionicons.document_text_outline,
+                onTap: () {},
+              ),
+              ProfileCardItem(
+                title: "Privacy Policy",
+                icon: Ionicons.lock_closed_outline,
+                onTap: () {},
+              ),
+            ],
+            w: w,
+            h: h,
+          ),
+    
+          SizedBox(height: 32 * h),
+    
+          // Follow Us
+          Text(
+            "Follow Us",
+            style: TextStyle(
+              color: Colors.grey[300],
+              fontSize: 16 * w,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 12 * h),
+    
+          ProfileCardGroup(
+            items: [
+              ProfileCardItem(
+                title: "Instagram",
+                icon: Ionicons.logo_instagram,
+                onTap: () => print("Edit Nutrition Goals clicked"),
+              ),
+              ProfileCardItem(
+                title: "TikTok",
+                icon: Ionicons.logo_tiktok,
+                onTap: () => print("Track Daily Intake clicked"),
+              ),
+              ProfileCardItem(
+                title: "X",
+                icon: FontAwesomeIcons.xTwitter,
+                onTap: () {},
+              ),
+            ],
+            w: w,
+            h: h,
+          ),
+          SizedBox(height: 32 * h),
+    
+          // Account Actions
+          Text(
+            "Account Actions",
+            style: TextStyle(
+              color: Colors.grey[300],
+              fontSize: 16 * w,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 12 * h),
+    
+          ProfileCardGroup(
+            items: [
+              ProfileCardItem(
+                title: "Logout",
+                icon: Ionicons.log_out_outline,
+                onTap: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                ),
+              ),
+              ProfileCardItem(
+                title: "Delete Account",
+                icon: Ionicons.person_remove_outline,
+                onTap: () => print("Track Daily Intake clicked"),
+              ),
+            ],
+            w: w,
+            h: h,
+          ),
+          SizedBox(
+            height: kBottomNavigationBarHeight + 40,
+          ), // 24 لتعطي مسافة زيادة
+    
+        ],
       ),
     );
   }

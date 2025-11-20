@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="healix_fixed"
+        android:label="new_proj"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

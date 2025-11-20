@@ -12,9 +12,9 @@ class UserInfo {
   DateTime? dateOfBirth;
   String? gender;
   String? bodyType;
-  int? userHeight;
-  int? userWeight;
-  int? userGoalWeight;
+  double? userHeight; // تغيير int? إلى double?
+  double? userWeight; // تغيير int? إلى double?
+  double? userGoalWeight; // تغيير int? إلى double?
 
   UserInfo({
     required this.username,
@@ -30,7 +30,7 @@ class UserInfo {
     this.userGoalWeight,
   });
 
-  // تحويل JSON إلى كائن
+  // تحويل JSON إلى كائن مع علاج النوع
   factory UserInfo.fromJson(Map<String, dynamic> json) {
     return UserInfo(
       username: json['username'] ?? "",
@@ -43,9 +43,9 @@ class UserInfo {
       gender: json['gender'],
       profilePictureUrl: json['profilePictureUrl'],
       bodyType: json['bodyType'],
-      userHeight: json['height'], // متوافق مع الـ backend الحالي
-      userWeight: json['weight'],
-      userGoalWeight: json['goalWeight'],
+      userHeight: (json['height'] as num?)?.toDouble(),
+      userWeight: (json['weight'] as num?)?.toDouble(),
+      userGoalWeight: (json['goalWeight'] as num?)?.toDouble(),
     );
   }
 
@@ -65,7 +65,7 @@ class UserInfo {
     };
   }
 
-  // تحميل أي صورة من الإنترنت بشكل مؤقت (اختياري)
+  // تحميل الصورة من الإنترنت (اختياري)
   static Future<File?> downloadProfileImage(String imageUrl) async {
     try {
       final dio = Dio();
@@ -85,7 +85,7 @@ class UserInfo {
     }
   }
 
-  // رفع صورة البروفايل للإندبوينت الصحيح + تحديث الرابط تلقائياً
+  // رفع صورة البروفايل
   Future<String?> uploadProfilePicture(File imageFile, {String? token}) async {
     final dio = Dio(BaseOptions(baseUrl: 'http://healix.somee.com/api'));
     try {
@@ -122,7 +122,7 @@ class UserInfo {
     }
   }
 
-  // استخراج الرابط من الرد (يدعم Map أو String JSON)
+  // استخراج الرابط من الرد
   String? _extractUrlFromResponse(dynamic responseBody) {
     try {
       if (responseBody is Map<String, dynamic>) {

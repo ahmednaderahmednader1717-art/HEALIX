@@ -78,151 +78,149 @@ class _HomeTabState extends State<HomeTab> {
 
     final bool showActionButton = Nutrient.nutrients.length > defaultGoals;
 
-    return SafeArea(
-      bottom: false,
-      top: true,
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Gap(40 * h),
-            Padding(
-              padding:  EdgeInsets.symmetric(horizontal: 16*w),
-              child: Row(
-                children: [
-                  Text(
-                    "HEALIX",
-                    style: GoogleFonts.inriaSans(
-                      fontSize: 35*scale,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.symmetric(vertical: 16 * h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 40 * h),
+          Padding(
+            padding:  EdgeInsets.symmetric(horizontal: 16*w),
+            child: Row(
+              children: [
+                Text(
+                  "HEALIX",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32 * w,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const Spacer(),
-                  Container(
-                    width: 60 * w,
-                    height: 40 * h,
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 42, 38, 38),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.35),
-                          blurRadius: 12,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          "assets/SVGs/fire-svgrepo-com.svg",
-                          color: Colors.amber,
-                          width: 20,
-                          height: 20,
-                        ),
-                        Gap(5 * w),
-                        Text(
-                          "0",
-                          style: GoogleFonts.inriaSans(
-                            fontSize: 20 * scale,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                const Spacer(),
+                Container(
+                  width: 60 * w,
+                  height: 40 * h,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 42, 38, 38),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.35),
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        "assets/SVGs/fire-svgrepo-com.svg",
+                        color: Colors.amber,
+                        width: 20,
+                        height: 20,
+                      ),
+                      Gap(5 * w),
+                      Text(
+                        "0",
+                        style: GoogleFonts.inriaSans(
+                          fontSize: 20 * scale,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Gap(16 * h),
-            DaySelector(
-              selectedDay: selectedDay,
-              onDaySelected: onDaySelected,
-              caloriesProgress: {
-                DateTime(2025, 11, 19): .75
+          ),
+          SizedBox(height: 16*h,),
+          DaySelector(
+            selectedDay: selectedDay,
+            onDaySelected: onDaySelected,
+            caloriesProgress: {
+              DateTime(2025, 11, 19): .75
+            },
+          ),
+    
+          SizedBox(height: 10 * h),
+          Padding(
+            padding:  EdgeInsets.symmetric(horizontal: 12*w),
+            child: RowHeader(
+              title: "Todays's Total Nutrations",
+              actionText: showActionButton
+                  ? (_showAllGoals ? "Show Less" : "View All")
+                  : "",
+              onAction: showActionButton
+                  ? () {
+                      setState(() => _showAllGoals = !_showAllGoals);
+                    }
+                  : null,
+              scale: w,
+            ),
+          ),
+          SizedBox(height: 12 * h),
+          Padding(
+            padding:  EdgeInsets.symmetric(horizontal: 16*w),
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              padding: EdgeInsets.zero, // مهم لتجنب أي فراغ داخلي
+              itemCount: goalsToShow,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                mainAxisSpacing: 6 * h,
+                crossAxisSpacing: 6 * w,
+                childAspectRatio: childAspectRatio,
+              ),
+              itemBuilder: (context, index) {
+                final nutrient = Nutrient.nutrients[index];
+                return AppleRingCard(
+                  title: nutrient.name,
+                  value: nutrient.value,
+                  color: nutrient.color,
+                  scale: scale,
+                );
               },
             ),
-      
-            Gap(10 * h),
-            Padding(
-              padding:  EdgeInsets.symmetric(horizontal: 12*w),
-              child: RowHeader(
-                title: "Todays's Total Nutrations",
-                actionText: showActionButton
-                    ? (_showAllGoals ? "Show Less" : "View All")
-                    : "",
-                onAction: showActionButton
-                    ? () {
-                        setState(() => _showAllGoals = !_showAllGoals);
-                      }
-                    : null,
-                scale: w,
-              ),
-            ),
-            Gap(12 * h),
-            Padding(
-              padding:  EdgeInsets.symmetric(horizontal: 16*w),
-              child: GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                padding: EdgeInsets.zero, // مهم لتجنب أي فراغ داخلي
-                itemCount: goalsToShow,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: 6 * h,
-                  crossAxisSpacing: 6 * w,
-                  childAspectRatio: childAspectRatio,
-                ),
-                itemBuilder: (context, index) {
-                  final nutrient = Nutrient.nutrients[index];
-                  return AppleRingCard(
-                    title: nutrient.name,
-                    value: nutrient.value,
-                    color: nutrient.color,
-                    scale: h,
-                  );
-                },
-              ),
-            ),
-            Gap(16 * h),
-            Padding(
-              padding:  EdgeInsets.symmetric(horizontal: 12*w),
-              child: RowHeader(
-                title: "Recommended Meals",
-                actionText: "",
-                onAction: null,
-                scale: w,
-              ),
-            ),
-            Gap(16 * h),
-            Padding(
-              padding:  EdgeInsets.symmetric(horizontal: 16*w),
-              child: ListView.separated(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: 5,
-                separatorBuilder: (_, __) => SizedBox(height: 8 * h), // gap صغير
-                itemBuilder: (context, index) {
-                  final image = index.isEven
-                      ? "assets/covers/IMG_1049.JPG"
-                      : "assets/covers/IMG_1050.PNG";
-                  return MealTile(
+          ),
+          SizedBox(height: 16 * h),
+          Padding(
+            padding:  EdgeInsets.symmetric(horizontal: 12*w),
+            child: Text(
+              "Recommended Meals",
+              style: TextStyle(
+              color: Colors.white,
+              fontSize: 18 * scale,
+              fontWeight: FontWeight.w700,
+        ),
+      ),
+          ),
+          SizedBox(height: 16 * h),
+          Padding(
+            padding:  EdgeInsets.symmetric(horizontal: 16*w),
+            child: Column(
+              children: List.generate(5, (index) {
+                final image = index.isEven
+                    ? "assets/covers/IMG_1049.JPG"
+                    : "assets/covers/IMG_1050.PNG";
+                return Padding(
+                  padding: EdgeInsets.only(bottom: index == 4 ? 0 : 8 * h),
+                  child: MealTile(
                     imagePath: image,
                     title: "High Protein Bowl",
                     calories: 420,
                     scale: h,
-                  );
-                },
-              ),
-            ),
-            // احذف أي Gap أو SizedBox كبيرة تحت ListView نهائياً
-          ],
-        ),
+                  ),
+                );
+              }),
+            )
+    
+          ),
+          SizedBox(height: kBottomNavigationBarHeight + 40),
+        ],
       ),
     );
   }

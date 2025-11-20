@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -52,14 +53,16 @@ class _DaySelectorState extends State<DaySelector> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
     const baseWidth = 430.0;
     const baseHeight = 932.0;
+
     final w = screenWidth / baseWidth;
     final h = screenHeight / baseHeight;
-    final scale = w < h ? w : h;
+    final scale = min(w, h);
 
     return SizedBox(
-      height: 86 * h,
+      height: 105 * h,
       child: PageView.builder(
         physics: const BouncingScrollPhysics(),
         controller: _pageController,
@@ -87,14 +90,9 @@ class _DaySelectorState extends State<DaySelector> {
               // ألوان الخلفية حسب الحالة
               Color bgColor;
               if (isSelected) {
-                bgColor = const Color.fromARGB(
-                  255,
-                  62,
-                  62,
-                  62,
-                ).withOpacity(0.70);
+                bgColor = const Color.fromARGB(255, 44, 43, 43).withOpacity(0.80);
               } else if (isToday) {
-                bgColor = Colors.white.withOpacity(.15);
+                bgColor = const Color.fromARGB(255, 168, 168, 168).withOpacity(.15);
               } else {
                 bgColor = Colors.white.withOpacity(0);
               }
@@ -137,6 +135,16 @@ class _DaySelectorState extends State<DaySelector> {
                   decoration: BoxDecoration(
                     color: bgColor,
                     borderRadius: BorderRadius.circular(20),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.25),
+                              blurRadius: 14,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 7), // ظل للأسفل قليلا
+                            ),
+                          ]
+                        : [],
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -146,14 +154,14 @@ class _DaySelectorState extends State<DaySelector> {
                         style: TextStyle(
                           color: labelColor,
                           fontWeight: FontWeight.w400,
-                          fontSize: 16 * h,
+                          fontSize: 14 * scale,
                         ),
                       ),
                       SizedBox(height: 7 * h),
                       CircularPercentIndicator(
-                        radius: 19 * w,
+                        radius: 20 * scale,
                         percent: caloriesPercent.clamp(0.0, 1.0),
-                        lineWidth: 4,
+                        lineWidth: 3,
                         animation: true,
                         circularStrokeCap: CircularStrokeCap.round,
                         backgroundColor: Colors.grey.withOpacity(0.15),
@@ -162,7 +170,7 @@ class _DaySelectorState extends State<DaySelector> {
                           day.day.toString(),
                           style: TextStyle(
                             color: dateColor,
-                            fontSize: 20 * scale,
+                            fontSize: 18 * scale,
                             fontWeight: FontWeight.w500,
                           ),
                         ),

@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
 
+// كرت حلقة أبـِل متجاوب مع جميع الأحجام
 class AppleRingCard extends StatefulWidget {
   final String title;
   final double value;
@@ -69,6 +70,11 @@ class _AppleRingCardState extends State<AppleRingCard>
         final cardHeight = constraints.maxHeight;
         final internalScale = (cardWidth / 180).clamp(0.75, 1.1);
 
+        // اجعل السمك دائمًا ثابت (20) أو نسبة من العرض
+        final ringDiameter = cardWidth * (0.80 * internalScale);
+        final ringStroke =
+            20.0; // ثابت مهما تغير الحجم (يمكنك تغييره لنسبة: max(8.0, ringDiameter * 0.10);)
+
         return Container(
           decoration: BoxDecoration(
             color: AppColors.ContainerColor,
@@ -90,12 +96,13 @@ class _AppleRingCardState extends State<AppleRingCard>
                 builder: (context, _) {
                   return CustomPaint(
                     size: Size(
-                      cardWidth * (0.80 * internalScale), // زودنا العرض
-                      cardHeight * (0.40 * internalScale), // زودنا الطول
+                      ringDiameter,
+                      cardHeight * (0.40 * internalScale),
                     ),
                     painter: AppleBottomLabelRingPainter(
                       progress: _animation.value,
                       color: widget.color,
+                      strokeWidth: ringStroke,
                     ),
                   );
                 },
@@ -132,15 +139,20 @@ class _AppleRingCardState extends State<AppleRingCard>
   }
 }
 
+/// رسمة الحلقة السفلية مع اللـabel، متجاوبة مع كل الأحجام
 class AppleBottomLabelRingPainter extends CustomPainter {
   final double progress;
   final Color color;
+  final double strokeWidth;
 
-  AppleBottomLabelRingPainter({required this.progress, required this.color});
+  AppleBottomLabelRingPainter({
+    required this.progress,
+    required this.color,
+    required this.strokeWidth,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final strokeWidth = 28.0; // زودنا السمك
     final center = Offset(size.width / 2, size.height);
     final radius = size.width / 2 - strokeWidth / 2;
 
@@ -178,8 +190,8 @@ class AppleBottomLabelRingPainter extends CustomPainter {
     final glowPaint = Paint()
       ..color = color.withOpacity(0.55)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth + 16
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+      ..strokeWidth = strokeWidth + 12
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
 
     final sweepFilled = totalAngle * progress;
 

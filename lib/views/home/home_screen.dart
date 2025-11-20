@@ -52,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final scale = min(w, h);
 
     return SafeArea(
+      top: false,
       child: Scaffold(
         extendBody: true,
         body: Stack(
