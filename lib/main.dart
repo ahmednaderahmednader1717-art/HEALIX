@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_splash/views/splash/splash_screen.dart';
 
+//test
 void main() => runApp(const HealixApp());
 
 class HealixApp extends StatelessWidget {
