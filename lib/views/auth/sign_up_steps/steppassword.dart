@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,51 +22,64 @@ class StepPassword extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Gap(20),
-          Text(
-            "Create Your Password",
-            style: GoogleFonts.inriaSans(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // مقاسات التصميم الأصلية (iPhone 14 Pro Max)
+    const baseWidth = 430.0;
+    const baseHeight = 932.0;
+
+    // نسب التناسب
+    final w = screenWidth / baseWidth;
+    final h = screenHeight / baseHeight;
+    final scale = min(w, h); // 👈 المفتاح لتصميم متناسق على كل الشاشات
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16 * w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Gap(20 * h),
+            Text(
+              "Create Your Password",
+              style: GoogleFonts.inriaSans(
+                fontSize: 20 * scale,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
-          ),
-          Gap(10),
-          Text(
-            "Create a strong password to secure your account.",
-            style: GoogleFonts.inriaSans(
-              fontSize: 16,
-              color: const Color.fromARGB(255, 255, 255, 255),
+            Gap(10 * h),
+            Text(
+              "Create a strong password to secure your account.",
+              style: GoogleFonts.inriaSans(
+                fontSize: 16 * scale,
+                color: const Color.fromARGB(255, 255, 255, 255),
+              ),
             ),
-          ),
-          Gap(16),
-          Text(
-            "Password",
-            style: GoogleFonts.inriaSans(
-              fontSize: 16,
-              color: AppColors.secondaryColor,
+            Gap(16 * h),
+            Text(
+              "Password",
+              style: GoogleFonts.inriaSans(
+                fontSize: 16 * scale,
+                color: AppColors.secondaryColor,
+              ),
             ),
-          ),
-          Gap(10),
-          HealixTextField(
-            controller: passwordController,
-            hint: "Enter your password",
-            isPassword: true,
-            errorText: passwordError,
-          ),
-          const SizedBox(height: 16),
-          HealixTextField(
-            controller: confirmController,
-            hint: "Re-enter your password",
-            isPassword: true,
-            errorText: confirmError,
-          ),
-        ],
+            Gap(10 * h),
+            HealixTextField(
+              controller: passwordController,
+              hint: "Enter your password",
+              isPassword: true,
+              errorText: passwordError,
+            ),
+            SizedBox(height: 16 * h),
+            HealixTextField(
+              controller: confirmController,
+              hint: "Re-enter your password",
+              isPassword: true,
+              errorText: confirmError,
+            ),
+          ],
+        ),
       ),
     );
   }

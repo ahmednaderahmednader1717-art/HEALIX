@@ -50,39 +50,40 @@ class StepDietType extends StatelessWidget {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16*w),
+        padding: EdgeInsets.symmetric(horizontal: 16 * w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Gap(20*h),
+            Gap(20 * h),
             Text(
               "Select Your Diet Type",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 22*scale,
+                fontSize: 22 * scale,
                 color: Colors.white,
               ),
             ),
-            Gap(20*h),
+            Gap(20 * h),
             if (errorText != null)
               Padding(
-                padding: const EdgeInsets.only(top: 2, bottom: 10),
+                padding: EdgeInsets.only(top: 2 * h, bottom: 10 * h),
                 child: Text(
                   errorText!,
-                  style: const TextStyle(color: Colors.red, fontSize: 13),
+                  style: TextStyle(color: Colors.red, fontSize: 13 * scale),
                 ),
               ),
-            const Gap(12),
+            Gap(12 * h),
             ...dietTypes.entries.map((e) {
               final isSelected = selectedDietType == e.key;
-              final Color color = (e.value["color"] as Color?) ?? Colors.blueGrey;
+              final Color color =
+                  (e.value["color"] as Color?) ?? Colors.blueGrey;
               final desc = e.value["desc"] as String? ?? '';
               // لو تريد icons صور غيّر هذا الجزء لما يناسبك
               // final String assetPath = e.value["iconAsset"] as String? ?? '';
               return AnimatedContainer(
                 curve: Curves.easeInOut,
                 duration: const Duration(milliseconds: 240),
-                margin: const EdgeInsets.only(bottom: 14),
+                margin: EdgeInsets.only(bottom: 14 * h),
                 child: Material(
                   color: isSelected
                       ? color.withOpacity(0.15)
@@ -91,17 +92,17 @@ class StepDietType extends StatelessWidget {
                   elevation: isSelected ? 6 : 2,
                   shadowColor: color.withOpacity(0.25),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(18 * scale),
                     onTap: () => onSelect(e.key),
                     child: Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: EdgeInsets.all(20 * scale),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(18 * scale),
                         border: Border.all(
                           color: isSelected
                               ? color.withOpacity(0.8)
                               : Colors.grey.shade700,
-                          width: 2.2,
+                          width: 2.2 * w,
                         ),
                         boxShadow: isSelected
                             ? [
@@ -118,17 +119,17 @@ class StepDietType extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CircleAvatar(
-                            radius: 24,
+                            radius: 24 * scale,
                             backgroundColor: color.withOpacity(0.2),
                             child: Icon(
                               e.value["icon"] as IconData,
                               color: color,
-                              size: 30*scale,
+                              size: 30 * scale,
                             ),
                             // أو استخدم صورة asset:
                             // child: SvgPicture.asset(assetPath, ...)
                           ),
-                          SizedBox(width: 18*w),
+                          SizedBox(width: 18 * w),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,17 +139,17 @@ class StepDietType extends StatelessWidget {
                                   style: TextStyle(
                                     color: isSelected ? color : Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 18*scale,
+                                    fontSize: 18 * scale,
                                     letterSpacing: 0.1,
                                   ),
                                 ),
-                                SizedBox(height: 7*h),
+                                SizedBox(height: 7 * h),
                                 Text(
                                   desc,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white70,
-                                    fontSize: 14,
-                                    height: 1.35,
+                                    fontSize: 14 * scale,
+                                    height: 1.35 * h,
                                   ),
                                 ),
                               ],
@@ -156,11 +157,14 @@ class StepDietType extends StatelessWidget {
                           ),
                           if (isSelected)
                             Padding(
-                              padding: const EdgeInsets.only(left: 10, top: 2),
+                              padding: EdgeInsets.only(
+                                left: 10 * w,
+                                top: 2 * h,
+                              ),
                               child: Icon(
                                 Icons.check_circle,
                                 color: color,
-                                size: 27,
+                                size: 27 * scale,
                               ),
                             ),
                         ],

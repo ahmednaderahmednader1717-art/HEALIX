@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
 
 class StepExtraDetails extends StatelessWidget {
-
   final String? selectedGender;
   final String? genderError;
   final DateTime? selectedDate;
@@ -44,7 +43,6 @@ class StepExtraDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     const baseWidth = 430.0;
@@ -55,23 +53,23 @@ class StepExtraDetails extends StatelessWidget {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16*w),
+        padding: EdgeInsets.symmetric(horizontal: 16 * w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Gap(20*h),
+            Gap(20 * h),
             Text(
               "A Few More Details",
               style: GoogleFonts.inriaSans(
-                fontSize: 22*scale,
+                fontSize: 22 * scale,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
-            Gap(20*h),
+            Gap(20 * h),
             _sectionTitle("Gender"),
             if (genderError != null) _errorText(genderError!),
-            Gap(8*h),
+            Gap(8 * h),
             Row(
               children: [
                 Expanded(
@@ -80,7 +78,7 @@ class StepExtraDetails extends StatelessWidget {
                     child: genderBox("Male", selectedGender == "Male"),
                   ),
                 ),
-                Gap(16*h),
+                Gap(16 * h),
                 Expanded(
                   child: GestureDetector(
                     onTap: () => onSelectGender("Female"),
@@ -89,10 +87,10 @@ class StepExtraDetails extends StatelessWidget {
                 ),
               ],
             ),
-            Gap(20*h),
+            Gap(20 * h),
             _sectionTitle("Date of Birth"),
             if (dobError != null) _errorText(dobError!),
-            Gap(8*h),
+            Gap(8 * h),
             GestureDetector(
               onTap: () => onSelectDate(context),
               child: pickerBox(
@@ -102,10 +100,10 @@ class StepExtraDetails extends StatelessWidget {
                 selectedDate != null,
               ),
             ),
-            Gap(20*h),
+            Gap(20 * h),
             _sectionTitle("Height (cm)"),
             if (heightError != null) _errorText(heightError!),
-            Gap(8*h),
+            Gap(8 * h),
             GestureDetector(
               onTap: () => onSelectHeight(context),
               child: pickerBox(
@@ -115,10 +113,10 @@ class StepExtraDetails extends StatelessWidget {
                 selectedHeight != null,
               ),
             ),
-            Gap(20*h),
+            Gap(20 * h),
             _sectionTitle("Weight (kg)"),
             if (weightError != null) _errorText(weightError!),
-            Gap(8*h),
+            Gap(8 * h),
             GestureDetector(
               onTap: () => onSelectWeight(context),
               child: pickerBox(
@@ -128,10 +126,10 @@ class StepExtraDetails extends StatelessWidget {
                 selectedWeight != null,
               ),
             ),
-            Gap(20*h),
+            Gap(20 * h),
             _sectionTitle("Goal Weight (kg)"),
             if (goalWeightError != null) _errorText(goalWeightError!),
-            Gap(8*h),
+            Gap(8 * h),
             GestureDetector(
               onTap: () => onSelectGoalWeight(context),
               child: pickerBox(
@@ -146,7 +144,7 @@ class StepExtraDetails extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _sectionTitle(String title) {
     return Text(
       title,
@@ -163,8 +161,6 @@ class StepExtraDetails extends StatelessWidget {
   }
 
   Widget pickerBox(String text, bool selected) {
-
-
     return Container(
       height: 55,
       decoration: BoxDecoration(
@@ -172,7 +168,7 @@ class StepExtraDetails extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         color: const Color.fromARGB(255, 0, 0, 0),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       alignment: Alignment.centerLeft,
       child: Text(
         text,

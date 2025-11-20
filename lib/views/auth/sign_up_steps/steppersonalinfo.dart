@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,57 +22,70 @@ class StepPersonalInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Gap(20),
-          Text(
-            "First, what can we call you?",
-            style: GoogleFonts.inriaSans(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // مقاسات التصميم الأصلية (iPhone 14 Pro Max)
+    const baseWidth = 430.0;
+    const baseHeight = 932.0;
+
+    // نسب التناسب
+    final w = screenWidth / baseWidth;
+    final h = screenHeight / baseHeight;
+    final scale = min(w, h); // 👈 المفتاح لتصميم متناسق على كل الشاشات
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16 * w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Gap(20 * h),
+            Text(
+              "First, what can we call you?",
+              style: GoogleFonts.inriaSans(
+                fontSize: 20 * scale,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
-          ),
-          Gap(10),
-          Text(
-            "HEALIX would like to get to know you.",
-            style: GoogleFonts.inriaSans(
-              fontSize: 16,
-              color: const Color.fromARGB(255, 255, 255, 255),
+            Gap(10 * h),
+            Text(
+              "HEALIX would like to get to know you.",
+              style: GoogleFonts.inriaSans(
+                fontSize: 16 * scale,
+                color: const Color.fromARGB(255, 255, 255, 255),
+              ),
             ),
-          ),
-          Gap(16),
-          Text(
-            "Preferred First Name",
-            style: GoogleFonts.inriaSans(
-              fontSize: 16,
-              color: AppColors.secondaryColor,
+            Gap(16 * h),
+            Text(
+              "Preferred First Name",
+              style: GoogleFonts.inriaSans(
+                fontSize: 16 * scale,
+                color: AppColors.secondaryColor,
+              ),
             ),
-          ),
-          Gap(10),
-          HealixTextField(
-            controller: nameController,
-            hint: "Enter Your Name",
-            errorText: nameError,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "Phone Number",
-            style: GoogleFonts.inriaSans(
-              fontSize: 16,
-              color: AppColors.secondaryColor,
+            Gap(10 * h),
+            HealixTextField(
+              controller: nameController,
+              hint: "Enter Your Name",
+              errorText: nameError,
             ),
-          ),
-          Gap(10),
-          HealixTextField(
-            controller: phoneController,
-            hint: "Enter Your Phone Number",
-            errorText: phoneError,
-          ),
-        ],
+            SizedBox(height: 16 * h),
+            Text(
+              "Phone Number",
+              style: GoogleFonts.inriaSans(
+                fontSize: 16 * scale,
+                color: AppColors.secondaryColor,
+              ),
+            ),
+            Gap(10 * h),
+            HealixTextField(
+              controller: phoneController,
+              hint: "Enter Your Phone Number",
+              errorText: phoneError,
+            ),
+          ],
+        ),
       ),
     );
   }
