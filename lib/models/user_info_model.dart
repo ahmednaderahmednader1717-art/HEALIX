@@ -12,9 +12,9 @@ class UserInfo {
   DateTime? dateOfBirth;
   String? gender;
   String? bodyType;
-  double? userHeight; // تغيير int? إلى double?
-  double? userWeight; // تغيير int? إلى double?
-  double? userGoalWeight; // تغيير int? إلى double?
+  double? userHeight;
+  double? userWeight;
+  double? userGoalWeight; 
 
   UserInfo({
     required this.username,

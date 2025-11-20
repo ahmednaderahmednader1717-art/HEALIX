@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -107,8 +108,22 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
 
   @override
   Widget build(BuildContext context) {
+
     Widget? avatarChild;
     ImageProvider? avatarBG;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // مقاسات التصميم الأصلية (iPhone 14 Pro Max)
+    const baseWidth = 430.0;
+    const baseHeight = 932.0;
+
+    // نسب التناسب
+    final w = screenWidth / baseWidth;
+    final h = screenHeight / baseHeight;
+    final scale = min(w, h); // 👈 المفتاح لتصميم متناسق على كل الشاشات
+
 
     if (UniversalPlatform.isWeb) {
       // web
@@ -117,7 +132,7 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
         avatarChild = null;
       } else {
         avatarBG = null;
-        avatarChild = Icon(Icons.person, color: Colors.grey[400], size: 60);
+        avatarChild = Icon(Icons.person, color: Colors.grey[400], size: 60*scale);
       }
     } else {
       // mobile
@@ -126,40 +141,40 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
         avatarChild = null;
       } else {
         avatarBG = null;
-        avatarChild = Icon(Icons.person, color: Colors.grey[400], size: 60);
+        avatarChild = Icon(Icons.person, color: Colors.grey[400], size: 60*scale);
       }
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding:  EdgeInsets.symmetric(horizontal: 24*w, vertical: 12*h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Gap(40),
+          Gap(40*h),
           Text(
             "Add a Profile Photo",
             style: GoogleFonts.inriaSans(
-              fontSize: 20,
+              fontSize: 20*scale,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          const Gap(12),
+            Gap(12*h),
           Text(
             "This step is optional, you can skip if you want.",
             style: GoogleFonts.inriaSans(fontSize: 14, color: Colors.grey),
             textAlign: TextAlign.center,
           ),
-          const Gap(30),
+            Gap(30*h),
           Center(
             child: CircleAvatar(
-              radius: 70,
+              radius: 70*scale,
               backgroundColor: Colors.grey[800],
               backgroundImage: avatarBG,
               child: avatarChild,
             ),
           ),
-          const Gap(40),
+          Gap(40*h),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -170,7 +185,7 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
                   _pickImageMobile(ImageSource.camera);
                 }
               }),
-              Gap(30),
+              Gap(30*h),
               _imageButton(Icons.photo_library, "Gallery", () {
                 if (UniversalPlatform.isWeb) {
                   _pickImageWeb();
@@ -197,24 +212,36 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
   }
 
   Widget _imageButton(IconData icon, String label, VoidCallback onPressed) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // مقاسات التصميم الأصلية (iPhone 14 Pro Max)
+    const baseWidth = 430.0;
+    const baseHeight = 932.0;
+
+    // نسب التناسب
+    final w = screenWidth / baseWidth;
+    final h = screenHeight / baseHeight;
+    final scale = min(w, h); // 👈 المفتاح لتصميم متناسق على كل الشاشات
+
     return Column(
       children: [
         GestureDetector(
           onTap: onPressed,
           child: Container(
-            height: 65,
-            width: 65,
+            height: 65*h,
+            width: 65*w,
             decoration: BoxDecoration(
               color: AppColors.primarayColor.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Colors.white, size: 28),
+            child: Icon(icon, color: Colors.white, size: 28*scale),
           ),
         ),
-        const Gap(8),
+        Gap(8*h),
         Text(
           label,
-          style: const TextStyle(color: Colors.white70, fontSize: 13),
+          style: TextStyle(color: Colors.white70, fontSize: 13*scale),
         ),
       ],
     );

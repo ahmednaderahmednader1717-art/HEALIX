@@ -73,7 +73,7 @@ class _AppleRingCardState extends State<AppleRingCard>
         // اجعل السمك دائمًا ثابت (20) أو نسبة من العرض
         final ringDiameter = cardWidth * (0.80 * internalScale);
         final ringStroke =
-            20.0; // ثابت مهما تغير الحجم (يمكنك تغييره لنسبة: max(8.0, ringDiameter * 0.10);)
+            18.0; // ثابت مهما تغير الحجم (يمكنك تغييره لنسبة: max(8.0, ringDiameter * 0.10);)
 
         return Container(
           decoration: BoxDecoration(
