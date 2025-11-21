@@ -1,26 +1,17 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
+import 'package:test_splash/views/auth/log_in_screen.dart';
+import 'package:test_splash/views/home/views/personal_details_page.dart';
 import 'package:test_splash/views/home/widgets/profile_card_group.dart';
 import 'package:test_splash/views/splash/welcome_screen.dart';
 
 // مودل الكارت كما لديك
-class ProfileCardItem {
-  final String title;
-  final IconData icon;
-  final String? subtitle;
-  final VoidCallback? onTap;
-  ProfileCardItem({
-    required this.title,
-    required this.icon,
-    this.subtitle,
-    this.onTap,
-  });
-}
 
 // الصفحة الرئيسية
 class ProfileTab extends StatelessWidget {
@@ -126,7 +117,11 @@ class ProfileTab extends StatelessWidget {
               ProfileCardItem(
                 title: "Personal Details",
                 icon: Ionicons.person,
-                onTap: () => print("Personal Details clicked"),
+                onTap: () => Navigator.push(context,
+                  CupertinoPageRoute(
+                    builder: (context) => PersonalDetailsPage(user: user,),
+                  ),
+                ),
               ),
               ProfileCardItem(
                 title: "Preferences",

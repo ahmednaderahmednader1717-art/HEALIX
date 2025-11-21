@@ -79,12 +79,14 @@ class HealixPrimaryButton extends StatelessWidget {
         children: [
           if (leading != null) ...[leading!, const SizedBox(width: 8)],
           if (text != null)
-            Text(
-              text!,
-              style: GoogleFonts.inriaSans(
-                fontSize: fontSize,
-                color: textColor,
-                fontWeight: fontWeight,
+            Center(
+              child: Text(
+                text!,
+                style: GoogleFonts.inriaSans(
+                  fontSize: fontSize,
+                  color: textColor,
+                  fontWeight: fontWeight,
+                ),
               ),
             ),
         ],

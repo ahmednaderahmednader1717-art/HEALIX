@@ -313,7 +313,7 @@ class _LogInScreenState extends State<LogInScreen> {
                       ),
                     ),
                   ),
-                  Gap(50 * h),
+                  Gap(20 * h),
                   HealixPrimaryButton(
                     text: _loading ? "Logging In..." : "Log In",
                     onPressed: login,
@@ -321,7 +321,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     fontSize: 20 * scale,
                     borderRadius: 80 * scale,
                   ),
-                  Gap(30 * h),
+                  Gap(25 * h),
                   Row(
                     children: [
                       const Expanded(
@@ -358,7 +358,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     backgroundColor: Colors.white.withOpacity(0.08),
                     onPressed: () {},
                   ),
-                  Gap(40 * h),
+                  Gap(30 * h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

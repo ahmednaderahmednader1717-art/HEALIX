@@ -263,7 +263,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
           centerTitle: true,
           title: const Text(
             "Complete Sign Up",
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         ),
         body: Stack(
@@ -387,7 +387,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   );
 
   Widget _buildNavigationButtons(double scale) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 20),
+    padding: const EdgeInsets.all(8.0),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -412,6 +412,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
                       text: _currentStep == _totalSteps - 1
                           ? "Finish"
                           : "Next Step",
+                          
                       onPressed: _nextPage,
                     ),
       ],

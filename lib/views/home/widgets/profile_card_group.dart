@@ -3,6 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/views/home/views/profile_tab.dart';
 
+class ProfileCardItem {
+  final String title;
+  final IconData icon;
+  final String? subtitle;
+  final VoidCallback? onTap;
+  ProfileCardItem({
+    required this.title,
+    required this.icon,
+    this.subtitle,
+    this.onTap,
+  });
+}
+
 class ProfileCardGroup extends StatelessWidget {
   final List<ProfileCardItem> items;
   final double w, h;
