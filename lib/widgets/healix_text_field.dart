@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:test_splash/core/app_colors.dart';
 
+// Widget خاص بحقل إدخال مع دعم القيمة الابتدائية - تعمل فقط عند الإنشاء
 class HealixTextField extends StatefulWidget {
   final TextEditingController controller;
   final String hint;
   final bool isPassword;
   final String? errorText;
-  final TextInputType? keyboardType; // ✅
+  final TextInputType? keyboardType;
+  final String? initialValue; // خاصية اختيارية
 
   const HealixTextField({
     super.key,
@@ -14,7 +16,8 @@ class HealixTextField extends StatefulWidget {
     required this.hint,
     this.isPassword = false,
     this.errorText,
-    this.keyboardType, // ✅
+    this.keyboardType,
+    this.initialValue, // Optional
   });
 
   @override
@@ -28,6 +31,12 @@ class _HealixTextFieldState extends State<HealixTextField> {
   void initState() {
     super.initState();
     _obscureText = widget.isPassword;
+    // الإضافة: ضبط قيمة controller فقط إذا فيه initialValue ولم يتم تعيين النص مسبقًا
+    if (widget.initialValue != null &&
+        widget.initialValue!.isNotEmpty &&
+        widget.controller.text.isEmpty) {
+      widget.controller.text = widget.initialValue!;
+    }
   }
 
   @override
@@ -40,7 +49,7 @@ class _HealixTextFieldState extends State<HealixTextField> {
         TextField(
           controller: widget.controller,
           obscureText: _obscureText,
-          keyboardType: widget.keyboardType, // ✅
+          keyboardType: widget.keyboardType,
           style: const TextStyle(color: Colors.white),
           cursorColor: Colors.white,
           decoration: InputDecoration(
@@ -102,4 +111,3 @@ class _HealixTextFieldState extends State<HealixTextField> {
     );
   }
 }
-

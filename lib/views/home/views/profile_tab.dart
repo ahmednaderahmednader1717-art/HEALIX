@@ -6,7 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
-import 'package:test_splash/views/auth/log_in_screen.dart';
+import 'package:test_splash/views/home/views/edit_profile.dart';
 import 'package:test_splash/views/home/views/personal_details_page.dart';
 import 'package:test_splash/views/home/widgets/profile_card_group.dart';
 import 'package:test_splash/views/splash/welcome_screen.dart';
@@ -49,7 +49,13 @@ class ProfileTab extends StatelessWidget {
     
           // Profile Card
           GestureDetector(
-            onTap: (){},
+            onTap: (){
+              Navigator.push(context,
+                CupertinoPageRoute(
+                  builder: (context) =>   EditProfile(user: user,),
+                ),
+              );
+            },
             child: Container(
               padding: EdgeInsets.all(18 * w),
               decoration: BoxDecoration(

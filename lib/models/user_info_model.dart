@@ -12,6 +12,7 @@ class UserInfo {
   DateTime? dateOfBirth;
   String? gender;
   String? bodyType;
+  String? dietType;
   double? userHeight; // تغيير int? إلى double?
   double? userWeight; // تغيير int? إلى double?
   double? userGoalWeight; // تغيير int? إلى double?
@@ -25,6 +26,7 @@ class UserInfo {
     this.dateOfBirth,
     this.gender,
     this.bodyType,
+    this.dietType,
     this.userHeight,
     this.userWeight,
     this.userGoalWeight,
@@ -43,6 +45,7 @@ class UserInfo {
       gender: json['gender'],
       profilePictureUrl: json['profilePictureUrl'],
       bodyType: json['bodyType'],
+      dietType: json['dietType'],
       userHeight: (json['height'] as num?)?.toDouble(),
       userWeight: (json['weight'] as num?)?.toDouble(),
       userGoalWeight: (json['goalWeight'] as num?)?.toDouble(),
@@ -59,6 +62,7 @@ class UserInfo {
       'gender': gender,
       'profilePictureUrl': profilePictureUrl,
       'bodyType': bodyType,
+      'dietType': dietType,
       'height': userHeight,
       'weight': userWeight,
       'goalWeight': userGoalWeight,
@@ -138,4 +142,36 @@ class UserInfo {
       return null;
     }
   }
+
+
+  UserInfo copyWith({
+    String? username,
+    String? email,
+    String? fullName,
+    String? phoneNumber,
+    String? profilePictureUrl,
+    DateTime? dateOfBirth,
+    String? gender,
+    String? bodyType,
+    String? dietType,
+    double? userHeight,
+    double? userWeight,
+    double? userGoalWeight,
+  }) {
+    return UserInfo(
+      username: username ?? this.username,
+      email: email ?? this.email,
+      fullName: fullName ?? this.fullName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      gender: gender ?? this.gender,
+      bodyType: bodyType ?? this.bodyType,
+      dietType: dietType ?? this.dietType,
+      userHeight: userHeight ?? this.userHeight,
+      userWeight: userWeight ?? this.userWeight,
+      userGoalWeight: userGoalWeight ?? this.userGoalWeight,
+    );
+  }
+
 }

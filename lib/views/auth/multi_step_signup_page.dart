@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
@@ -19,7 +20,8 @@ import 'package:test_splash/widgets/healix_primary_button.dart';
 import 'package:gap/gap.dart';
 
 class MultiStepSignUpPage extends StatefulWidget {
-  const MultiStepSignUpPage({super.key});
+  const MultiStepSignUpPage({super.key, this.user});
+  final UserInfo? user;
 
   @override
   State<MultiStepSignUpPage> createState() => _MultiStepSignUpPageState();
@@ -125,8 +127,21 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       if (signupResp.statusCode == 200 || signupResp.statusCode == 201) {
         // 👇 استخراج التوكن من رد التسجيل
         String? accessToken;
-        if (signupResp.data is Map && signupResp.data['accessToken'] != null) {
-          accessToken = signupResp.data['accessToken'];
+        String? refreshToken;
+        if (signupResp.data is Map) {
+          // Try both 'token' and 'accessToken' keys
+          accessToken = signupResp.data['token'] ?? signupResp.data['accessToken'];
+          refreshToken = signupResp.data['refreshToken'] ?? "";
+        }
+
+        // 👇 حفظ التوكن في SharedPreferences
+        if (accessToken != null && accessToken.isNotEmpty) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString("token", accessToken);
+          if (refreshToken != null && refreshToken.isNotEmpty) {
+            await prefs.setString("refreshToken", refreshToken);
+          }
+          print("✅ Token saved successfully");
         }
 
         // 2. رفع الصورة (اختياري)

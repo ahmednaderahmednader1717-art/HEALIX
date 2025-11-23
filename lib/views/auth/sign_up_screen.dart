@@ -14,7 +14,6 @@ import 'package:test_splash/views/home/home_screen.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/widgets/healix_primary_button.dart';
 import 'package:test_splash/widgets/social_button.dart';
-
 import 'package:test_splash/src/web_wrapper.dart' as web;
 
 class SignUpScreen extends StatefulWidget {
@@ -37,17 +36,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final String? clientId =
       '664346993317-p759gclcv2jt2avu18tg0efkdkv28i21.apps.googleusercontent.com';
 
-  Future<void> _handleGoogleSignIn(GoogleSignInAccount user) async {
+  // دالة التسجيل ومعالجة حالة 400 - تعرض الرسالة للمستخدم
+  Future<void> _handleGoogleSignUp(GoogleSignInAccount user) async {
     setState(() => _loading = true);
     try {
+      // إعداد الـpayload بشكل يلبي متطلبات الـAPI
+      final username = user.email.split('@').first;
+      final password = "GoogleSignInP@ss1"; // بطول مناسب وشروط قوية
+      final fullName =
+          (user.displayName != null && user.displayName!.length >= 3)
+          ? user.displayName!
+          : "Google User";
+
       final payload = {
-        "provider": "Google",
-        "externalId": user.id,
+        "username": username.length > 50
+            ? username.substring(0, 50)
+            : username, // بطول مناسب
         "email": user.email,
-        "fullName": user.displayName ?? "Unknown",
+        "password": password,
+        "fullName": fullName,
         "profilePictureUrl": user.photoUrl ?? "",
       };
-      final response = await dio.post('/Auth/external-login', data: payload);
+
+      final response = await dio.post('/Auth/signup', data: payload);
+
       if (response.statusCode == 200 && response.data['user'] != null) {
         final userJson = response.data['user'];
         final token = response.data['token'] ?? "";
@@ -56,58 +68,72 @@ class _SignUpScreenState extends State<SignUpScreen> {
         UserInfo userObj = UserInfo.fromJson(userJson);
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => HomeScreen(user: userObj)),
+          MaterialPageRoute(builder: (_) => MultiStepSignUpPage(user: userObj)),
         );
       } else {
-        _showCupertinoDialog(
-          "فشل تسجيل الدخول مع جوجل. الحالة: ${response.statusCode}",
+        _showCupertinoDialog("حدث خطأ غير متوقع أثناء التسجيل.");
+      }
+    } on DioError catch (dioError) {
+      // هنا نطبع رسالة الخطأ للتصحيح على أساسها
+      print("RESPONSE ERROR DATA: ${dioError.response?.data}");
+      final apiError = dioError.response?.data;
+      if (dioError.response?.statusCode == 400 ||
+          dioError.response?.statusCode == 409) {
+        // غالباً الإيميل مستخدم من قبل - جرب تسجيل الدخول الخارجي بنفس بيانات جوجل
+        final externalLoginPayload = {
+          "provider": "Google",
+          "externalId": user.id,
+          "email": user.email,
+          "fullName": user.displayName ?? "Unknown",
+          "profilePictureUrl": user.photoUrl ?? "",
+        };
+        final loginResponse = await dio.post(
+          '/Auth/external-login',
+          data: externalLoginPayload,
         );
+        if (loginResponse.statusCode == 200 &&
+            loginResponse.data['user'] != null) {
+          final userJson = loginResponse.data['user'];
+          final token = loginResponse.data['token'] ?? "";
+          final refreshToken = loginResponse.data['refreshToken'] ?? "";
+          await _saveTokens(token, refreshToken);
+          UserInfo userObj = UserInfo.fromJson(userJson);
+          // يدخل مباشرة للـHome
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => HomeScreen(user: userObj)),
+          );
+        } else {
+          _showCupertinoDialog("فشل تسجيل الدخول بحساب جوجل.");
+        }
+      } else {
+        // عرض الرسالة من الرد للـuser أو للمطور
+        _showCupertinoDialog("خطأ في التسجيل بحساب جوجل: $apiError");
       }
     } catch (e) {
-      _showCupertinoDialog("فشل تسجيل الدخول مع جوجل: $e");
+      _showCupertinoDialog("فشل التسجيل بواسطة جوجل: $e");
     } finally {
       setState(() => _loading = false);
     }
   }
 
-  Future<void> _signInWithGoogle() async {
-    print("Google Sign-In button pressed from SignUp");
+  Future<void> _signUpWithGoogle() async {
     setState(() => _loading = true);
-
     try {
       GoogleSignInAccount? googleUser;
-      print("Platform check: kIsWeb = $kIsWeb");
-
       if (kIsWeb) {
-        // For web platform, use the web-specific implementation
-        print("Using web implementation");
         googleUser = await web.signInWithGoogle();
-        print("Web sign-in result: $googleUser");
       } else {
-        // For mobile platforms, create a GoogleSignIn instance and use signIn
-        print("Using mobile implementation");
         final GoogleSignIn googleSignIn = GoogleSignIn();
-        print("GoogleSignIn instance created");
-
-        try {
-          googleUser = await googleSignIn.signIn();
-          print("Google Sign-In completed, user: ${googleUser?.email}");
-        } catch (signInError) {
-          print("Sign-in error details: $signInError");
-          rethrow;
-        }
+        googleUser = await googleSignIn.signIn();
       }
-
       if (googleUser != null) {
-        print("User signed in successfully: ${googleUser.email}");
-        await _handleGoogleSignIn(googleUser);
+        await _handleGoogleSignUp(googleUser);
       } else {
-        print("User cancelled sign-in - googleUser is null");
-        _showCupertinoDialog("تم إلغاء تسجيل الدخول");
+        _showCupertinoDialog("تم إلغاء تسجيل الدخول.");
       }
     } catch (e) {
-      print("Google Sign-In error: $e");
-      _showCupertinoDialog("فشل تسجيل الدخول مع جوجل: $e");
+      _showCupertinoDialog("فشل التسجيل بواسطة جوجل: $e");
     } finally {
       setState(() => _loading = false);
     }
@@ -134,10 +160,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              "Ok",
-              style: TextStyle(color: Colors.blueAccent),
-            ),
+            child: const Text("Ok", style: TextStyle(color: Colors.blueAccent)),
           ),
         ],
       ),
@@ -213,11 +236,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   Gap(15 * h),
                   SocialElevatedButton(
-                    text: "Sign in with Google",
+                    text: "Sign Up with Google",
                     imagePath: "assets/icons/google.png",
                     size: scale,
                     backgroundColor: Colors.white.withOpacity(0.08),
-                    onPressed: _signInWithGoogle,
+                    onPressed: _signUpWithGoogle,
                   ),
                   Gap(15 * h),
                   SocialElevatedButton(
@@ -240,7 +263,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       children: [
                         const TextSpan(
                           text:
-                              "We will collect personal information from and about\nyou and use it for various purposes, including to\ncustomize your HEALIX experience. Read more\nabout the purposes, our practices, your choices, and\nyour rights in our  ",
+                              "We will collect personal information from and about\nyou and use it for various purposes, including to\ncustomize your HEALIX experience. Read more\nabout the purposes, our practices, your choices, and\nyour rights in our  ",
                         ),
                         TextSpan(
                           text: "Privacy Policy",
@@ -262,7 +285,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           ),
         ),
-        // Loading overlay
         if (_loading)
           Container(
             color: Colors.black.withOpacity(0.7),

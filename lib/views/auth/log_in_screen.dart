@@ -76,8 +76,28 @@ class _LogInScreenState extends State<LogInScreen> {
         },
       );
 
+      print("🔍 Login Response Status: ${response.statusCode}");
+      print("📦 Full Response Data: ${response.data}");
+
       if (response.statusCode == 200) {
         final userJson = response.data['user'];
+        // ✅ الـ API بيرجع accessToken مش token
+        final token = response.data['accessToken'] ?? response.data['token'] ?? "";
+        final refreshToken = response.data['refreshToken'] ?? "";
+        
+        print("👤 User Data exists: ${userJson != null}");
+        print("🔑 Token from API: '${token.isEmpty ? 'EMPTY' : token.substring(0, token.length > 20 ? 20 : token.length)}...'");
+        print("📏 Token length: ${token.length}");
+        print("🔄 RefreshToken: '${refreshToken.isEmpty ? 'EMPTY' : 'EXISTS'}'");
+        
+        // حفظ التوكن
+        await _saveTokens(token, refreshToken);
+        
+        // تحقق من الحفظ
+        final prefs = await SharedPreferences.getInstance();
+        final savedToken = prefs.getString("token");
+        print("💾 Token saved successfully: ${savedToken?.isNotEmpty ?? false}");
+        
         if (userJson != null) {
           UserInfo user = UserInfo.fromJson(userJson);
           Navigator.pushReplacement(
@@ -91,6 +111,7 @@ class _LogInScreenState extends State<LogInScreen> {
         _showCupertinoDialog("Login failed. Status: ${response.statusCode}");
       }
     } catch (e) {
+      print("❌ Login Error: $e");
       _showCupertinoDialog("Wrong username or password");
     } finally {
       setState(() => _loading = false);
