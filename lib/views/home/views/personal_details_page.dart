@@ -186,7 +186,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     
     try {
       final response = await dio.put(
-        "http://healix.somee.com/api/Auth/update-health-profile",
+        "http://healix.somee.com/api/User/update-health-profile",
         data: payload,
         options: Options(
           headers: {

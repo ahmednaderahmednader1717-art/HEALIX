@@ -133,7 +133,8 @@ class _LogInScreenState extends State<LogInScreen> {
 
       if (response.statusCode == 200 && response.data['user'] != null) {
         final userJson = response.data['user'];
-        final token = response.data['token'] ?? "";
+        // ✅ الـ API بيرجع accessToken مش token
+        final token = response.data['accessToken'] ?? response.data['token'] ?? "";
         final refreshToken = response.data['refreshToken'] ?? "";
 
         await _saveTokens(token, refreshToken);

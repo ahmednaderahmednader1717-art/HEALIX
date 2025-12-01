@@ -62,7 +62,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (response.statusCode == 200 && response.data['user'] != null) {
         final userJson = response.data['user'];
-        final token = response.data['token'] ?? "";
+        // ✅ الـ API بيرجع accessToken مش token
+        final token = response.data['accessToken'] ?? response.data['token'] ?? "";
         final refreshToken = response.data['refreshToken'] ?? "";
         await _saveTokens(token, refreshToken);
         UserInfo userObj = UserInfo.fromJson(userJson);
@@ -94,7 +95,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         if (loginResponse.statusCode == 200 &&
             loginResponse.data['user'] != null) {
           final userJson = loginResponse.data['user'];
-          final token = loginResponse.data['token'] ?? "";
+          // ✅ الـ API بيرجع accessToken مش token
+          final token = loginResponse.data['accessToken'] ?? loginResponse.data['token'] ?? "";
           final refreshToken = loginResponse.data['refreshToken'] ?? "";
           await _saveTokens(token, refreshToken);
           UserInfo userObj = UserInfo.fromJson(userJson);
