@@ -1,5 +1,8 @@
 import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
@@ -41,27 +44,44 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
                 padding: EdgeInsets.symmetric(horizontal: 16 * widget.w),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 28 * widget.scale,
-                      backgroundColor: Colors.grey[800],
-                      backgroundImage:
-                          (widget.profilePictureUrl != null &&
-                              widget.profilePictureUrl!.isNotEmpty)
-                          ? NetworkImage(widget.profilePictureUrl!)
-                          : const AssetImage('assets/logo/person_icon.png')
-                                as ImageProvider,
-                      onBackgroundImageError: (exception, stackTrace) {
-                        print("⚠️ Error loading profile image: $exception");
-                      },
-                      child:
-                          (widget.profilePictureUrl == null ||
-                              widget.profilePictureUrl!.isEmpty)
-                          ? Icon(
-                              Icons.person,
-                              color: Colors.grey[400],
-                              size: 30 * widget.scale,
-                            )
-                          : null,
+                    Container(
+                      width: 56 * widget.scale,
+                      height: 56 * widget.scale,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.grey[800],
+                      ),
+                      child: ClipOval(
+                        child: (widget.profilePictureUrl != null &&
+                                widget.profilePictureUrl!.isNotEmpty)
+                            ? (kIsWeb
+                                ? Image.network(
+                                    'https://corsproxy.io/?${Uri.encodeComponent(widget.profilePictureUrl!)}',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        "assets/logo/person_icon.png",
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  )
+                                : CachedNetworkImage(
+                                    imageUrl: widget.profilePictureUrl!,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) =>
+                                        const CupertinoActivityIndicator(),
+                                    errorWidget: (context, url, error) {
+                                      return Image.asset(
+                                        "assets/logo/person_icon.png",
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ))
+                            : Image.asset(
+                                "assets/logo/person_icon.png",
+                                fit: BoxFit.cover,
+                              ),
+                      ),
                     ),
 
                     Gap(10 * widget.w),

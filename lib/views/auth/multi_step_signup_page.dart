@@ -177,10 +177,32 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
               ),
             );
 
+            // 🐛 طباعة الاستجابة الكاملة للتشخيص
+            print("📦 Upload Response Status: ${resp.statusCode}");
+            print("📦 Upload Response Data Type: ${resp.data.runtimeType}");
+            print("📦 Upload Response Data: ${resp.data}");
+
             uploadedProfileUrl = _extractUrlFromResponse(resp.data);
             if (uploadedProfileUrl != null && uploadedProfileUrl.isNotEmpty) {
               setState(() => _uploadedProfileUrl = uploadedProfileUrl);
               print("✅ Uploaded: $_uploadedProfileUrl");
+
+              // ✅ تحديث البروفايل بالصورة الجديدة
+              try {
+                await _dio.put(
+                  '/User/update-profile-picture',
+                  data: {'profilePictureUrl': uploadedProfileUrl},
+                  options: Options(
+                    headers: {
+                      if (accessToken != null) 'Authorization': 'Bearer $accessToken',
+                      'Content-Type': 'application/json',
+                    },
+                  ),
+                );
+                print("✅ Profile picture updated in account");
+              } catch (updateError) {
+                print("⚠️ Failed to update profile picture in account: $updateError");
+              }
             }
           } catch (e) {
             print("⚠️ Upload error: $e");
@@ -234,15 +256,53 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
 
   String? _extractUrlFromResponse(dynamic responseBody) {
     try {
+      print("🔍 Extracting URL from response type: ${responseBody.runtimeType}");
+      
+      // Case 1: Response is a Map (JSON object)
       if (responseBody is Map<String, dynamic>) {
-        return responseBody['url'] ?? responseBody['profilePictureUrl'];
+        // Try common field names
+        final url = responseBody['url'] ?? 
+                   responseBody['profilePictureUrl'] ?? 
+                   responseBody['imageUrl'] ??
+                   responseBody['fileUrl'] ??
+                   responseBody['path'];
+        
+        if (url != null) {
+          print("✅ Found URL in map: $url");
+          return url.toString();
+        }
+        
+        // Print all keys to help debug
+        print("⚠️ Available keys in response: ${responseBody.keys.toList()}");
       }
+      
+      // Case 2: Response is a String
       if (responseBody is String) {
-        final decoded = jsonDecode(responseBody);
-        return decoded['url'] ?? decoded['profilePictureUrl'];
+        // Try to parse as JSON first
+        try {
+          final decoded = jsonDecode(responseBody);
+          if (decoded is Map<String, dynamic>) {
+            final url = decoded['url'] ?? 
+                       decoded['profilePictureUrl'] ?? 
+                       decoded['imageUrl'] ??
+                       decoded['fileUrl'];
+            if (url != null) {
+              print("✅ Found URL in decoded JSON: $url");
+              return url.toString();
+            }
+          }
+        } catch (jsonError) {
+          // Not valid JSON, might be plain URL
+          if (responseBody.startsWith('http://') || responseBody.startsWith('https://')) {
+            print("✅ Response is direct URL: $responseBody");
+            return responseBody;
+          }
+        }
       }
+      
+      print("⚠️ Could not extract URL from response");
     } catch (e) {
-      print('⚠️ تحليل الرد فشل: $e');
+      print('⚠️ Error extracting URL: $e');
     }
     return null;
   }

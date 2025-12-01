@@ -110,6 +110,24 @@ class UserInfo {
         if (newUrl != null) {
           profilePictureUrl = newUrl;
           print('✅ تم رفع الصورة: $newUrl');
+
+          // ✅ تحديث البروفايل بالصورة الجديدة
+          try {
+            await dio.put(
+              '/User/update-profile-picture',
+              data: {'profilePictureUrl': newUrl},
+              options: Options(
+                headers: {
+                  if (token != null) 'Authorization': 'Bearer $token',
+                  'Content-Type': 'application/json',
+                },
+              ),
+            );
+            print("✅ Profile picture updated in account");
+          } catch (updateError) {
+            print("⚠️ Failed to update profile picture in account: $updateError");
+          }
+
           return newUrl;
         }
         print('⚠️ لم يتم إيجاد رابط الصورة في الرد.');

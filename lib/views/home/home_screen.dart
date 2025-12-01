@@ -1,6 +1,9 @@
 import 'dart:math';
 import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/views/home/views/home_tab.dart';
@@ -125,14 +128,44 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                         ),
-                        child: CircleAvatar(
-                          radius: 15, // صغير ليتناسب مع navbar
-                          backgroundImage:
-                              user.profilePictureUrl != null &&
-                                  user.profilePictureUrl!.isNotEmpty
-                              ? NetworkImage(user.profilePictureUrl!)
-                              : AssetImage("assets/logo/person_icon.png")
-                                    as ImageProvider,
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[800],
+                          ),
+                          child: ClipOval(
+                            child: (user.profilePictureUrl != null &&
+                                    user.profilePictureUrl!.isNotEmpty)
+                                ? (kIsWeb
+                                    ? Image.network(
+                                        'https://corsproxy.io/?${Uri.encodeComponent(user.profilePictureUrl!)}',
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Image.asset(
+                                            "assets/logo/person_icon.png",
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      )
+                                    : CachedNetworkImage(
+                                        imageUrl: user.profilePictureUrl!,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) =>
+                                            const CupertinoActivityIndicator(),
+                                        errorWidget: (context, url, error) {
+                                          return Image.asset(
+                                            "assets/logo/person_icon.png",
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      ))
+                                : Image.asset(
+                                    "assets/logo/person_icon.png",
+                                    fit: BoxFit.cover,
+                                  ),
+                          ),
                         ),
                       ),
                       label: "Profile",

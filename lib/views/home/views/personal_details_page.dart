@@ -6,6 +6,7 @@ import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class PersonalDetailsPage extends StatefulWidget {
   final UserInfo user;
@@ -139,7 +140,6 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     String? bodyType,
     String? dietType,
     double? goalWeight,
-    String? gender,
   }) async {
     final token = await getToken();
     print("🔍 Token retrieved: ${token != null ? 'EXISTS' : 'NULL'}");
@@ -171,7 +171,6 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
       if (bodyType != null) user.bodyType = bodyType;
       if (dietType != null) user.dietType = dietType;
       if (goalWeight != null) user.userGoalWeight = goalWeight;
-      if (gender != null) user.gender = gender;
     });
 
     final payload = {
@@ -180,7 +179,6 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
       "bodyType": user.bodyType,
       "dietType": user.dietType,
       "goalWeight": user.userGoalWeight,
-      "gender": user.gender,
     };
     
     print("📤 Sending update request with token...");
@@ -322,6 +320,126 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     );
 
     return selectedValue?.toDouble();
+  }
+
+  Future<DateTime?> showDateOfBirthDialog(DateTime? currentValue) async {
+    DateTime tempDate = currentValue ?? DateTime(2000, 1, 1);
+    DateTime? selectedDate;
+
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (_) => Container(
+        height: 320,
+        color: Colors.black,
+        child: Column(
+          children: [
+            Container(
+              color: Colors.grey[900],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CupertinoButton(
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  CupertinoButton(
+                    child: Text(
+                      "Done",
+                      style: TextStyle(color: AppColors.primarayColor),
+                    ),
+                    onPressed: () {
+                      selectedDate = tempDate;
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: CupertinoTheme(
+                data: CupertinoThemeData(
+                  textTheme: CupertinoTextThemeData(
+                    dateTimePickerTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  dateOrder: DatePickerDateOrder.dmy,
+                  initialDateTime: currentValue ?? DateTime(2000, 1, 1),
+                  minimumYear: 1900,
+                  maximumDate: DateTime.now(),
+                  onDateTimeChanged: (DateTime newDate) {
+                    tempDate = newDate;
+                  },
+                  backgroundColor: Colors.black,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return selectedDate;
+  }
+
+  Future<void> updateProfile({DateTime? dateOfBirth, String? gender}) async {
+    final token = await getToken();
+    if (token == null || token.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("غير مسجل الدخول. الرجاء إعادة تسجيل الدخول")),
+      );
+      return;
+    }
+
+    // Update UI optimistically
+    setState(() {
+      if (dateOfBirth != null) user.dateOfBirth = dateOfBirth;
+      if (gender != null) user.gender = gender;
+    });
+
+    final payload = {
+      if (dateOfBirth != null) "dateOfBirth": dateOfBirth.toIso8601String(),
+      if (gender != null) "gender": gender,
+    };
+
+    try {
+      final response = await dio.put(
+        "http://healix.somee.com/api/User/update-profile",
+        data: payload,
+        options: Options(
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer $token",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data != null && data['user'] != null) {
+          setState(() {
+            user = UserInfo.fromJson(data['user']);
+          });
+        }
+        _showTopMessage(context, "تم تحديث البيانات بنجاح");
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("حدث خطأ أثناء التحديث: ${response.statusCode}")),
+        );
+      }
+    } catch (e) {
+      print("❌ Error updating profile: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("حصل خطأ أثناء التحديث: $e")),
+      );
+    }
   }
 
   Future<String?> showTextEditDialog(String title, String? currentValue) async {
@@ -567,7 +685,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     final currentWeight = '${user.userWeight ?? "--"}KG';
     final height = '${user.userHeight ?? "--"}CM';
     final birthDate = user.dateOfBirth != null
-        ? user.dateOfBirth.toString().substring(0, 10)
+        ? DateFormat('dd-MM-yyyy').format(user.dateOfBirth!)
         : "--";
     final gender = '${user.gender ?? "--"}';
     final bodyType = '${user.bodyType ?? "--"}';
@@ -716,7 +834,12 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                     endIndent: 10,
                     indent: 10,
                   ),
-                  _infoRow('Date of birth', birthDate, onEdit: () {}),
+                  _infoRow('Date of birth', birthDate, onEdit: () async {
+                    DateTime? newDate = await showDateOfBirthDialog(user.dateOfBirth);
+                    if (newDate != null) {
+                      await updateProfile(dateOfBirth: newDate);
+                    }
+                  }),
                   Divider(
                     color: Colors.grey.withOpacity(0.35),
                     height: 1,
@@ -733,7 +856,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         user.gender,
                       );
                       if (newGender != null && newGender.isNotEmpty) {
-                        await updateHealthProfile(gender: newGender);
+                        await updateProfile(gender: newGender);
                       }
                     },
                   ),
