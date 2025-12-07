@@ -56,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return SafeArea(
       top: false,
+      bottom: false,
       child: Scaffold(
         extendBody: true,
         body: Stack(
@@ -125,9 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       // CircleAvatar صورة المستخدم في التاب الخامس (Profile)
                       icon: Container(
                         padding: EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                        ),
+                        decoration: BoxDecoration(shape: BoxShape.circle),
                         child: Container(
                           width: 30,
                           height: 30,
@@ -136,31 +135,33 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.grey[800],
                           ),
                           child: ClipOval(
-                            child: (user.profilePictureUrl != null &&
+                            child:
+                                (user.profilePictureUrl != null &&
                                     user.profilePictureUrl!.isNotEmpty)
                                 ? (kIsWeb
-                                    ? Image.network(
-                                        'https://corsproxy.io/?${Uri.encodeComponent(user.profilePictureUrl!)}',
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Image.asset(
-                                            "assets/logo/person_icon.png",
-                                            fit: BoxFit.cover,
-                                          );
-                                        },
-                                      )
-                                    : CachedNetworkImage(
-                                        imageUrl: user.profilePictureUrl!,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) =>
-                                            const CupertinoActivityIndicator(),
-                                        errorWidget: (context, url, error) {
-                                          return Image.asset(
-                                            "assets/logo/person_icon.png",
-                                            fit: BoxFit.cover,
-                                          );
-                                        },
-                                      ))
+                                      ? Image.network(
+                                          'https://corsproxy.io/?${Uri.encodeComponent(user.profilePictureUrl!)}',
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return Image.asset(
+                                                  "assets/logo/person_icon.png",
+                                                  fit: BoxFit.cover,
+                                                );
+                                              },
+                                        )
+                                      : CachedNetworkImage(
+                                          imageUrl: user.profilePictureUrl!,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) =>
+                                              const CupertinoActivityIndicator(),
+                                          errorWidget: (context, url, error) {
+                                            return Image.asset(
+                                              "assets/logo/person_icon.png",
+                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                        ))
                                 : Image.asset(
                                     "assets/logo/person_icon.png",
                                     fit: BoxFit.cover,

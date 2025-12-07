@@ -10,12 +10,12 @@ class DaySelector extends StatefulWidget {
   caloriesProgress; // نسبة الإنجاز لكل يوم (من 0.0 إلى 1.0)
 
   const DaySelector({
-    Key? key,
+    super.key,
     required this.selectedDay,
     required this.onDaySelected,
     required this.caloriesProgress,
     this.totalDays = 35,
-  }) : super(key: key);
+  });
 
   @override
   State<DaySelector> createState() => _DaySelectorState();

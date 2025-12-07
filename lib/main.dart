@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_splash/views/splash/splash_screen.dart';
 
-//test
+
 void main() => runApp(const HealixApp());
 
 class HealixApp extends StatelessWidget {
@@ -11,8 +11,8 @@ class HealixApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      locale: const Locale('en'),
-      supportedLocales: const [Locale('en'), Locale('ar')],
+      locale: Locale('en'),
+      supportedLocales: [Locale('en'), Locale('ar')],
       home: SplashScreen(),
     );
   }

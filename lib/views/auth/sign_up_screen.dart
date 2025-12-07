@@ -74,7 +74,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       } else {
         _showCupertinoDialog("حدث خطأ غير متوقع أثناء التسجيل.");
       }
-    } on DioError catch (dioError) {
+    } on DioException catch (dioError) {
       // هنا نطبع رسالة الخطأ للتصحيح على أساسها
       print("RESPONSE ERROR DATA: ${dioError.response?.data}");
       final apiError = dioError.response?.data;

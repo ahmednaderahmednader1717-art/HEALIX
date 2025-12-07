@@ -687,9 +687,9 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     final birthDate = user.dateOfBirth != null
         ? DateFormat('dd-MM-yyyy').format(user.dateOfBirth!)
         : "--";
-    final gender = '${user.gender ?? "--"}';
-    final bodyType = '${user.bodyType ?? "--"}';
-    final dietType = '${user.dietType ?? "--"}';
+    final gender = user.gender ?? "--";
+    final bodyType = user.bodyType ?? "--";
+    final dietType = user.dietType ?? "--";
 
     return Scaffold(
       backgroundColor: AppColors.ContainerColor,

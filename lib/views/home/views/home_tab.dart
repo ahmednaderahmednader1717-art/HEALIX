@@ -5,7 +5,6 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/models/nutrient.dart';
 import 'package:test_splash/views/home/widgets/charts_widget.dart';
-import 'package:test_splash/views/home/widgets/custom_search_bar.dart';
 import 'package:test_splash/views/home/widgets/meal_tile.dart';
 import 'package:test_splash/views/home/widgets/row_header.dart';
 import 'package:test_splash/views/home/widgets/day_selector.dart';

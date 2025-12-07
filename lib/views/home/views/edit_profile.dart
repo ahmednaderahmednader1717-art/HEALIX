@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
@@ -66,8 +65,7 @@ class _EditProfileState extends State<EditProfile> {
               onPrimary: Colors.black,
               surface: AppColors.ContainerColor,
               onSurface: Colors.white,
-            ),
-            dialogBackgroundColor: AppColors.ContainerColor,
+            ), dialogTheme: DialogThemeData(backgroundColor: AppColors.ContainerColor),
           ),
           child: child!,
         );
@@ -155,8 +153,9 @@ class _EditProfileState extends State<EditProfile> {
          String? newImageUrl;
          final data = response.data;
          if (data is Map<String, dynamic>) {
-            if (data['imageUrl'] != null) newImageUrl = data['imageUrl'];
-            else if (data['url'] != null) newImageUrl = data['url'];
+            if (data['imageUrl'] != null) {
+              newImageUrl = data['imageUrl'];
+            } else if (data['url'] != null) newImageUrl = data['url'];
             else if (data['profilePictureUrl'] != null) newImageUrl = data['profilePictureUrl'];
          }
          
