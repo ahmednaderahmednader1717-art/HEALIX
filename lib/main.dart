@@ -1,19 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:test_splash/views/splash/splash_screen.dart';
 
+void main() {
+  // تهيئة Flutter bindings قبل تعيين إعدادات النظام
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() => runApp(const HealixApp());
+  // تعيين لون الـ status bar لأبيض على مستوى التطبيق بالكامل
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarBrightness: Brightness.dark, // For iOS
+      statusBarIconBrightness: Brightness.light, // For Android
+      statusBarColor: Colors.transparent, // For Android
+    ),
+  );
+
+  runApp(const HealixApp());
+}
 
 class HealixApp extends StatelessWidget {
   const HealixApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      locale: Locale('en'),
-      supportedLocales: [Locale('en'), Locale('ar')],
-      home: SplashScreen(),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.dark, // For iOS
+        statusBarIconBrightness: Brightness.light, // For Android
+        statusBarColor: Colors.transparent, // For Android
+      ),
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        locale: Locale('en'),
+        supportedLocales: [Locale('en'), Locale('ar')],
+        home: SplashScreen(),
+      ),
     );
   }
 }

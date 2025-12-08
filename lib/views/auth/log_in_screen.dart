@@ -82,22 +82,29 @@ class _LogInScreenState extends State<LogInScreen> {
       if (response.statusCode == 200) {
         final userJson = response.data['user'];
         // ✅ الـ API بيرجع accessToken مش token
-        final token = response.data['accessToken'] ?? response.data['token'] ?? "";
+        final token =
+            response.data['accessToken'] ?? response.data['token'] ?? "";
         final refreshToken = response.data['refreshToken'] ?? "";
-        
+
         print("👤 User Data exists: ${userJson != null}");
-        print("🔑 Token from API: '${token.isEmpty ? 'EMPTY' : token.substring(0, token.length > 20 ? 20 : token.length)}...'");
+        print(
+          "🔑 Token from API: '${token.isEmpty ? 'EMPTY' : token.substring(0, token.length > 20 ? 20 : token.length)}...'",
+        );
         print("📏 Token length: ${token.length}");
-        print("🔄 RefreshToken: '${refreshToken.isEmpty ? 'EMPTY' : 'EXISTS'}'");
-        
+        print(
+          "🔄 RefreshToken: '${refreshToken.isEmpty ? 'EMPTY' : 'EXISTS'}'",
+        );
+
         // حفظ التوكن
         await _saveTokens(token, refreshToken);
-        
+
         // تحقق من الحفظ
         final prefs = await SharedPreferences.getInstance();
         final savedToken = prefs.getString("token");
-        print("💾 Token saved successfully: ${savedToken?.isNotEmpty ?? false}");
-        
+        print(
+          "💾 Token saved successfully: ${savedToken?.isNotEmpty ?? false}",
+        );
+
         if (userJson != null) {
           UserInfo user = UserInfo.fromJson(userJson);
           Navigator.pushReplacement(
@@ -134,7 +141,8 @@ class _LogInScreenState extends State<LogInScreen> {
       if (response.statusCode == 200 && response.data['user'] != null) {
         final userJson = response.data['user'];
         // ✅ الـ API بيرجع accessToken مش token
-        final token = response.data['accessToken'] ?? response.data['token'] ?? "";
+        final token =
+            response.data['accessToken'] ?? response.data['token'] ?? "";
         final refreshToken = response.data['refreshToken'] ?? "";
 
         await _saveTokens(token, refreshToken);
@@ -199,7 +207,11 @@ class _LogInScreenState extends State<LogInScreen> {
       } else {
         // For mobile platforms, create a GoogleSignIn instance and use signIn
         print("Using mobile implementation");
-        final GoogleSignIn googleSignIn = GoogleSignIn();
+        final GoogleSignIn googleSignIn = GoogleSignIn(
+          // إضافة serverClientId للـ iOS
+          serverClientId: clientId,
+          scopes: ['email', 'profile'],
+        );
         print("GoogleSignIn instance created");
 
         try {

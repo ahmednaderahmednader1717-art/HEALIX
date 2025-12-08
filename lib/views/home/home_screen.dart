@@ -79,99 +79,112 @@ class _HomeScreenState extends State<HomeScreen> {
             IndexedStack(index: _currentIndex, children: _pages),
           ],
         ),
-        bottomNavigationBar: Theme(
-          data: Theme.of(context).copyWith(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-          ),
-          child: ClipRRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.ContainerColor.withOpacity(0.4),
-                ),
-                child: BottomNavigationBar(
-                  currentIndex: _currentIndex,
-                  onTap: (index) => setState(() => _currentIndex = index),
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  type: BottomNavigationBarType.fixed,
-                  selectedItemColor: Colors.white,
-                  unselectedItemColor: Colors.white54,
-                  showSelectedLabels: true,
-                  showUnselectedLabels: true,
-                  useLegacyColorScheme: false,
-                  items: [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.home, size: 30 * scale),
-                      label: "Home",
+        bottomNavigationBar: MediaQuery.removePadding(
+          context: context,
+          removeBottom: true,
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+            ),
+            child: ClipRRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.ContainerColor.withOpacity(0.4),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 8.0,
+                      right: 8.0,
+                      left: 8.0,
                     ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.search, size: 30 * scale),
-                      label: "Search",
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: EdgeInsets.only(top: 15 * h),
-                        child: Icon(Icons.add_circle, size: 55 * scale),
-                      ),
-                      label: "",
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.insights_sharp, size: 30 * scale),
-                      label: "Progress",
-                    ),
-                    BottomNavigationBarItem(
-                      // CircleAvatar صورة المستخدم في التاب الخامس (Profile)
-                      icon: Container(
-                        padding: EdgeInsets.all(2),
-                        decoration: BoxDecoration(shape: BoxShape.circle),
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.grey[800],
+                    child: BottomNavigationBar(
+                      currentIndex: _currentIndex,
+                      onTap: (index) => setState(() => _currentIndex = index),
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      type: BottomNavigationBarType.fixed,
+                      selectedItemColor: Colors.white,
+                      unselectedItemColor: Colors.white54,
+                      selectedFontSize: 12,
+                      unselectedFontSize: 10,
+                      showSelectedLabels: true,
+                      showUnselectedLabels: true,
+                      useLegacyColorScheme: false,
+                      items: [
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.home, size: 30 * scale),
+                          label: "Home",
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.search, size: 30 * scale),
+                          label: "Search",
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Padding(
+                            padding: EdgeInsets.only(top: 15 * h),
+                            child: Icon(Icons.add_circle, size: 55 * scale),
                           ),
-                          child: ClipOval(
-                            child:
-                                (user.profilePictureUrl != null &&
-                                    user.profilePictureUrl!.isNotEmpty)
-                                ? (kIsWeb
-                                      ? Image.network(
-                                          'https://corsproxy.io/?${Uri.encodeComponent(user.profilePictureUrl!)}',
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
+                          label: "",
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.insights_sharp, size: 30 * scale),
+                          label: "Progress",
+                        ),
+                        BottomNavigationBarItem(
+                          // CircleAvatar صورة المستخدم في التاب الخامس (Profile)
+                          icon: Container(
+                            padding: EdgeInsets.all(2),
+                            decoration: BoxDecoration(shape: BoxShape.circle),
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.grey[800],
+                              ),
+                              child: ClipOval(
+                                child:
+                                    (user.profilePictureUrl != null &&
+                                        user.profilePictureUrl!.isNotEmpty)
+                                    ? (kIsWeb
+                                          ? Image.network(
+                                              'https://corsproxy.io/?${Uri.encodeComponent(user.profilePictureUrl!)}',
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                    return Image.asset(
+                                                      "assets/logo/person_icon.png",
+                                                      fit: BoxFit.cover,
+                                                    );
+                                                  },
+                                            )
+                                          : CachedNetworkImage(
+                                              imageUrl: user.profilePictureUrl!,
+                                              fit: BoxFit.cover,
+                                              placeholder: (context, url) =>
+                                                  const CupertinoActivityIndicator(),
+                                              errorWidget: (context, url, error) {
                                                 return Image.asset(
                                                   "assets/logo/person_icon.png",
                                                   fit: BoxFit.cover,
                                                 );
                                               },
-                                        )
-                                      : CachedNetworkImage(
-                                          imageUrl: user.profilePictureUrl!,
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) =>
-                                              const CupertinoActivityIndicator(),
-                                          errorWidget: (context, url, error) {
-                                            return Image.asset(
-                                              "assets/logo/person_icon.png",
-                                              fit: BoxFit.cover,
-                                            );
-                                          },
-                                        ))
-                                : Image.asset(
-                                    "assets/logo/person_icon.png",
-                                    fit: BoxFit.cover,
-                                  ),
+                                            ))
+                                    : Image.asset(
+                                        "assets/logo/person_icon.png",
+                                        fit: BoxFit.cover,
+                                      ),
+                              ),
+                            ),
                           ),
+                          label: "Profile",
                         ),
-                      ),
-                      label: "Profile",
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
