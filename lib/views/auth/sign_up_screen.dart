@@ -214,7 +214,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Gap(250 * h),
+                  Gap(180 * h),
                   Text(
                     "Welcome! Let's customize\n HEALIX for your goals.",
                     textAlign: TextAlign.center,
@@ -262,7 +262,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       // TODO SIGN IN WITH APPLE LOGIC HERE
                     },
                   ),
-                  Gap(100 * h),
+                  Gap(80 * h),
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(

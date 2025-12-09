@@ -77,8 +77,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          width: screenWidth * 0.68,
-                          height: screenHeight * 0.4,
+                          width: 300 * w,
+                          height: 360 * h,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20 * scale),
                             image: DecorationImage(
@@ -100,7 +100,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   },
                   options: CarouselOptions(
                     scrollPhysics: BouncingScrollPhysics(),
-                    height: 450 * h,
+                    height: 430 * h,
                     viewportFraction: 0.8,
                     enableInfiniteScroll: false,
                     enlargeCenterPage: false,
@@ -109,8 +109,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     },
                   ),
                 ),
-
-                Gap(25 * h),
 
                 // 🟣 Modern Animated Dots Indicator
                 AnimatedSwitcher(
@@ -148,7 +146,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ),
                 ),
 
-                Gap(60 * h),
+                Gap(40 * h),
 
                 // 🟣 Sign Up button
                 SizedBox(

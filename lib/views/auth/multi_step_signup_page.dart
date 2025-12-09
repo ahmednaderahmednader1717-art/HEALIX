@@ -51,33 +51,119 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   String? _uploadedProfileUrl;
   bool _isLoading = false;
 
+  // Error messages
+  String? _nameError;
+  String? _phoneError;
+  String? _emailError;
+  String? _usernameError;
+  String? _passwordError;
+  String? _confirmPasswordError;
+  String? _genderError;
+  String? _dobError;
+  String? _heightError;
+  String? _weightError;
+  String? _goalWeightError;
+  String? _bodyTypeError;
+  String? _dietTypeError;
+
   final Dio _dio = Dio(BaseOptions(baseUrl: "http://healix.somee.com/api"));
 
-  bool _validateStep1() =>
-      _fullNameController.text.trim().isNotEmpty &&
-      _phoneController.text.trim().isNotEmpty;
-  bool _validateStep2() =>
-      _emailController.text.contains("@") &&
-      _userNameController.text.trim().isNotEmpty;
-  bool _validateStep3() =>
-      _passwordController.text.isNotEmpty &&
-      _confirmPasswordController.text == _passwordController.text;
-  bool _validateStep4() =>
-      _selectedGender != null &&
-      _selectedDate != null &&
-      _selectedHeight != null &&
-      _selectedWeight != null &&
-      _selectedGoalWeight != null;
-  bool _validateStepBodyType() => _selectedBodyType != null;
-  bool _validateStepDietType() => _selectedDietType != null;
-
   void _nextPage() async {
-    if (_currentStep == 0 && !_validateStep1()) return;
-    if (_currentStep == 1 && !_validateStep2()) return;
-    if (_currentStep == 2 && !_validateStep3()) return;
-    if (_currentStep == 3 && !_validateStep4()) return;
-    if (_currentStep == 4 && !_validateStepBodyType()) return;
-    if (_currentStep == 5 && !_validateStepDietType()) return;
+    // Clear previous errors
+    setState(() {
+      _nameError = null;
+      _phoneError = null;
+      _emailError = null;
+      _usernameError = null;
+      _passwordError = null;
+      _confirmPasswordError = null;
+      _genderError = null;
+      _dobError = null;
+      _heightError = null;
+      _weightError = null;
+      _goalWeightError = null;
+      _bodyTypeError = null;
+      _dietTypeError = null;
+    });
+
+    // Validate current step
+    if (_currentStep == 0) {
+      bool isValid = true;
+      if (_fullNameController.text.trim().isEmpty) {
+        setState(() => _nameError = "Please enter your full name");
+        isValid = false;
+      }
+      if (_phoneController.text.trim().isEmpty) {
+        setState(() => _phoneError = "Please enter your phone number");
+        isValid = false;
+      }
+      if (!isValid) return;
+    }
+
+    if (_currentStep == 1) {
+      bool isValid = true;
+      if (!_emailController.text.contains("@")) {
+        setState(() => _emailError = "Please enter a valid email");
+        isValid = false;
+      }
+      if (_userNameController.text.trim().isEmpty) {
+        setState(() => _usernameError = "Please enter a username");
+        isValid = false;
+      }
+      if (!isValid) return;
+    }
+
+    if (_currentStep == 2) {
+      bool isValid = true;
+      if (_passwordController.text.isEmpty) {
+        setState(() => _passwordError = "Please enter a password");
+        isValid = false;
+      }
+      if (_confirmPasswordController.text != _passwordController.text) {
+        setState(() => _confirmPasswordError = "Passwords do not match");
+        isValid = false;
+      }
+      if (!isValid) return;
+    }
+
+    if (_currentStep == 3) {
+      bool isValid = true;
+      if (_selectedGender == null) {
+        setState(() => _genderError = "Please select your gender");
+        isValid = false;
+      }
+      if (_selectedDate == null) {
+        setState(() => _dobError = "Please select your date of birth");
+        isValid = false;
+      }
+      if (_selectedHeight == null) {
+        setState(() => _heightError = "Please select your height");
+        isValid = false;
+      }
+      if (_selectedWeight == null) {
+        setState(() => _weightError = "Please select your weight");
+        isValid = false;
+      }
+      if (_selectedGoalWeight == null) {
+        setState(() => _goalWeightError = "Please select your goal weight");
+        isValid = false;
+      }
+      if (!isValid) return;
+    }
+
+    if (_currentStep == 4) {
+      if (_selectedBodyType == null) {
+        setState(() => _bodyTypeError = "Please select your body type");
+        return;
+      }
+    }
+
+    if (_currentStep == 5) {
+      if (_selectedDietType == null) {
+        setState(() => _dietTypeError = "Please select your diet type");
+        return;
+      }
+    }
 
     if (_currentStep < _totalSteps - 1) {
       setState(() => _currentStep++);
@@ -130,7 +216,8 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         String? refreshToken;
         if (signupResp.data is Map) {
           // Try both 'token' and 'accessToken' keys
-          accessToken = signupResp.data['token'] ?? signupResp.data['accessToken'];
+          accessToken =
+              signupResp.data['token'] ?? signupResp.data['accessToken'];
           refreshToken = signupResp.data['refreshToken'] ?? "";
         }
 
@@ -194,14 +281,17 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
                   data: {'profilePictureUrl': uploadedProfileUrl},
                   options: Options(
                     headers: {
-                      if (accessToken != null) 'Authorization': 'Bearer $accessToken',
+                      if (accessToken != null)
+                        'Authorization': 'Bearer $accessToken',
                       'Content-Type': 'application/json',
                     },
                   ),
                 );
                 print("✅ Profile picture updated in account");
               } catch (updateError) {
-                print("⚠️ Failed to update profile picture in account: $updateError");
+                print(
+                  "⚠️ Failed to update profile picture in account: $updateError",
+                );
               }
             }
           } catch (e) {
@@ -256,36 +346,40 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
 
   String? _extractUrlFromResponse(dynamic responseBody) {
     try {
-      print("🔍 Extracting URL from response type: ${responseBody.runtimeType}");
-      
+      print(
+        "🔍 Extracting URL from response type: ${responseBody.runtimeType}",
+      );
+
       // Case 1: Response is a Map (JSON object)
       if (responseBody is Map<String, dynamic>) {
         // Try common field names
-        final url = responseBody['url'] ?? 
-                   responseBody['profilePictureUrl'] ?? 
-                   responseBody['imageUrl'] ??
-                   responseBody['fileUrl'] ??
-                   responseBody['path'];
-        
+        final url =
+            responseBody['url'] ??
+            responseBody['profilePictureUrl'] ??
+            responseBody['imageUrl'] ??
+            responseBody['fileUrl'] ??
+            responseBody['path'];
+
         if (url != null) {
           print("✅ Found URL in map: $url");
           return url.toString();
         }
-        
+
         // Print all keys to help debug
         print("⚠️ Available keys in response: ${responseBody.keys.toList()}");
       }
-      
+
       // Case 2: Response is a String
       if (responseBody is String) {
         // Try to parse as JSON first
         try {
           final decoded = jsonDecode(responseBody);
           if (decoded is Map<String, dynamic>) {
-            final url = decoded['url'] ?? 
-                       decoded['profilePictureUrl'] ?? 
-                       decoded['imageUrl'] ??
-                       decoded['fileUrl'];
+            final url =
+                decoded['url'] ??
+                decoded['profilePictureUrl'] ??
+                decoded['imageUrl'] ??
+                decoded['fileUrl'];
             if (url != null) {
               print("✅ Found URL in decoded JSON: $url");
               return url.toString();
@@ -293,13 +387,14 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
           }
         } catch (jsonError) {
           // Not valid JSON, might be plain URL
-          if (responseBody.startsWith('http://') || responseBody.startsWith('https://')) {
+          if (responseBody.startsWith('http://') ||
+              responseBody.startsWith('https://')) {
             print("✅ Response is direct URL: $responseBody");
             return responseBody;
           }
         }
       }
-      
+
       print("⚠️ Could not extract URL from response");
     } catch (e) {
       print('⚠️ Error extracting URL: $e');
@@ -370,32 +465,32 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       StepPersonalInfo(
         nameController: _fullNameController,
         phoneController: _phoneController,
-        nameError: null,
-        phoneError: null,
+        nameError: _nameError,
+        phoneError: _phoneError,
       ),
       StepAccountInfo(
         emailController: _emailController,
         usernameController: _userNameController,
-        emailError: null,
-        usernameError: null,
+        emailError: _emailError,
+        usernameError: _usernameError,
       ),
       StepPassword(
         passwordController: _passwordController,
         confirmController: _confirmPasswordController,
-        passwordError: null,
-        confirmError: null,
+        passwordError: _passwordError,
+        confirmError: _confirmPasswordError,
       ),
       StepExtraDetails(
         selectedGender: _selectedGender,
-        genderError: null,
+        genderError: _genderError,
         selectedDate: _selectedDate,
-        dobError: null,
+        dobError: _dobError,
         selectedHeight: _selectedHeight?.toInt(), // للـPicker يجب int
-        heightError: null,
+        heightError: _heightError,
         selectedWeight: _selectedWeight?.toInt(),
-        weightError: null,
+        weightError: _weightError,
         selectedGoalWeight: _selectedGoalWeight?.toInt(),
-        goalWeightError: null,
+        goalWeightError: _goalWeightError,
         onSelectGender: (g) => setState(() => _selectedGender = g),
         onSelectDate: (ctx) async => await _pickDate(ctx),
         onSelectHeight: (ctx) async => await _pickIntValue(
@@ -425,12 +520,12 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       ),
       StepBodyType(
         selectedBodyType: _selectedBodyType,
-        errorText: null,
+        errorText: _bodyTypeError,
         onSelect: (bt) => setState(() => _selectedBodyType = bt),
       ),
       StepDietType(
         selectedDietType: _selectedDietType,
-        errorText: null,
+        errorText: _dietTypeError,
         onSelect: (dt) => setState(() => _selectedDietType = dt),
       ),
       StepProfilePhoto(
@@ -467,29 +562,27 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         HealixPrimaryButton.iconOnly(
-                      leading: Icon(
-                        _currentStep > 0 ? Icons.arrow_back : Icons.close,
-                        color: Colors.white,
-                        size: 30 * scale,
-                      ),
-                      onPressed: _currentStep > 0
-                          ? _previousPage
-                          : () => Navigator.pop(context),
-                      width: 60 *scale,
-                      height: 60 *scale,
-                      borderRadius: 999,
-                      backgroundColor: AppColors.primarayColor.withOpacity(0.4),
-                    ),
-                    Gap(20 *scale),
-                    HealixPrimaryButton(
-                      height: 60*scale,
-                      width: 300 *scale,
-                      text: _currentStep == _totalSteps - 1
-                          ? "Finish"
-                          : "Next Step",
-                          
-                      onPressed: _nextPage,
-                    ),
+          leading: Icon(
+            _currentStep > 0 ? Icons.arrow_back : Icons.close,
+            color: Colors.white,
+            size: 30 * scale,
+          ),
+          onPressed: _currentStep > 0
+              ? _previousPage
+              : () => Navigator.pop(context),
+          width: 60 * scale,
+          height: 60 * scale,
+          borderRadius: 999,
+          backgroundColor: AppColors.primarayColor.withOpacity(0.4),
+        ),
+        Gap(20 * scale),
+        HealixPrimaryButton(
+          height: 60 * scale,
+          width: 300 * scale,
+          text: _currentStep == _totalSteps - 1 ? "Finish" : "Next Step",
+
+          onPressed: _nextPage,
+        ),
       ],
     ),
   );
