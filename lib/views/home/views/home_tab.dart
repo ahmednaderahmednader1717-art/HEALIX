@@ -4,12 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/models/nutrient.dart';
-import 'package:test_splash/views/home/widgets/charts_widget.dart';
+import 'package:test_splash/widgets/home/charts_widget.dart';
 import 'package:test_splash/views/home/widgets/meal_tile.dart';
 import 'package:test_splash/views/home/widgets/row_header.dart';
 import 'package:test_splash/views/home/widgets/day_selector.dart';
 // صحح المسار حسب مكان الملف في مشروعك
-
 
 class HomeTab extends StatefulWidget {
   final void Function(int)? onTabChange;
@@ -29,7 +28,6 @@ class _HomeTabState extends State<HomeTab> {
       selectedDay = day;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +83,7 @@ class _HomeTabState extends State<HomeTab> {
         children: [
           SizedBox(height: 40 * h),
           Padding(
-            padding:  EdgeInsets.symmetric(horizontal: 16*w),
+            padding: EdgeInsets.symmetric(horizontal: 16 * w),
             child: Row(
               children: [
                 Text(
@@ -135,18 +133,16 @@ class _HomeTabState extends State<HomeTab> {
               ],
             ),
           ),
-          SizedBox(height: 16*h,),
+          SizedBox(height: 16 * h),
           DaySelector(
             selectedDay: selectedDay,
             onDaySelected: onDaySelected,
-            caloriesProgress: {
-              DateTime(2025, 11, 19): .75
-            },
+            caloriesProgress: {DateTime(2025, 11, 19): .75},
           ),
-    
+
           SizedBox(height: 10 * h),
           Padding(
-            padding:  EdgeInsets.symmetric(horizontal: 12*w),
+            padding: EdgeInsets.symmetric(horizontal: 12 * w),
             child: RowHeader(
               title: "Todays's Total Nutrations",
               actionText: showActionButton
@@ -162,7 +158,7 @@ class _HomeTabState extends State<HomeTab> {
           ),
           SizedBox(height: 12 * h),
           Padding(
-            padding:  EdgeInsets.symmetric(horizontal: 16*w),
+            padding: EdgeInsets.symmetric(horizontal: 16 * w),
             child: GridView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
@@ -187,19 +183,19 @@ class _HomeTabState extends State<HomeTab> {
           ),
           SizedBox(height: 16 * h),
           Padding(
-            padding:  EdgeInsets.symmetric(horizontal: 12*w),
+            padding: EdgeInsets.symmetric(horizontal: 12 * w),
             child: Text(
               "Recommended Meals",
               style: TextStyle(
-              color: Colors.white,
-              fontSize: 18 * scale,
-              fontWeight: FontWeight.w700,
-        ),
-      ),
+                color: Colors.white,
+                fontSize: 18 * scale,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
           SizedBox(height: 16 * h),
           Padding(
-            padding:  EdgeInsets.symmetric(horizontal: 16*w),
+            padding: EdgeInsets.symmetric(horizontal: 16 * w),
             child: Column(
               children: List.generate(5, (index) {
                 final image = index.isEven
@@ -215,8 +211,7 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                 );
               }),
-            )
-    
+            ),
           ),
           SizedBox(height: kBottomNavigationBarHeight + 40),
         ],

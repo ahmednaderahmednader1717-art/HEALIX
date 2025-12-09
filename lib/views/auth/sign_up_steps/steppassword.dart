@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
-import 'package:test_splash/widgets/healix_text_field.dart';
+import 'package:test_splash/widgets/common/healix_text_field.dart';
 
 class StepPassword extends StatelessWidget {
   final TextEditingController passwordController;

@@ -12,8 +12,8 @@ import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/views/auth/multi_step_signup_page.dart';
 import 'package:test_splash/views/home/home_screen.dart';
 import 'package:test_splash/models/user_info_model.dart';
-import 'package:test_splash/widgets/healix_primary_button.dart';
-import 'package:test_splash/widgets/social_button.dart';
+import 'package:test_splash/widgets/common/healix_primary_button.dart';
+import 'package:test_splash/widgets/auth/social_button.dart';
 import 'package:test_splash/src/web_wrapper.dart' as web;
 
 class SignUpScreen extends StatefulWidget {

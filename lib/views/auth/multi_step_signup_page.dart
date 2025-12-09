@@ -16,7 +16,7 @@ import 'package:test_splash/views/auth/sign_up_steps/stepextradetails.dart';
 import 'package:test_splash/views/auth/sign_up_steps/steppassword.dart';
 import 'package:test_splash/views/auth/sign_up_steps/step_profile_photo.dart';
 import 'package:test_splash/views/home/home_screen.dart';
-import 'package:test_splash/widgets/healix_primary_button.dart';
+import 'package:test_splash/widgets/common/healix_primary_button.dart';
 import 'package:gap/gap.dart';
 
 class MultiStepSignUpPage extends StatefulWidget {
