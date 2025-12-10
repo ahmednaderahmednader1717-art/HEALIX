@@ -4,14 +4,16 @@ import 'package:test_splash/core/app_colors.dart';
 
 class ProfileCardItem {
   final String title;
-  final IconData icon;
+  final IconData? icon;
   final String? subtitle;
   final VoidCallback? onTap;
+  final bool arrow;
   ProfileCardItem({
     required this.title,
-    required this.icon,
+    this.icon,
     this.subtitle,
     this.onTap,
+    this.arrow = true,
   });
 }
 
@@ -64,7 +66,6 @@ class ProfileCardGroup extends StatelessWidget {
     );
   }
 
-
   Widget _buildCard(ProfileCardItem item, double w, double h) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 18 * h, horizontal: 18 * w),
@@ -95,7 +96,9 @@ class ProfileCardGroup extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18 *w),
+          item.arrow
+              ? Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18 * w)
+              : SizedBox(),
         ],
       ),
     );

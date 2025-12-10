@@ -65,19 +65,17 @@ class _ProfileTabState extends State<ProfileTab> {
       final token = prefs.getString("token");
 
       if (token == null) {
-        _showErrorDialog("Authentication token not found. Please log in again.");
+        _showErrorDialog(
+          "Authentication token not found. Please log in again.",
+        );
         return;
       }
 
       final dio = Dio(BaseOptions(baseUrl: 'http://healix.somee.com/api'));
-      
+
       final response = await dio.delete(
         '/User/delete-account',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       if (response.statusCode == 200) {
@@ -90,7 +88,9 @@ class _ProfileTabState extends State<ProfileTab> {
           );
         }
       } else {
-        _showErrorDialog("Failed to delete account. Status: ${response.statusCode}");
+        _showErrorDialog(
+          "Failed to delete account. Status: ${response.statusCode}",
+        );
       }
     } catch (e) {
       _showErrorDialog("An error occurred: $e");
@@ -137,7 +137,7 @@ class _ProfileTabState extends State<ProfileTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 40*h,),
+              SizedBox(height: 40 * h),
               Text(
                 "Profile",
                 style: TextStyle(
@@ -147,13 +147,14 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ),
               SizedBox(height: 24 * h),
-        
+
               // Profile Card
               GestureDetector(
-                onTap: (){
-                  Navigator.push(context,
+                onTap: () {
+                  Navigator.push(
+                    context,
                     CupertinoPageRoute(
-                      builder: (context) =>   EditProfile(user: widget.user,),
+                      builder: (context) => EditProfile(user: widget.user),
                     ),
                   );
                 },
@@ -174,44 +175,51 @@ class _ProfileTabState extends State<ProfileTab> {
                           color: Colors.grey[800],
                         ),
                         child: ClipOval(
-                          child: (widget.user.profilePictureUrl != null &&
+                          child:
+                              (widget.user.profilePictureUrl != null &&
                                   widget.user.profilePictureUrl!.isNotEmpty)
                               ? (kIsWeb
-                                  ? Image.network(
-                                      // CORS Proxy for development only
-                                      'https://corsproxy.io/?${Uri.encodeComponent(widget.user.profilePictureUrl!)}',
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        print("❌ Error loading image: $error");
-                                        return Image.asset(
-                                          "assets/logo/person_icon.png",
-                                          fit: BoxFit.cover,
-                                        );
-                                      },
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return const CupertinoActivityIndicator();
-                                      },
-                                    )
-                                  : CachedNetworkImage(
-                                      imageUrl: widget.user.profilePictureUrl!,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) =>
-                                          const CupertinoActivityIndicator(),
-                                      errorWidget: (context, url, error) {
-                                        return Image.asset(
-                                          "assets/logo/person_icon.png",
-                                          fit: BoxFit.cover,
-                                        );
-                                      },
-                                    ))
+                                    ? Image.network(
+                                        // CORS Proxy for development only
+                                        'https://corsproxy.io/?${Uri.encodeComponent(widget.user.profilePictureUrl!)}',
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              print(
+                                                "❌ Error loading image: $error",
+                                              );
+                                              return Image.asset(
+                                                "assets/logo/person_icon.png",
+                                                fit: BoxFit.cover,
+                                              );
+                                            },
+                                        loadingBuilder:
+                                            (context, child, loadingProgress) {
+                                              if (loadingProgress == null)
+                                                return child;
+                                              return const CupertinoActivityIndicator();
+                                            },
+                                      )
+                                    : CachedNetworkImage(
+                                        imageUrl:
+                                            widget.user.profilePictureUrl!,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) =>
+                                            const CupertinoActivityIndicator(),
+                                        errorWidget: (context, url, error) {
+                                          return Image.asset(
+                                            "assets/logo/person_icon.png",
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      ))
                               : Image.asset(
                                   "assets/logo/person_icon.png",
                                   fit: BoxFit.cover,
                                 ),
                         ),
                       ),
-                      
+
                       SizedBox(width: 16 * w),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,7 +235,10 @@ class _ProfileTabState extends State<ProfileTab> {
                           SizedBox(height: 4),
                           Text(
                             " @${widget.user.username}",
-                            style: TextStyle(color: Colors.grey, fontSize: 14 * w),
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14 * w,
+                            ),
                           ),
                         ],
                       ),
@@ -236,14 +247,14 @@ class _ProfileTabState extends State<ProfileTab> {
                         Icons.arrow_forward_ios,
                         color: Colors.grey,
                         size: 18 * w,
-                      )
+                      ),
                     ],
                   ),
                 ),
               ),
-        
+
               SizedBox(height: 32 * h),
-        
+
               // Account Section
               Text(
                 "Account",
@@ -254,15 +265,17 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ),
               SizedBox(height: 12 * h),
-        
+
               ProfileCardGroup(
                 items: [
                   ProfileCardItem(
                     title: "Personal Details",
                     icon: Ionicons.person,
-                    onTap: () => Navigator.push(context,
+                    onTap: () => Navigator.push(
+                      context,
                       CupertinoPageRoute(
-                        builder: (context) => PersonalDetailsPage(user: widget.user,),
+                        builder: (context) =>
+                            PersonalDetailsPage(user: widget.user),
                       ),
                     ),
                   ),
@@ -285,9 +298,9 @@ class _ProfileTabState extends State<ProfileTab> {
                 w: w,
                 h: h,
               ),
-        
+
               SizedBox(height: 32 * h),
-        
+
               // Goals & Tracking
               Text(
                 "Goals & Tracking",
@@ -298,7 +311,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ),
               SizedBox(height: 12 * h),
-        
+
               ProfileCardGroup(
                 items: [
                   ProfileCardItem(
@@ -321,7 +334,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 h: h,
               ),
               SizedBox(height: 32 * h),
-        
+
               // Support & Legal
               Text(
                 "Support & Legal",
@@ -332,7 +345,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ),
               SizedBox(height: 12 * h),
-        
+
               ProfileCardGroup(
                 items: [
                   ProfileCardItem(
@@ -348,6 +361,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   ProfileCardItem(
                     title: "Sync Data",
                     icon: Ionicons.sync_outline,
+                    arrow: false,
                     onTap: () {},
                   ),
                   ProfileCardItem(
@@ -364,9 +378,9 @@ class _ProfileTabState extends State<ProfileTab> {
                 w: w,
                 h: h,
               ),
-        
+
               SizedBox(height: 32 * h),
-        
+
               // Follow Us
               Text(
                 "Follow Us",
@@ -377,7 +391,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ),
               SizedBox(height: 12 * h),
-        
+
               ProfileCardGroup(
                 items: [
                   ProfileCardItem(
@@ -400,7 +414,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 h: h,
               ),
               SizedBox(height: 32 * h),
-        
+
               // Account Actions
               Text(
                 "Account Actions",
@@ -411,7 +425,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ),
               SizedBox(height: 12 * h),
-        
+
               ProfileCardGroup(
                 items: [
                   ProfileCardItem(
@@ -434,16 +448,13 @@ class _ProfileTabState extends State<ProfileTab> {
               SizedBox(
                 height: kBottomNavigationBarHeight + 40,
               ), // 24 لتعطي مسافة زيادة
-        
             ],
           ),
         ),
         if (_isLoading)
           Container(
             color: Colors.black.withOpacity(0.5),
-            child: const Center(
-              child: CupertinoActivityIndicator(radius: 15),
-            ),
+            child: const Center(child: CupertinoActivityIndicator(radius: 15)),
           ),
       ],
     );
