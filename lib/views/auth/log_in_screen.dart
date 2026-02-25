@@ -35,7 +35,7 @@ class _LogInScreenState extends State<LogInScreen> {
 
   final Dio dio = Dio(
     BaseOptions(
-      baseUrl: "http://healix.somee.com/api",
+      baseUrl: "http://healix26.somee.com/api",
       headers: {"Content-Type": "application/json"},
     ),
   );
@@ -107,9 +107,10 @@ class _LogInScreenState extends State<LogInScreen> {
 
         if (userJson != null) {
           UserInfo user = UserInfo.fromJson(userJson);
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
+            (route) => false,
           );
         } else {
           _showCupertinoDialog("User data not found in response");
@@ -175,9 +176,10 @@ class _LogInScreenState extends State<LogInScreen> {
         }
 
         // انتقل للواجهة الرئيسية
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => HomeScreen(user: userObj)),
+          (route) => false,
         );
       } else {
         _showCupertinoDialog(
@@ -295,7 +297,7 @@ class _LogInScreenState extends State<LogInScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 60 * h),
+                  SizedBox(height: 20 * h),
                   Text(
                     "Log In",
                     style: GoogleFonts.inriaSans(
@@ -304,7 +306,7 @@ class _LogInScreenState extends State<LogInScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Gap(40 * h),
+                  Gap(30 * h),
                   Text(
                     "Enter Your Username",
                     style: GoogleFonts.inriaSans(
@@ -318,7 +320,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     hint: "Username",
                     errorText: _usernameError,
                   ),
-                  Gap(25 * h),
+                  Gap(15 * h),
                   Text(
                     "Enter Your Password",
                     style: GoogleFonts.inriaSans(
@@ -333,9 +335,9 @@ class _LogInScreenState extends State<LogInScreen> {
                     isPassword: true,
                     errorText: _passwordError,
                   ),
-                  Gap(10 * h),
+
                   Align(
-                    alignment: Alignment.centerRight,
+                    alignment: Alignment.topRight,
                     child: TextButton(
                       onPressed: () {},
                       child: Text(

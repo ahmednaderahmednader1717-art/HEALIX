@@ -139,7 +139,7 @@ class _EditProfileState extends State<EditProfile> {
       final formData = FormData.fromMap({'file': multipartFile});
 
       final response = await dio.post(
-        'http://healix.somee.com/api/User/upload-profile-picture',
+        'http://healix26.somee.com/api/User/upload-profile-picture',
         data: formData,
         options: Options(
           headers: {
@@ -169,7 +169,7 @@ class _EditProfileState extends State<EditProfile> {
           // Save to profile API
           try {
             await dio.put(
-              'http://healix.somee.com/api/User/update-profile-picture', // Fixed endpoint from Auth to User based on API spec if needed, but spec says /User/update-profile-picture
+              'http://healix26.somee.com/api/User/update-profile-picture', // Fixed endpoint from Auth to User based on API spec if needed, but spec says /User/update-profile-picture
               data: {'profilePictureUrl': newImageUrl},
               options: Options(
                 headers: {
@@ -227,7 +227,7 @@ class _EditProfileState extends State<EditProfile> {
 
       final dio = Dio();
       final response = await dio.put(
-        'http://healix.somee.com/api/User/update-profile',
+        'http://healix26.somee.com/api/User/update-profile',
         data: {'fullName': fullName, 'username': username},
         options: Options(
           headers: {

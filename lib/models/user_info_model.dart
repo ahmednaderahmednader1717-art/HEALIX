@@ -91,7 +91,7 @@ class UserInfo {
 
   // رفع صورة البروفايل
   Future<String?> uploadProfilePicture(File imageFile, {String? token}) async {
-    final dio = Dio(BaseOptions(baseUrl: 'http://healix.somee.com/api'));
+    final dio = Dio(BaseOptions(baseUrl: 'http://healix26.somee.com/api'));
     try {
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(imageFile.path),

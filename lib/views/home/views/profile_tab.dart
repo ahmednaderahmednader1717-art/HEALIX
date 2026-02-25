@@ -71,7 +71,7 @@ class _ProfileTabState extends State<ProfileTab> {
         return;
       }
 
-      final dio = Dio(BaseOptions(baseUrl: 'http://healix.somee.com/api'));
+      final dio = Dio(BaseOptions(baseUrl: 'http://healix26.somee.com/api'));
 
       final response = await dio.delete(
         '/User/delete-account',
@@ -137,7 +137,7 @@ class _ProfileTabState extends State<ProfileTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 40 * h),
+              SizedBox(height: 70 * h),
               Text(
                 "Profile",
                 style: TextStyle(

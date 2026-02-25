@@ -67,11 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Color.fromARGB(255, 48, 6, 21),
-                    Color.fromARGB(255, 14, 5, 47),
-                    Color.fromARGB(255, 47, 6, 53),
-                  ],
+                  colors: [Color(0xFF000D11), Color(0xFF022836)],
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
                 ),
@@ -97,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
           data: const CupertinoThemeData(brightness: Brightness.dark),
           child: CNTabBar(
             height: 90,
-            tint: const Color.fromARGB(255, 238, 174, 211),
+            tint: const Color.fromARGB(255, 141, 215, 225),
             items: [
               CNTabBarItem(label: 'Home', icon: CNSymbol('house.fill')),
               CNTabBarItem(label: 'Search', icon: CNSymbol('magnifyingglass')),

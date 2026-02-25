@@ -188,7 +188,7 @@ class AppleBottomLabelRingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final glowPaint = Paint()
-      ..color = color.withOpacity(0.55)
+      ..color = color.withOpacity(0.30)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth + 12
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);

@@ -28,7 +28,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   final Dio dio = Dio(
     BaseOptions(
-      baseUrl: "http://healix.somee.com/api",
+      baseUrl: "http://healix26.somee.com/api",
       headers: {"Content-Type": "application/json"},
     ),
   );
@@ -105,9 +105,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
           await _saveTokens(token, refreshToken);
           UserInfo userObj = UserInfo.fromJson(userJson);
           // يدخل مباشرة للـHome
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => HomeScreen(user: userObj)),
+            (route) => false,
           );
         } else {
           _showCupertinoDialog("فشل تسجيل الدخول بحساب جوجل.");

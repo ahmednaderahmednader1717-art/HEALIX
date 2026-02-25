@@ -85,14 +85,8 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
           position: Tween<Offset>(
             begin: Offset(0, -1),
             end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          )),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
+          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+          child: FadeTransition(opacity: animation, child: child),
         );
       },
     );
@@ -114,7 +108,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
         return;
       }
       final response = await dio.get(
-        "http://healix.somee.com/api/Auth/verify-token", // عدل Endpoint بحسب الـAPI عندك
+        "http://healix26.somee.com/api/Auth/verify-token", // عدل Endpoint بحسب الـAPI عندك
         options: Options(
           headers: {
             "Content-Type": "application/json",
@@ -144,10 +138,12 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     final token = await getToken();
     print("🔍 Token retrieved: ${token != null ? 'EXISTS' : 'NULL'}");
     if (token != null) {
-      print("📝 Token value (first 20 chars): ${token.substring(0, token.length > 20 ? 20 : token.length)}...");
+      print(
+        "📝 Token value (first 20 chars): ${token.substring(0, token.length > 20 ? 20 : token.length)}...",
+      );
       print("📏 Token length: ${token.length}");
     }
-    
+
     if (token == null || token.isEmpty) {
       print("❌ Token is null or empty, showing error");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -180,13 +176,13 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
       "dietType": user.dietType,
       "goalWeight": user.userGoalWeight,
     };
-    
+
     print("📤 Sending update request with token...");
     print("🎯 Payload: $payload");
-    
+
     try {
       final response = await dio.put(
-        "http://healix.somee.com/api/User/update-health-profile",
+        "http://healix26.somee.com/api/User/update-health-profile",
         data: payload,
         options: Options(
           headers: {
@@ -203,7 +199,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
             user = UserInfo.fromJson(data['user']);
           });
         }
-        
+
         // ✅ رسالة نجاح في الأعلى باستخدام Overlay
         _showTopMessage(context, "تم تحديث البيانات بنجاح");
       } else if (response.statusCode == 401) {
@@ -227,7 +223,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
       }
     } on DioException catch (e) {
       print("❌ DioException: ${e.response?.statusCode} - ${e.message}");
-      
+
       if (e.response?.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -411,7 +407,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
 
     try {
       final response = await dio.put(
-        "http://healix.somee.com/api/User/update-profile",
+        "http://healix26.somee.com/api/User/update-profile",
         data: payload,
         options: Options(
           headers: {
@@ -431,14 +427,16 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
         _showTopMessage(context, "تم تحديث البيانات بنجاح");
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("حدث خطأ أثناء التحديث: ${response.statusCode}")),
+          SnackBar(
+            content: Text("حدث خطأ أثناء التحديث: ${response.statusCode}"),
+          ),
         );
       }
     } catch (e) {
       print("❌ Error updating profile: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("حصل خطأ أثناء التحديث: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("حصل خطأ أثناء التحديث: $e")));
     }
   }
 
@@ -480,7 +478,10 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text),
-            child: Text('Save', style: TextStyle(color: AppColors.primarayColor)),
+            child: Text(
+              'Save',
+              style: TextStyle(color: AppColors.primarayColor),
+            ),
           ),
         ],
       ),
@@ -502,19 +503,28 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
             children: [
               Container(
                 color: Colors.grey[900],
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text("Cancel", style: TextStyle(color: Colors.white70)),
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white70),
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Text("Done", style: TextStyle(color: AppColors.primarayColor)),
+                      child: Text(
+                        "Done",
+                        style: TextStyle(color: AppColors.primarayColor),
+                      ),
                     ),
                   ],
                 ),
@@ -527,8 +537,12 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       title: Text(
                         gender,
                         style: TextStyle(
-                          color: isSelected ? AppColors.primarayColor : Colors.white,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? AppColors.primarayColor
+                              : Colors.white,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                       trailing: isSelected
@@ -566,19 +580,28 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
             children: [
               Container(
                 color: Colors.grey[900],
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text("Cancel", style: TextStyle(color: Colors.white70)),
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white70),
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Text("Done", style: TextStyle(color: AppColors.primarayColor)),
+                      child: Text(
+                        "Done",
+                        style: TextStyle(color: AppColors.primarayColor),
+                      ),
                     ),
                   ],
                 ),
@@ -591,8 +614,12 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       title: Text(
                         type,
                         style: TextStyle(
-                          color: isSelected ? AppColors.primarayColor : Colors.white,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? AppColors.primarayColor
+                              : Colors.white,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                       trailing: isSelected
@@ -630,19 +657,28 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
             children: [
               Container(
                 color: Colors.grey[900],
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text("Cancel", style: TextStyle(color: Colors.white70)),
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white70),
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Text("Done", style: TextStyle(color: AppColors.primarayColor)),
+                      child: Text(
+                        "Done",
+                        style: TextStyle(color: AppColors.primarayColor),
+                      ),
                     ),
                   ],
                 ),
@@ -655,8 +691,12 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       title: Text(
                         diet,
                         style: TextStyle(
-                          color: isSelected ? AppColors.primarayColor : Colors.white,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? AppColors.primarayColor
+                              : Colors.white,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                       trailing: isSelected
@@ -834,12 +874,18 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                     endIndent: 10,
                     indent: 10,
                   ),
-                  _infoRow('Date of birth', birthDate, onEdit: () async {
-                    DateTime? newDate = await showDateOfBirthDialog(user.dateOfBirth);
-                    if (newDate != null) {
-                      await updateProfile(dateOfBirth: newDate);
-                    }
-                  }),
+                  _infoRow(
+                    'Date of birth',
+                    birthDate,
+                    onEdit: () async {
+                      DateTime? newDate = await showDateOfBirthDialog(
+                        user.dateOfBirth,
+                      );
+                      if (newDate != null) {
+                        await updateProfile(dateOfBirth: newDate);
+                      }
+                    },
+                  ),
                   Divider(
                     color: Colors.grey.withOpacity(0.35),
                     height: 1,

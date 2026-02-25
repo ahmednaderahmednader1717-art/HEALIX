@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:test_splash/core/app_colors.dart';
@@ -66,7 +67,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   String? _bodyTypeError;
   String? _dietTypeError;
 
-  final Dio _dio = Dio(BaseOptions(baseUrl: "http://healix.somee.com/api"));
+  final Dio _dio = Dio(BaseOptions(baseUrl: "http://healix26.somee.com/api"));
 
   void _nextPage() async {
     // Clear previous errors
@@ -189,30 +190,42 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   Future<void> _signUpWithProfileImage() async {
     setState(() => _isLoading = true);
     String? uploadedProfileUrl;
+    String? accessToken;
+
     try {
-      // إعداد البيانات الأساسية (أرسل القيم الرقمية كـdouble)
-      final signupData = {
+      // ✅ PHASE 1: إنشاء الحساب بالبيانات الأساسية فقط (مثل Google Sign-Up)
+      // Backend لا يدعم كل الحقول في endpoint التسجيل
+      final basicSignupData = {
         "username": _userNameController.text.trim(),
         "email": _emailController.text.trim(),
         "password": _passwordController.text.trim(),
         "fullName": _fullNameController.text.trim(),
-        "phoneNumber": _phoneController.text.trim(),
-        "dateOfBirth": _selectedDate?.toIso8601String(),
-        "gender": _selectedGender,
-        "bodyType": _selectedBodyType,
-        "dietType": _selectedDietType,
-        "height": _selectedHeight,
-        "weight": _selectedWeight,
-        "goalWeight": _selectedGoalWeight,
-        "profilePictureUrl": null,
+        "profilePictureUrl": null, // سيتم رفعها لاحقاً
       };
 
-      final signupResp = await _dio.post("/Auth/signup", data: signupData);
+      print("🚀 === PHASE 1: CREATING ACCOUNT ===");
+      print("📤 Sending basic signup request to: /Auth/signup");
+      print("📝 Basic signup data:");
+      basicSignupData.forEach((key, value) {
+        print("   $key: $value (${value.runtimeType})");
+      });
+
+      final signupResp = await _dio.post(
+        "/Auth/signup",
+        data: basicSignupData,
+        options: Options(
+          validateStatus: (status) => status != null && status < 600,
+        ),
+      );
+
+      print("📥 Signup Response Status: ${signupResp.statusCode}");
+      print("📥 Signup Response Data: ${signupResp.data}");
 
       // ✅ التحقق من النتيجة
       if (signupResp.statusCode == 200 || signupResp.statusCode == 201) {
+        print("✅ Account created successfully!");
+
         // 👇 استخراج التوكن من رد التسجيل
-        String? accessToken;
         String? refreshToken;
         if (signupResp.data is Map) {
           // Try both 'token' and 'accessToken' keys
@@ -229,10 +242,93 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
             await prefs.setString("refreshToken", refreshToken);
           }
           print("✅ Token saved successfully");
+        } else {
+          print("⚠️ No token received from server");
         }
 
-        // 2. رفع الصورة (اختياري)
-        if (_profileImage != null) {
+        // ✅ PHASE 2: تحديث بيانات البروفايل الإضافية (phone, dateOfBirth, gender)
+        if (accessToken != null && accessToken.isNotEmpty) {
+          print("🚀 === PHASE 2: UPDATING PROFILE DATA ===");
+          try {
+            final profileUpdateData = {
+              if (_phoneController.text.trim().isNotEmpty)
+                "phoneNumber": _phoneController.text.trim(),
+              if (_selectedDate != null)
+                "dateOfBirth": _selectedDate!.toIso8601String(),
+              if (_selectedGender != null) "gender": _selectedGender,
+            };
+
+            if (profileUpdateData.isNotEmpty) {
+              print(
+                "📤 Updating profile with: ${profileUpdateData.keys.toList()}",
+              );
+              final profileResp = await _dio.put(
+                "/User/update-profile",
+                data: profileUpdateData,
+                options: Options(
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer $accessToken",
+                  },
+                  validateStatus: (status) => status != null && status < 600,
+                ),
+              );
+
+              if (profileResp.statusCode == 200) {
+                print("✅ Profile data updated successfully");
+              } else {
+                print("⚠️ Profile update failed: ${profileResp.statusCode}");
+              }
+            }
+          } catch (e) {
+            print("⚠️ Profile update error (non-critical): $e");
+            // Don't block signup if profile update fails
+          }
+
+          // ✅ PHASE 3: تحديث البيانات الصحية (height, weight, goalWeight, bodyType, dietType)
+          print("🚀 === PHASE 3: UPDATING HEALTH PROFILE ===");
+          try {
+            final healthUpdateData = {
+              if (_selectedHeight != null) "height": _selectedHeight,
+              if (_selectedWeight != null) "weight": _selectedWeight,
+              if (_selectedGoalWeight != null)
+                "goalWeight": _selectedGoalWeight,
+              if (_selectedBodyType != null) "bodyType": _selectedBodyType,
+              if (_selectedDietType != null) "dietType": _selectedDietType,
+            };
+
+            if (healthUpdateData.isNotEmpty) {
+              print(
+                "📤 Updating health profile with: ${healthUpdateData.keys.toList()}",
+              );
+              final healthResp = await _dio.put(
+                "/User/update-health-profile",
+                data: healthUpdateData,
+                options: Options(
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer $accessToken",
+                  },
+                  validateStatus: (status) => status != null && status < 600,
+                ),
+              );
+
+              if (healthResp.statusCode == 200) {
+                print("✅ Health profile updated successfully");
+              } else {
+                print(
+                  "⚠️ Health profile update failed: ${healthResp.statusCode}",
+                );
+              }
+            }
+          } catch (e) {
+            print("⚠️ Health profile update error (non-critical): $e");
+            // Don't block signup if health update fails
+          }
+        }
+
+        // ✅ PHASE 4: رفع الصورة (اختياري) - لا توقف التسجيل إذا فشل
+        if (_profileImage != null && accessToken != null) {
           try {
             FormData fd;
             if (_profileImage is File) {
@@ -252,15 +348,16 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
               throw Exception("الصورة غير مدعومة");
             }
 
+            print("📤 Attempting to upload profile picture...");
+
             // 👇 إضافة التوكن في الهيدر
             final resp = await _dio.post(
               "/User/upload-profile-picture",
               data: fd,
               options: Options(
-                headers: {
-                  if (accessToken != null)
-                    'Authorization': 'Bearer $accessToken',
-                },
+                headers: {'Authorization': 'Bearer $accessToken'},
+                // Don't throw on status code errors - handle them gracefully
+                validateStatus: (status) => status != null && status < 600,
               ),
             );
 
@@ -269,38 +366,49 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
             print("📦 Upload Response Data Type: ${resp.data.runtimeType}");
             print("📦 Upload Response Data: ${resp.data}");
 
-            uploadedProfileUrl = _extractUrlFromResponse(resp.data);
-            if (uploadedProfileUrl != null && uploadedProfileUrl.isNotEmpty) {
-              setState(() => _uploadedProfileUrl = uploadedProfileUrl);
-              print("✅ Uploaded: $_uploadedProfileUrl");
+            // Check if upload was successful
+            if (resp.statusCode == 200 || resp.statusCode == 201) {
+              uploadedProfileUrl = _extractUrlFromResponse(resp.data);
+              if (uploadedProfileUrl != null && uploadedProfileUrl.isNotEmpty) {
+                setState(() => _uploadedProfileUrl = uploadedProfileUrl);
+                print("✅ Uploaded: $_uploadedProfileUrl");
 
-              // ✅ تحديث البروفايل بالصورة الجديدة
-              try {
-                await _dio.put(
-                  '/User/update-profile-picture',
-                  data: {'profilePictureUrl': uploadedProfileUrl},
-                  options: Options(
-                    headers: {
-                      if (accessToken != null)
+                // ✅ تحديث البروفايل بالصورة الجديدة
+                try {
+                  await _dio.put(
+                    '/User/update-profile-picture',
+                    data: {'profilePictureUrl': uploadedProfileUrl},
+                    options: Options(
+                      headers: {
                         'Authorization': 'Bearer $accessToken',
-                      'Content-Type': 'application/json',
-                    },
-                  ),
-                );
-                print("✅ Profile picture updated in account");
-              } catch (updateError) {
-                print(
-                  "⚠️ Failed to update profile picture in account: $updateError",
-                );
+                        'Content-Type': 'application/json',
+                      },
+                    ),
+                  );
+                  print("✅ Profile picture updated in account");
+                } catch (updateError) {
+                  print(
+                    "⚠️ Failed to update profile picture in account: $updateError",
+                  );
+                }
               }
+            } else {
+              // Upload failed but don't block signup
+              print(
+                "⚠️ Profile picture upload failed with status ${resp.statusCode}",
+              );
+              print("⚠️ Error details: ${resp.data}");
+              print("ℹ️ Continuing with signup - user can upload photo later");
             }
           } catch (e) {
-            print("⚠️ Upload error: $e");
+            // Catch any upload errors but don't block signup
+            print("⚠️ Profile picture upload error: $e");
+            print("ℹ️ Continuing with signup - user can upload photo later");
           }
         }
 
         // 3. المتابعة للصفحة الرئيسية
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (_) => HomeScreen(
@@ -319,26 +427,66 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
               ),
             ),
           ),
+          (route) => false,
         );
       } else {
-        // ✅ عرض الرسالة الفعلية من السيرفر (مثل Username already exists)
+        // ❌ Signup failed - show the actual server error
+        print("❌ Signup failed with status code: ${signupResp.statusCode}");
         final respData = signupResp.data;
-        if (respData is Map && respData['message'] != null) {
-          _showDialog(respData['message']);
+
+        String errorMessage = "Signup failed";
+
+        if (respData is Map) {
+          // Try to extract error message from response
+          errorMessage =
+              respData['message'] ??
+              respData['error'] ??
+              respData['title'] ??
+              "Signup failed with status ${signupResp.statusCode}";
+
+          // If there are validation errors, show them
+          if (respData['errors'] != null) {
+            errorMessage += "\n\nDetails:";
+            final errors = respData['errors'];
+            if (errors is Map) {
+              errors.forEach((key, value) {
+                errorMessage +=
+                    "\n• $key: ${value is List ? value.join(', ') : value}";
+              });
+            }
+          }
         } else {
-          _showDialog(
-            "Unexpected error: ${signupResp.statusCode}\n${signupResp.data}",
-          );
+          errorMessage =
+              "Server error: ${signupResp.statusCode}\n${respData?.toString() ?? 'Unknown error'}";
         }
+
+        print("❌ Error message to show: $errorMessage");
+        _showDialog(errorMessage);
       }
     } on DioException catch (e) {
-      String msg = "";
+      print("❌ === DIO EXCEPTION OCCURRED ===");
+      print("❌ Error type: ${e.type}");
+      print("❌ Error message: ${e.message}");
+      print("❌ Response status: ${e.response?.statusCode}");
+      print("❌ Response data: ${e.response?.data}");
+
+      String msg = "Network error";
       if (e.response?.data is Map && e.response?.data["message"] != null) {
         msg = e.response?.data["message"];
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        msg = "Connection timeout - please check your internet";
+      } else if (e.type == DioExceptionType.receiveTimeout) {
+        msg = "Server took too long to respond";
+      } else if (e.type == DioExceptionType.connectionError) {
+        msg = "Cannot connect to server - check your internet";
       } else {
         msg = e.message ?? "Something went wrong";
       }
       _showDialog(msg);
+    } catch (e) {
+      print("❌ === UNEXPECTED ERROR ===");
+      print("❌ Error: $e");
+      _showDialog("Unexpected error: $e");
     } finally {
       setState(() => _isLoading = false);
     }
@@ -428,12 +576,19 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       child: Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
-          automaticallyImplyLeading: false,
           backgroundColor: Colors.black,
-          centerTitle: true,
-          title: const Text(
+          title: Text(
             "Complete Sign Up",
-            style: TextStyle(color: Colors.white, fontSize: 20),
+            style: GoogleFonts.inriaSans(
+              color: Colors.white,
+              fontSize: 22 * scale,
+            ),
+          ),
+          centerTitle: true,
+          iconTheme: const IconThemeData(color: Colors.white),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
         body: Stack(

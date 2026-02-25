@@ -7,7 +7,8 @@ class MealTile extends StatelessWidget {
   final int calories;
   final double scale;
 
-  const MealTile({super.key, 
+  const MealTile({
+    super.key,
     required this.imagePath,
     required this.title,
     required this.calories,
@@ -77,7 +78,8 @@ class MealTile extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(right: 10 * scale),
-            child:IconButton(onPressed: (){},
+            child: IconButton(
+              onPressed: () {},
               icon: Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: 12 * scale,
@@ -91,14 +93,12 @@ class MealTile extends StatelessWidget {
                   'Add',
                   style: TextStyle(
                     color: AppColors.primarayColor,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w900,
                     fontSize: 12 * scale,
                   ),
                 ),
               ),
-              
-              ),
-              
+            ),
           ),
         ],
       ),

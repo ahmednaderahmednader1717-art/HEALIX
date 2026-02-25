@@ -81,7 +81,7 @@ class _HomeTabState extends State<HomeTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 40 * h),
+          SizedBox(height: 70 * h),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16 * w),
             child: Row(
@@ -133,14 +133,14 @@ class _HomeTabState extends State<HomeTab> {
               ],
             ),
           ),
-          SizedBox(height: 16 * h),
+          SizedBox(height: 14 * h),
           DaySelector(
             selectedDay: selectedDay,
             onDaySelected: onDaySelected,
-            caloriesProgress: {DateTime(2025, 11, 19): .75},
+            caloriesProgress: {DateTime(2026, 2, 16): .75},
           ),
 
-          SizedBox(height: 10 * h),
+          SizedBox(height: 8 * h),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 12 * w),
             child: RowHeader(
