@@ -32,46 +32,115 @@ class ProfileCardGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: List.generate(items.length * 2 - 1, (i) {
-        // حتى (0, 2, 4, ...) كروت - باقي (1, 3, 5, ...) Dividers
         if (i.isEven) {
           final idx = i ~/ 2;
-          return InkWell(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(idx == 0 ? 20 : 0),
-              bottom: Radius.circular(idx == items.length - 1 ? 20 : 0),
-            ),
-            onTap: items[idx].onTap,
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.ContainerColor,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(idx == 0 ? 20 : 0),
-                  bottom: Radius.circular(idx == items.length - 1 ? 20 : 0),
-                ),
-              ),
-              child: _buildCard(items[idx], w, h),
-            ),
+          return _InteractiveCard(
+            item: items[idx],
+            isFirst: idx == 0,
+            isLast: idx == items.length - 1,
+            w: w,
+            h: h,
           );
         } else {
-          // Divider بين الكروت فقط
           return Divider(
             endIndent: 20,
-            indent: 20,
+            indent: 72 * w, // Align with text
             height: 0,
-            thickness: 1 * h,
-            color: Colors.grey.withOpacity(0.35),
+            thickness: 0.8 * h,
+            color: Colors.white.withValues(alpha: 0.08),
           );
         }
       }),
     );
   }
+}
 
-  Widget _buildCard(ProfileCardItem item, double w, double h) {
+class _InteractiveCard extends StatefulWidget {
+  final ProfileCardItem item;
+  final bool isFirst;
+  final bool isLast;
+  final double w, h;
+
+  const _InteractiveCard({
+    required this.item,
+    required this.isFirst,
+    required this.isLast,
+    required this.w,
+    required this.h,
+  });
+
+  @override
+  State<_InteractiveCard> createState() => _InteractiveCardState();
+}
+
+class _InteractiveCardState extends State<_InteractiveCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 60),
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.97,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        Future.delayed(const Duration(milliseconds: 20), () {
+          if (widget.item.onTap != null) widget.item.onTap!();
+        });
+      },
+      onTapCancel: () => _controller.reverse(),
+      behavior: HitTestBehavior.opaque,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.ContainerColor,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(widget.isFirst ? 20 : 0),
+              bottom: Radius.circular(widget.isLast ? 20 : 0),
+            ),
+          ),
+          child: _buildCardContent(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardContent() {
+    final item = widget.item;
+    final w = widget.w;
+    final h = widget.h;
     return Container(
       padding: EdgeInsets.symmetric(vertical: 18 * h, horizontal: 18 * w),
       child: Row(
         children: [
-          Icon(item.icon, color: Colors.white, size: 24 * w),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(item.icon, color: Colors.white, size: 22 * w),
+          ),
           SizedBox(width: 16 * w),
           Expanded(
             child: Column(
@@ -96,9 +165,8 @@ class ProfileCardGroup extends StatelessWidget {
               ],
             ),
           ),
-          item.arrow
-              ? Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18 * w)
-              : SizedBox(),
+          if (item.arrow)
+            Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16 * w),
         ],
       ),
     );

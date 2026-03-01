@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -116,8 +117,9 @@ class _EditProfileState extends State<EditProfile> {
       String fileName = image.name.split('/').last;
       String fileExtension = fileName.split('.').last.toLowerCase();
       // Default to jpeg if extension is missing or weird
-      if (fileExtension.isEmpty || fileExtension.length > 4)
+      if (fileExtension.isEmpty || fileExtension.length > 4) {
         fileExtension = 'jpg';
+      }
 
       MultipartFile multipartFile;
 
@@ -283,7 +285,7 @@ class _EditProfileState extends State<EditProfile> {
     final scale = min(w, h);
 
     return Scaffold(
-      backgroundColor: AppColors.ContainerColor,
+      backgroundColor: const Color(0xFF16313B), // Solid background fix
       appBar: AppBar(
         backgroundColor: AppColors.ContainerColor,
         title: Text(
@@ -300,10 +302,10 @@ class _EditProfileState extends State<EditProfile> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24 * w, vertical: 16 * h),
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24 * w, vertical: 16 * h),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -320,30 +322,84 @@ class _EditProfileState extends State<EditProfile> {
                         shape: BoxShape.circle,
                         color: Colors.grey.shade800,
                       ),
-                      child: ClipOval(
-                        child: _pickedImage != null
-                            ? (kIsWeb
-                                  ? Image.network(
-                                      _pickedImage!.path,
-                                      fit: BoxFit.cover,
-                                      width: 140,
-                                      height: 140,
-                                    )
-                                  : Image.file(
-                                      File(_pickedImage!.path),
-                                      fit: BoxFit.cover,
-                                      width: 140,
-                                      height: 140,
-                                    ))
-                            : (userProfileImage.isNotEmpty
-                                  ? (kIsWeb
-                                        ? Image.network(
-                                            'https://corsproxy.io/?${Uri.encodeComponent(userProfileImage)}',
-                                            fit: BoxFit.cover,
-                                            width: 140,
-                                            height: 140,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
+                      child: GestureDetector(
+                        onTap: () {
+                          if (_pickedImage != null ||
+                              userProfileImage.isNotEmpty) {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (_) => FullScreenImage(
+                                  imageUrl: userProfileImage,
+                                  localPath: _pickedImage?.path,
+                                  heroTag: "profile_pic",
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: Hero(
+                          tag: "profile_pic",
+                          child: ClipOval(
+                            child: _pickedImage != null
+                                ? (kIsWeb
+                                      ? Image.network(
+                                          _pickedImage!.path,
+                                          fit: BoxFit.cover,
+                                          width: 140,
+                                          height: 140,
+                                        )
+                                      : Image.file(
+                                          File(_pickedImage!.path),
+                                          fit: BoxFit.cover,
+                                          width: 140,
+                                          height: 140,
+                                        ))
+                                : (userProfileImage.isNotEmpty
+                                      ? (kIsWeb
+                                            ? Image.network(
+                                                'https://corsproxy.io/?${Uri.encodeComponent(userProfileImage)}',
+                                                fit: BoxFit.cover,
+                                                width: 140,
+                                                height: 140,
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) {
+                                                      return Center(
+                                                        child: Text(
+                                                          widget
+                                                                  .user
+                                                                  .fullName
+                                                                  .isNotEmpty
+                                                              ? widget
+                                                                    .user
+                                                                    .fullName[0]
+                                                                    .toUpperCase()
+                                                              : '',
+                                                          style:
+                                                              GoogleFonts.inriaSans(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 40,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                        ),
+                                                      );
+                                                    },
+                                              )
+                                            : CachedNetworkImage(
+                                                imageUrl: userProfileImage,
+                                                fit: BoxFit.cover,
+                                                width: 140,
+                                                height: 140,
+                                                placeholder: (context, url) =>
+                                                    const CircularProgressIndicator(),
+                                                errorWidget: (context, url, error) {
                                                   return Center(
                                                     child: Text(
                                                       widget
@@ -365,46 +421,22 @@ class _EditProfileState extends State<EditProfile> {
                                                     ),
                                                   );
                                                 },
-                                          )
-                                        : CachedNetworkImage(
-                                            imageUrl: userProfileImage,
-                                            fit: BoxFit.cover,
-                                            width: 140,
-                                            height: 140,
-                                            placeholder: (context, url) =>
-                                                const CircularProgressIndicator(),
-                                            errorWidget: (context, url, error) {
-                                              return Center(
-                                                child: Text(
-                                                  widget
-                                                          .user
-                                                          .fullName
-                                                          .isNotEmpty
-                                                      ? widget.user.fullName[0]
-                                                            .toUpperCase()
-                                                      : '',
-                                                  style: GoogleFonts.inriaSans(
-                                                    color: Colors.white,
-                                                    fontSize: 40,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ))
-                                  : Center(
-                                      child: Text(
-                                        widget.user.fullName.isNotEmpty
-                                            ? widget.user.fullName[0]
-                                                  .toUpperCase()
-                                            : '',
-                                        style: GoogleFonts.inriaSans(
-                                          color: Colors.white,
-                                          fontSize: 40,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    )),
+                                              ))
+                                      : Center(
+                                          child: Text(
+                                            widget.user.fullName.isNotEmpty
+                                                ? widget.user.fullName[0]
+                                                      .toUpperCase()
+                                                : '',
+                                            style: GoogleFonts.inriaSans(
+                                              color: Colors.white,
+                                              fontSize: 40,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        )),
+                          ),
+                        ),
                       ),
                     ),
                     GestureDetector(
@@ -492,6 +524,69 @@ class _EditProfileState extends State<EditProfile> {
         const Gap(4),
         HealixTextField(controller: controller, hint: hint ?? 'Username'),
       ],
+    );
+  }
+}
+
+class FullScreenImage extends StatelessWidget {
+  final String imageUrl;
+  final String? localPath;
+  final String heroTag;
+
+  const FullScreenImage({
+    super.key,
+    required this.imageUrl,
+    this.localPath,
+    required this.heroTag,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Center(
+            child: Hero(
+              tag: heroTag,
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: localPath != null
+                    ? (kIsWeb
+                          ? Image.network(localPath!, fit: BoxFit.contain)
+                          : Image.file(File(localPath!), fit: BoxFit.contain))
+                    : CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) =>
+                            const CupertinoActivityIndicator(
+                              color: Colors.white,
+                            ),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error, color: Colors.white),
+                      ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 50,
+            left: 20,
+            child: SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

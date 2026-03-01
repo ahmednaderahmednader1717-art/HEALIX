@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/core/app_colors.dart';
 
@@ -64,7 +65,7 @@ class HealixPrimaryButton extends StatelessWidget {
       buttonChild = const SizedBox(
         width: 25,
         height: 25,
-        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+        child: CupertinoActivityIndicator(color: Colors.white, radius: 10),
       );
     }
     // ✅ لو الزر أيقونة فقط
@@ -108,7 +109,7 @@ class HealixPrimaryButton extends StatelessWidget {
               padding ??
               const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
           elevation: 6,
-          shadowColor: backgroundColor.withOpacity(0.3),
+          shadowColor: backgroundColor.withValues(alpha: 0.3),
         ),
         onPressed: effectiveDisabled ? null : onPressed,
         child: AnimatedSwitcher(

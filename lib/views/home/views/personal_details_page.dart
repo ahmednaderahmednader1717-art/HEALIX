@@ -732,7 +732,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     final dietType = user.dietType ?? "--";
 
     return Scaffold(
-      backgroundColor: AppColors.ContainerColor,
+      backgroundColor: const Color(0xFF16313B), // Solid background fix
       appBar: AppBar(
         backgroundColor: AppColors.ContainerColor,
         title: Text(
@@ -751,7 +751,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(height: 35),
+            const SizedBox(height: 35),
             Container(
               decoration: BoxDecoration(
                 color: AppColors.ContainerColor,

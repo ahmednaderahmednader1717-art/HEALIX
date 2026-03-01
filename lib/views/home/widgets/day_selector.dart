@@ -90,9 +90,19 @@ class _DaySelectorState extends State<DaySelector> {
               // ألوان الخلفية حسب الحالة
               Color bgColor;
               if (isSelected) {
-                bgColor = const Color.fromARGB(255, 44, 43, 43).withOpacity(0.80);
+                bgColor = const Color.fromARGB(
+                  111,
+                  0,
+                  154,
+                  205,
+                ).withOpacity(0.80);
               } else if (isToday) {
-                bgColor = const Color.fromARGB(255, 168, 168, 168).withOpacity(.15);
+                bgColor = const Color.fromARGB(
+                  255,
+                  168,
+                  168,
+                  168,
+                ).withOpacity(.15);
               } else {
                 bgColor = Colors.white.withOpacity(0);
               }
@@ -107,12 +117,16 @@ class _DaySelectorState extends State<DaySelector> {
 
               Color ringColor = isFuture
                   ? Colors.grey.withOpacity(0.18)
-                  : Color.fromARGB(
+                  : const Color.fromARGB(
                       255,
                       245,
                       44,
                       44,
                     ); // يمكنك تغيير اللون حسب النسبة
+
+              Color ringBgColor = isSelected
+                  ? Colors.white
+                  : Colors.grey.withOpacity(0.15);
 
               Color dateColor = isSelected
                   ? Colors.white
@@ -164,7 +178,7 @@ class _DaySelectorState extends State<DaySelector> {
                         lineWidth: 3,
                         animation: true,
                         circularStrokeCap: CircularStrokeCap.round,
-                        backgroundColor: Colors.grey.withOpacity(0.15),
+                        backgroundColor: ringBgColor,
                         progressColor: ringColor,
                         center: Text(
                           day.day.toString(),

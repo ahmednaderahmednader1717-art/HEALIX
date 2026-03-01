@@ -149,7 +149,7 @@ class _ProfileTabState extends State<ProfileTab> {
               SizedBox(height: 24 * h),
 
               // Profile Card
-              GestureDetector(
+              ScaleFeedbackWrapper(
                 onTap: () {
                   Navigator.push(
                     context,
@@ -195,8 +195,9 @@ class _ProfileTabState extends State<ProfileTab> {
                                             },
                                         loadingBuilder:
                                             (context, child, loadingProgress) {
-                                              if (loadingProgress == null)
+                                              if (loadingProgress == null) {
                                                 return child;
+                                              }
                                               return const CupertinoActivityIndicator();
                                             },
                                       )
@@ -453,10 +454,75 @@ class _ProfileTabState extends State<ProfileTab> {
         ),
         if (_isLoading)
           Container(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withValues(alpha: 0.5),
             child: const Center(child: CupertinoActivityIndicator(radius: 15)),
           ),
       ],
+    );
+  }
+}
+
+class ScaleFeedbackWrapper extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const ScaleFeedbackWrapper({
+    super.key,
+    required this.child,
+    required this.onTap,
+  });
+
+  @override
+  State<ScaleFeedbackWrapper> createState() => _ScaleFeedbackWrapperState();
+}
+
+class _ScaleFeedbackWrapperState extends State<ScaleFeedbackWrapper>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 60),
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.96,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    _controller.forward();
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    _controller.reverse();
+    Future.delayed(const Duration(milliseconds: 20), () {
+      widget.onTap();
+    });
+  }
+
+  void _handleTapCancel() {
+    _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      behavior: HitTestBehavior.opaque,
+      child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
     );
   }
 }

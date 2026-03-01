@@ -64,5 +64,10 @@
 	<string>HEALIX needs camera access to scan your meal and identify nutrition information.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>HEALIX needs photo library access to let you pick a meal photo.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

@@ -351,7 +351,8 @@ class _LogInScreenState extends State<LogInScreen> {
                   ),
                   Gap(20 * h),
                   HealixPrimaryButton(
-                    text: _loading ? "Logging In..." : "Log In",
+                    text: "Log In",
+                    isLoading: _loading,
                     onPressed: login,
                     height: 60 * h,
                     fontSize: 20 * scale,
@@ -383,7 +384,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     text: "Sign in with Google",
                     imagePath: "assets/icons/google.png",
                     size: scale,
-                    backgroundColor: Colors.white.withOpacity(0.08),
+                    backgroundColor: Colors.white.withValues(alpha: 0.08),
                     onPressed: _signInWithGoogle,
                   ),
                   Gap(15 * h),
@@ -391,7 +392,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     text: "Sign in with Apple",
                     imagePath: "assets/icons/apple.png",
                     size: scale,
-                    backgroundColor: Colors.white.withOpacity(0.08),
+                    backgroundColor: Colors.white.withValues(alpha: 0.08),
                     onPressed: () {},
                   ),
                   Gap(30 * h),
@@ -435,8 +436,13 @@ class _LogInScreenState extends State<LogInScreen> {
         // Loading overlay
         if (_loading)
           Container(
-            color: Colors.black.withOpacity(0.7),
-            child: const Center(child: CupertinoActivityIndicator(radius: 15)),
+            color: Colors.black.withValues(alpha: 0.7),
+            child: const Center(
+              child: CupertinoActivityIndicator(
+                color: Colors.white,
+                radius: 15,
+              ),
+            ),
           ),
       ],
     );
