@@ -24,7 +24,6 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  bool _showAllGoals = false;
   DateTime selectedDay = DateTime.now();
   late Future<List<Food>> _foodsFuture;
 
@@ -60,40 +59,6 @@ class _HomeTabState extends State<HomeTab> {
     final w = screenWidth / baseWidth;
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
-
-    int crossAxisCount;
-    double childAspectRatio;
-
-    if (screenWidth < 600) {
-      crossAxisCount = 2;
-      childAspectRatio = 1.1;
-    } else if (screenWidth < 900) {
-      crossAxisCount = 3;
-      childAspectRatio = 1.2;
-    } else if (screenWidth < 1200) {
-      crossAxisCount = 4;
-      childAspectRatio = 1.25;
-    } else {
-      crossAxisCount = 4;
-      childAspectRatio = 1.3;
-    }
-
-    int defaultGoals;
-    if (screenWidth < 600) {
-      defaultGoals = 2;
-    } else if (screenWidth < 900) {
-      defaultGoals = 3;
-    } else {
-      defaultGoals = Nutrient.nutrients.length;
-    }
-
-    final goalsToShow = _showAllGoals
-        ? Nutrient.nutrients.length
-        : (Nutrient.nutrients.length >= defaultGoals
-              ? defaultGoals
-              : Nutrient.nutrients.length);
-
-    final bool showActionButton = Nutrient.nutrients.length > defaultGoals;
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(
@@ -201,37 +166,41 @@ class _HomeTabState extends State<HomeTab> {
                   padding: EdgeInsets.symmetric(horizontal: 12 * w),
                   child: RowHeader(
                     title: "Todays's Total Nutrations",
-                    actionText: showActionButton
-                        ? (_showAllGoals ? "Show Less" : "View All")
-                        : "",
-                    onAction: showActionButton
-                        ? () {
-                            setState(() => _showAllGoals = !_showAllGoals);
-                          }
-                        : null,
+                    actionText: "",
+                    onAction: null,
                     scale: w,
                   ),
                 ),
                 SizedBox(height: 12 * h),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16 * w),
-                  child: GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    padding: EdgeInsets.zero,
-                    itemCount: goalsToShow,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 6 * h,
-                      crossAxisSpacing: 6 * w,
-                      childAspectRatio: childAspectRatio,
-                    ),
-                    itemBuilder: (context, index) {
-                      final nutrient = Nutrient.nutrients[index];
-                      return AppleRingCard(
-                        title: nutrient.name,
-                        value: nutrient.value,
-                        color: nutrient.color,
+                  child: Builder(
+                    builder: (context) {
+                      final calories = Nutrient.nutrients.firstWhere(
+                        (n) => n.name == "Calories",
+                        orElse: () => Nutrient.nutrients[0],
+                      );
+                      final protein = Nutrient.nutrients.firstWhere(
+                        (n) => n.name == "Protein",
+                        orElse: () => Nutrient.nutrients[1],
+                      );
+                      final carbs = Nutrient.nutrients.firstWhere(
+                        (n) => n.name == "Carbs",
+                        orElse: () => Nutrient.nutrients[2],
+                      );
+                      final fats = Nutrient.nutrients.firstWhere(
+                        (n) => n.name == "Fats",
+                        orElse: () => Nutrient.nutrients[3],
+                      );
+
+                      return UnifiedMacroChart(
+                        caloriesRemaining:
+                            2500 *
+                            (1 - calories.value), // Example total goal 2500
+                        proteinPercent:
+                            protein.value * 0.3, // Scaling for visual segments
+                        carbsPercent: carbs.value * 0.4,
+                        fatsPercent: fats.value * 0.2,
                         scale: scale,
                       );
                     },
