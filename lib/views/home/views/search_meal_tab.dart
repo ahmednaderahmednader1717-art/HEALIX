@@ -20,10 +20,18 @@ class SearchMealTab extends StatefulWidget {
 class _SearchMealTabState extends State<SearchMealTab> {
   final FoodService _foodService = FoodService();
 
-  List<Food> _allFoods = [];
   List<Food> _filteredFoods = [];
   bool _isLoading = true;
   String _searchQuery = '';
+  String _selectedDiet = 'All';
+
+  final List<String> _dietTypes = [
+    'All',
+    'Vegan',
+    'Vegetarian',
+    'Pescatarian',
+    'Standard',
+  ];
 
   @override
   void initState() {
@@ -34,9 +42,22 @@ class _SearchMealTabState extends State<SearchMealTab> {
   Future<void> _fetchFoods() async {
     setState(() => _isLoading = true);
     try {
-      final foods = await _foodService.getFoods();
+      List<Food> foods;
+      if (_selectedDiet != 'All') {
+        foods = await _foodService.getFoodsByDiet(_selectedDiet);
+        if (_searchQuery.isNotEmpty) {
+          foods = foods.where((food) {
+            final name = food.name?.toLowerCase() ?? '';
+            final desc = food.description?.toLowerCase() ?? '';
+            return name.contains(_searchQuery) || desc.contains(_searchQuery);
+          }).toList();
+        }
+      } else if (_searchQuery.isNotEmpty) {
+        foods = await _foodService.searchFoods(_searchQuery);
+      } else {
+        foods = await _foodService.getFoods();
+      }
       setState(() {
-        _allFoods = foods;
         _filteredFoods = foods;
       });
     } catch (e) {
@@ -47,18 +68,15 @@ class _SearchMealTabState extends State<SearchMealTab> {
   }
 
   void _onSearchChanged(String query) {
+    _searchQuery = query.trim().toLowerCase();
+    _fetchFoods();
+  }
+
+  void _onFilterChanged(String diet) {
     setState(() {
-      _searchQuery = query.trim().toLowerCase();
-      if (_searchQuery.isEmpty) {
-        _filteredFoods = _allFoods;
-      } else {
-        _filteredFoods = _allFoods.where((food) {
-          final title = food.name?.toLowerCase() ?? '';
-          final desc = food.description?.toLowerCase() ?? '';
-          return title.contains(_searchQuery) || desc.contains(_searchQuery);
-        }).toList();
-      }
+      _selectedDiet = diet;
     });
+    _fetchFoods();
   }
 
   Future<void> _onRefresh() async {
@@ -96,7 +114,48 @@ class _SearchMealTabState extends State<SearchMealTab> {
           padding: EdgeInsets.symmetric(horizontal: 16 * w),
           child: CustomSearchBar(scale: scale, onChanged: _onSearchChanged),
         ),
-        Gap(20 * h),
+        Gap(16 * h),
+        SizedBox(
+          height: 48 * h,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.symmetric(horizontal: 16 * w),
+            itemCount: _dietTypes.length,
+            itemBuilder: (context, index) {
+              final diet = _dietTypes[index];
+              final isSelected = _selectedDiet == diet;
+              return Padding(
+                padding: EdgeInsets.only(right: 8 * w),
+                child: ChoiceChip(
+                  label: Text(
+                    diet,
+                    style: GoogleFonts.inter(
+                      color: isSelected ? Colors.black : Colors.white70,
+                      fontSize: 14 * scale,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                  selected: isSelected,
+                  onSelected: (_) => _onFilterChanged(diet),
+                  selectedColor: AppColors.primarayColor,
+                  backgroundColor: AppColors.secondaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24 * scale),
+                    side: BorderSide(
+                      color: isSelected
+                          ? AppColors.primarayColor
+                          : AppColors.secondaryColor,
+                    ),
+                  ),
+                  showCheckmark: false,
+                ),
+              );
+            },
+          ),
+        ),
+        Gap(12 * h),
         Expanded(
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(

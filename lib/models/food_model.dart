@@ -54,14 +54,14 @@ class Food {
     if (val is String) return val;
     if (val is int) {
       const categories = [
-        'Uncategorized',
+        'Protein',
+        'Carbs',
+        'Fats',
+        'Dairy',
         'Fruits',
         'Vegetables',
-        'Grains',
-        'Proteins',
-        'Dairy',
-        'Snacks',
         'Drinks',
+        'Snacks',
       ];
       if (val >= 0 && val < categories.length) return categories[val];
     }
@@ -71,7 +71,7 @@ class Food {
   static String? _mapDietType(dynamic val) {
     if (val is String) return val;
     if (val is int) {
-      const types = ['General', 'Vegetarian', 'Vegan', 'Keto'];
+      const types = ['Vegan', 'Vegetarian', 'Pescatarian', 'Standard'];
       if (val >= 0 && val < types.length) return types[val];
     }
     return null;
