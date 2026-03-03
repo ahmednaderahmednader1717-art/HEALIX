@@ -22,6 +22,18 @@ class FoodService {
     return _fetchFromUrl('/foods/by-category/$category');
   }
 
+  Future<List<Food>> filterFoods({
+    String? dietType,
+    List<String>? categories,
+  }) async {
+    final params = <String, dynamic>{};
+    if (dietType != null) params['dietType'] = dietType;
+    if (categories != null && categories.isNotEmpty) {
+      params['categories'] = categories;
+    }
+    return _fetchFromUrl('/foods/filter', queryParameters: params);
+  }
+
   Future<List<Food>> _fetchFromUrl(
     String url, {
     Map<String, dynamic>? queryParameters,

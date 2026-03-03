@@ -24,18 +24,16 @@ class _SearchMealTabState extends State<SearchMealTab> {
   bool _isLoading = true;
   String _searchQuery = '';
   String _selectedDiet = 'All';
-  String _selectedCategory = 'All';
+  final Set<String> _selectedCategories = {};
 
   final List<String> _dietTypes = [
-    'All',
+    'Standard',
     'Vegan',
     'Vegetarian',
     'Pescatarian',
-    'Standard',
   ];
 
   final List<String> _categories = [
-    'All',
     'Protein',
     'Carbs',
     'Fats',
@@ -57,55 +55,32 @@ class _SearchMealTabState extends State<SearchMealTab> {
     try {
       List<Food> foods;
 
-      // 1. Prioritize Fetch Endpoints
-      // Use the specialized diet endpoint for all diets including Standard
-      if (_selectedDiet != 'All') {
-        foods = await _foodService.getFoodsByDiet(_selectedDiet);
-      } else if (_selectedCategory != 'All') {
-        foods = await _foodService.getFoodsByCategory(_selectedCategory);
+      final hasDietFilter = _selectedDiet != 'All';
+      final hasCategoryFilter = _selectedCategories.isNotEmpty;
+
+      if (hasDietFilter || hasCategoryFilter) {
+        // Send both dietType and categories array to the server in one request.
+        foods = await _foodService.filterFoods(
+          dietType: hasDietFilter ? _selectedDiet : null,
+          categories: hasCategoryFilter ? _selectedCategories.toList() : null,
+        );
+
+        // Narrow by search query if also present.
+        if (_searchQuery.isNotEmpty) {
+          foods = foods.where((food) {
+            final name = food.name?.toLowerCase() ?? '';
+            final desc = food.description?.toLowerCase() ?? '';
+            return name.contains(_searchQuery) || desc.contains(_searchQuery);
+          }).toList();
+        }
       } else if (_searchQuery.isNotEmpty) {
         foods = await _foodService.searchFoods(_searchQuery);
       } else {
         foods = await _foodService.getFoods();
       }
 
-      // 2. Refine results locally against ALL active criteria
-      final refinedList = foods.where((food) {
-        // Diet check (Hierarchical)
-        bool dietMatch = false;
-        final diet = food.dietType?.toLowerCase() ?? '';
-
-        if (_selectedDiet == 'All' || _selectedDiet == 'Standard') {
-          dietMatch = true;
-        } else if (_selectedDiet == 'Vegan') {
-          dietMatch = diet == 'vegan';
-        } else if (_selectedDiet == 'Vegetarian') {
-          dietMatch = diet == 'vegan' || diet == 'vegetarian';
-        } else if (_selectedDiet == 'Pescatarian') {
-          dietMatch =
-              diet == 'vegan' || diet == 'vegetarian' || diet == 'pescatarian';
-        } else {
-          dietMatch = diet == _selectedDiet.toLowerCase();
-        }
-
-        // Category check
-        final categoryMatch =
-            _selectedCategory == 'All' ||
-            (food.category?.toLowerCase() == _selectedCategory.toLowerCase());
-
-        // Search check (redundant but safe if we didn't use search endpoint)
-        final name = food.name?.toLowerCase() ?? '';
-        final desc = food.description?.toLowerCase() ?? '';
-        final queryMatch =
-            _searchQuery.isEmpty ||
-            name.contains(_searchQuery) ||
-            desc.contains(_searchQuery);
-
-        return dietMatch && categoryMatch && queryMatch;
-      }).toList();
-
       setState(() {
-        _filteredFoods = refinedList;
+        _filteredFoods = foods;
       });
     } catch (e) {
       debugPrint('Error fetching foods: $e');
@@ -126,14 +101,15 @@ class _SearchMealTabState extends State<SearchMealTab> {
     _fetchFoods();
   }
 
-  void _onCategoryChanged(String category) {
-    setState(() {
-      _selectedCategory = category;
-    });
+  void _removeCategory(String category) {
+    setState(() => _selectedCategories.remove(category));
     _fetchFoods();
   }
 
   void _showFilterBottomSheet(double scale, double h, double w) {
+    // Work on a local copy so Apply is needed to confirm.
+    final localSelected = Set<String>.from(_selectedCategories);
+
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.secondaryColor,
@@ -174,14 +150,16 @@ class _SearchMealTabState extends State<SearchMealTab> {
                     spacing: 8 * w,
                     runSpacing: 8 * h,
                     children: _categories.map((category) {
-                      final isSelected = _selectedCategory == category;
+                      final isSelected = localSelected.contains(category);
                       return GestureDetector(
                         onTap: () {
                           setModalState(() {
-                            _selectedCategory = category;
+                            if (isSelected) {
+                              localSelected.remove(category);
+                            } else {
+                              localSelected.add(category);
+                            }
                           });
-                          _onCategoryChanged(category);
-                          Navigator.pop(context);
                         },
                         child: Container(
                           padding: EdgeInsets.symmetric(
@@ -213,7 +191,63 @@ class _SearchMealTabState extends State<SearchMealTab> {
                       );
                     }).toList(),
                   ),
-                  Gap(24 * h),
+                  Gap(20 * h),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setModalState(() => localSelected.clear());
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.white24),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12 * scale),
+                            ),
+                            padding: EdgeInsets.symmetric(vertical: 14 * h),
+                          ),
+                          child: Text(
+                            'Clear All',
+                            style: GoogleFonts.inter(
+                              color: Colors.white70,
+                              fontSize: 14 * scale,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Gap(12 * w),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _selectedCategories
+                                ..clear()
+                                ..addAll(localSelected);
+                            });
+                            _fetchFoods();
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primarayColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12 * scale),
+                            ),
+                            padding: EdgeInsets.symmetric(vertical: 14 * h),
+                          ),
+                          child: Text(
+                            'Apply',
+                            style: GoogleFonts.inter(
+                              color: Colors.black,
+                              fontSize: 14 * scale,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Gap(8 * h),
                 ],
               ),
             );
@@ -303,55 +337,64 @@ class _SearchMealTabState extends State<SearchMealTab> {
             },
           ),
         ),
-        if (_selectedCategory != 'All') ...[
-          Gap(4 * h),
+        if (_selectedCategories.isNotEmpty) ...[
+          Gap(12 * h),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16 * w),
-            child: Row(
-              children: [
-                Text(
-                  'Category: ',
-                  style: GoogleFonts.inter(
-                    color: Colors.white54,
-                    fontSize: 12 * scale,
+            padding: EdgeInsets.only(left: 16 * w),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.zero,
+              child: Row(
+                children: [
+                  Text(
+                    'Category: ',
+                    style: GoogleFonts.inter(
+                      color: Colors.white54,
+                      fontSize: 12 * scale,
+                    ),
                   ),
-                ),
-                GestureDetector(
-                  onTap: () => _onCategoryChanged('All'),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8 * w,
-                      vertical: 4 * h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primarayColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8 * scale),
-                      border: Border.all(
-                        color: AppColors.primarayColor.withOpacity(0.5),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _selectedCategory,
-                          style: GoogleFonts.inter(
-                            color: AppColors.primarayColor,
-                            fontSize: 12 * scale,
-                            fontWeight: FontWeight.bold,
+                  ..._selectedCategories.map((cat) {
+                    return Padding(
+                      padding: EdgeInsets.only(right: 6 * w),
+                      child: GestureDetector(
+                        onTap: () => _removeCategory(cat),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8 * w,
+                            vertical: 4 * h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primarayColor.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8 * scale),
+                            border: Border.all(
+                              color: AppColors.primarayColor.withOpacity(0.5),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                cat,
+                                style: GoogleFonts.inter(
+                                  color: AppColors.primarayColor,
+                                  fontSize: 12 * scale,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Gap(4 * w),
+                              Icon(
+                                Icons.close,
+                                size: 14 * scale,
+                                color: AppColors.primarayColor,
+                              ),
+                            ],
                           ),
                         ),
-                        Gap(4 * w),
-                        Icon(
-                          Icons.close,
-                          size: 14 * scale,
-                          color: AppColors.primarayColor,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
             ),
           ),
         ],
@@ -440,7 +483,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
               setState(() {
                 _searchQuery = '';
                 _selectedDiet = 'All';
-                _selectedCategory = 'All';
+                _selectedCategories.clear();
               });
               _fetchFoods();
             },
