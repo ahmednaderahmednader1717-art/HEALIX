@@ -5,8 +5,14 @@ import 'package:test_splash/core/app_colors.dart';
 class CustomSearchBar extends StatefulWidget {
   final double scale;
   final ValueChanged<String>? onChanged;
+  final VoidCallback? onFilterPressed;
 
-  const CustomSearchBar({super.key, required this.scale, this.onChanged});
+  const CustomSearchBar({
+    super.key,
+    required this.scale,
+    this.onChanged,
+    this.onFilterPressed,
+  });
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -38,7 +44,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       ),
       padding: EdgeInsets.symmetric(
         horizontal: 12 * scale,
-        vertical: 6 * scale,
+        vertical: 2 * scale,
       ),
       child: Row(
         children: [
@@ -58,25 +64,42 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 hintStyle: const TextStyle(color: Colors.white54),
                 border: InputBorder.none,
                 isDense: true,
-                suffixIcon: _controller.text.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.clear,
-                          color: Colors.white54,
-                          size: 20 * scale,
-                        ),
-                        onPressed: () {
-                          _controller.clear();
-                          if (widget.onChanged != null) {
-                            widget.onChanged!('');
-                          }
-                          setState(() {});
-                        },
-                      )
-                    : null,
+                contentPadding: EdgeInsets.symmetric(vertical: 12 * scale),
               ),
             ),
           ),
+          if (_controller.text.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.clear, color: Colors.white54, size: 20 * scale),
+              onPressed: () {
+                _controller.clear();
+                if (widget.onChanged != null) {
+                  widget.onChanged!('');
+                }
+                setState(() {});
+              },
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          if (widget.onFilterPressed != null) ...[
+            if (_controller.text.isNotEmpty) SizedBox(width: 8 * scale),
+            Container(
+              height: 20 * scale,
+              width: 1,
+              color: Colors.white24,
+              margin: EdgeInsets.symmetric(horizontal: 4 * scale),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.tune_rounded,
+                color: AppColors.primarayColor,
+                size: 22 * scale,
+              ),
+              onPressed: widget.onFilterPressed,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
         ],
       ),
     );

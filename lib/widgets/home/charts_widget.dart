@@ -169,7 +169,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 4000),
+      duration: const Duration(milliseconds: 3200),
     );
     _animation = CurvedAnimation(
       parent: _controller,

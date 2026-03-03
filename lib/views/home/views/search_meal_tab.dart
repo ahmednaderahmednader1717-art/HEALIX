@@ -24,6 +24,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
   bool _isLoading = true;
   String _searchQuery = '';
   String _selectedDiet = 'All';
+  String _selectedCategory = 'All';
 
   final List<String> _dietTypes = [
     'All',
@@ -31,6 +32,18 @@ class _SearchMealTabState extends State<SearchMealTab> {
     'Vegetarian',
     'Pescatarian',
     'Standard',
+  ];
+
+  final List<String> _categories = [
+    'All',
+    'Protein',
+    'Carbs',
+    'Fats',
+    'Dairy',
+    'Fruits',
+    'Vegetables',
+    'Drinks',
+    'Snacks',
   ];
 
   @override
@@ -43,22 +56,56 @@ class _SearchMealTabState extends State<SearchMealTab> {
     setState(() => _isLoading = true);
     try {
       List<Food> foods;
+
+      // 1. Prioritize Fetch Endpoints
+      // Use the specialized diet endpoint for all diets including Standard
       if (_selectedDiet != 'All') {
         foods = await _foodService.getFoodsByDiet(_selectedDiet);
-        if (_searchQuery.isNotEmpty) {
-          foods = foods.where((food) {
-            final name = food.name?.toLowerCase() ?? '';
-            final desc = food.description?.toLowerCase() ?? '';
-            return name.contains(_searchQuery) || desc.contains(_searchQuery);
-          }).toList();
-        }
+      } else if (_selectedCategory != 'All') {
+        foods = await _foodService.getFoodsByCategory(_selectedCategory);
       } else if (_searchQuery.isNotEmpty) {
         foods = await _foodService.searchFoods(_searchQuery);
       } else {
         foods = await _foodService.getFoods();
       }
+
+      // 2. Refine results locally against ALL active criteria
+      final refinedList = foods.where((food) {
+        // Diet check (Hierarchical)
+        bool dietMatch = false;
+        final diet = food.dietType?.toLowerCase() ?? '';
+
+        if (_selectedDiet == 'All' || _selectedDiet == 'Standard') {
+          dietMatch = true;
+        } else if (_selectedDiet == 'Vegan') {
+          dietMatch = diet == 'vegan';
+        } else if (_selectedDiet == 'Vegetarian') {
+          dietMatch = diet == 'vegan' || diet == 'vegetarian';
+        } else if (_selectedDiet == 'Pescatarian') {
+          dietMatch =
+              diet == 'vegan' || diet == 'vegetarian' || diet == 'pescatarian';
+        } else {
+          dietMatch = diet == _selectedDiet.toLowerCase();
+        }
+
+        // Category check
+        final categoryMatch =
+            _selectedCategory == 'All' ||
+            (food.category?.toLowerCase() == _selectedCategory.toLowerCase());
+
+        // Search check (redundant but safe if we didn't use search endpoint)
+        final name = food.name?.toLowerCase() ?? '';
+        final desc = food.description?.toLowerCase() ?? '';
+        final queryMatch =
+            _searchQuery.isEmpty ||
+            name.contains(_searchQuery) ||
+            desc.contains(_searchQuery);
+
+        return dietMatch && categoryMatch && queryMatch;
+      }).toList();
+
       setState(() {
-        _filteredFoods = foods;
+        _filteredFoods = refinedList;
       });
     } catch (e) {
       debugPrint('Error fetching foods: $e');
@@ -77,6 +124,103 @@ class _SearchMealTabState extends State<SearchMealTab> {
       _selectedDiet = diet;
     });
     _fetchFoods();
+  }
+
+  void _onCategoryChanged(String category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+    _fetchFoods();
+  }
+
+  void _showFilterBottomSheet(double scale, double h, double w) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.secondaryColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24 * scale)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 20 * w,
+                vertical: 24 * h,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Filter by Category',
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 20 * scale,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                  Gap(16 * h),
+                  Wrap(
+                    spacing: 8 * w,
+                    runSpacing: 8 * h,
+                    children: _categories.map((category) {
+                      final isSelected = _selectedCategory == category;
+                      return GestureDetector(
+                        onTap: () {
+                          setModalState(() {
+                            _selectedCategory = category;
+                          });
+                          _onCategoryChanged(category);
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16 * w,
+                            vertical: 10 * h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primarayColor
+                                : AppColors.secondaryColor,
+                            borderRadius: BorderRadius.circular(12 * scale),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.primarayColor
+                                  : Colors.white24,
+                            ),
+                          ),
+                          child: Text(
+                            category,
+                            style: GoogleFonts.inter(
+                              color: isSelected ? Colors.black : Colors.white70,
+                              fontSize: 14 * scale,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  Gap(24 * h),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _onRefresh() async {
@@ -112,7 +256,11 @@ class _SearchMealTabState extends State<SearchMealTab> {
         Gap(16 * h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16 * w),
-          child: CustomSearchBar(scale: scale, onChanged: _onSearchChanged),
+          child: CustomSearchBar(
+            scale: scale,
+            onChanged: _onSearchChanged,
+            onFilterPressed: () => _showFilterBottomSheet(scale, h, w),
+          ),
         ),
         Gap(16 * h),
         SizedBox(
@@ -155,6 +303,58 @@ class _SearchMealTabState extends State<SearchMealTab> {
             },
           ),
         ),
+        if (_selectedCategory != 'All') ...[
+          Gap(4 * h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16 * w),
+            child: Row(
+              children: [
+                Text(
+                  'Category: ',
+                  style: GoogleFonts.inter(
+                    color: Colors.white54,
+                    fontSize: 12 * scale,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _onCategoryChanged('All'),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8 * w,
+                      vertical: 4 * h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primarayColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8 * scale),
+                      border: Border.all(
+                        color: AppColors.primarayColor.withOpacity(0.5),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _selectedCategory,
+                          style: GoogleFonts.inter(
+                            color: AppColors.primarayColor,
+                            fontSize: 12 * scale,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Gap(4 * w),
+                        Icon(
+                          Icons.close,
+                          size: 14 * scale,
+                          color: AppColors.primarayColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         Gap(12 * h),
         Expanded(
           child: CustomScrollView(
@@ -226,7 +426,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
           ),
           SizedBox(height: 12 * h),
           Text(
-            "We couldn't find anything matching '$_searchQuery'.\nTry adjusting your search criteria.",
+            "We couldn't find anything matching your criteria.\nTry adjusting your search or filters.",
             textAlign: TextAlign.center,
             style: GoogleFonts.inriaSans(
               color: Colors.white54,
@@ -236,14 +436,21 @@ class _SearchMealTabState extends State<SearchMealTab> {
           ),
           SizedBox(height: 40 * h),
           OutlinedButton.icon(
-            onPressed: _fetchFoods,
+            onPressed: () {
+              setState(() {
+                _searchQuery = '';
+                _selectedDiet = 'All';
+                _selectedCategory = 'All';
+              });
+              _fetchFoods();
+            },
             icon: Icon(
               Icons.refresh,
               color: AppColors.primarayColor,
               size: 20 * scale,
             ),
             label: Text(
-              'Reload Foods',
+              'Reset Filters',
               style: TextStyle(
                 color: AppColors.primarayColor,
                 fontSize: 16 * scale,

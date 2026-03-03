@@ -30,7 +30,13 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    _foodsFuture = FoodService().getFoods();
+    _foodsFuture = _fetchProcessedFoods();
+  }
+
+  Future<List<Food>> _fetchProcessedFoods() async {
+    final foods = await FoodService().getFoods();
+    if (foods.isEmpty) return [];
+    return (foods..shuffle()).take(4).toList();
   }
 
   void onDaySelected(DateTime day) {
@@ -41,11 +47,10 @@ class _HomeTabState extends State<HomeTab> {
 
   Future<void> _onRefresh() async {
     await AuthService().refreshToken();
-    final fetchFuture = FoodService().getFoods();
     setState(() {
-      _foodsFuture = fetchFuture;
+      _foodsFuture = _fetchProcessedFoods();
     });
-    await fetchFuture;
+    await _foodsFuture;
   }
 
   @override
