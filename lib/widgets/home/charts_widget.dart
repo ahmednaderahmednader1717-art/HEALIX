@@ -140,18 +140,20 @@ class _AppleRingCardState extends State<AppleRingCard>
 }
 
 class UnifiedMacroChart extends StatefulWidget {
-  final double caloriesRemaining;
-  final double proteinPercent;
-  final double carbsPercent;
-  final double fatsPercent;
+  final double caloriesEaten;
+  final double calorieGoal;
+  final double proteinGrams;
+  final double carbsGrams;
+  final double fatsGrams;
   final double scale;
 
   const UnifiedMacroChart({
     super.key,
-    required this.caloriesRemaining,
-    required this.proteinPercent,
-    required this.carbsPercent,
-    required this.fatsPercent,
+    required this.caloriesEaten,
+    required this.calorieGoal,
+    required this.proteinGrams,
+    required this.carbsGrams,
+    required this.fatsGrams,
     this.scale = 1.0,
   });
 
@@ -163,6 +165,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  bool _showGrams = true; // Toggle state
 
   @override
   void initState() {
@@ -181,10 +184,10 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
   @override
   void didUpdateWidget(UnifiedMacroChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.proteinPercent != widget.proteinPercent ||
-        oldWidget.carbsPercent != widget.carbsPercent ||
-        oldWidget.fatsPercent != widget.fatsPercent ||
-        oldWidget.caloriesRemaining != widget.caloriesRemaining) {
+    if (oldWidget.proteinGrams != widget.proteinGrams ||
+        oldWidget.carbsGrams != widget.carbsGrams ||
+        oldWidget.fatsGrams != widget.fatsGrams ||
+        oldWidget.caloriesEaten != widget.caloriesEaten) {
       _controller.forward(from: 0);
     }
   }
@@ -198,138 +201,184 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
   @override
   Widget build(BuildContext context) {
     final scale = widget.scale;
-    return Container(
-      padding: EdgeInsets.all(20 * scale),
-      decoration: BoxDecoration(
-        color: AppColors.ContainerColor,
-        borderRadius: BorderRadius.circular(24 * scale),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Calories",
-            style: GoogleFonts.inter(
-              color: Colors.white,
-              fontSize: 18 * scale,
-              fontWeight: FontWeight.bold,
+
+    // Compute ring proportions from grams eaten.
+    // Calorie contribution: protein=4 kcal/g, carbs=4 kcal/g, fats=9 kcal/g
+    final proteinKcal = widget.proteinGrams * 4;
+    final carbsKcal = widget.carbsGrams * 4;
+    final fatsKcal = widget.fatsGrams * 9;
+    final totalMacroKcal = proteinKcal + carbsKcal + fatsKcal;
+
+    final proteinPct = totalMacroKcal > 0 ? proteinKcal / totalMacroKcal : 0.0;
+    final carbsPct = totalMacroKcal > 0 ? carbsKcal / totalMacroKcal : 0.0;
+    final fatsPct = totalMacroKcal > 0 ? fatsKcal / totalMacroKcal : 0.0;
+
+    // Overall calorie progress relative to goal (0.0 to 1.0)
+    final overallProgress = widget.calorieGoal > 0
+        ? (widget.caloriesEaten / widget.calorieGoal).clamp(0.0, 1.0)
+        : 0.0;
+
+    final goalStr = widget.calorieGoal > 0
+        ? widget.calorieGoal.toStringAsFixed(0)
+        : '—';
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _showGrams = !_showGrams;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.all(20 * scale),
+        decoration: BoxDecoration(
+          color: AppColors.ContainerColor,
+          borderRadius: BorderRadius.circular(24 * scale),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
-          ),
-          Gap(15 * scale),
-          Row(
-            children: [
-              // Left Side: Segmented Ring
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: EdgeInsets.all(
-                    10 * scale,
-                  ), // Padding to make the ring smaller
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        AnimatedBuilder(
-                          animation: _animation,
-                          builder: (context, child) {
-                            return CustomPaint(
-                              size: Size.infinite,
-                              painter: SegmentedRingPainter(
-                                protein:
-                                    widget.proteinPercent * _animation.value,
-                                carbs: widget.carbsPercent * _animation.value,
-                                fats: widget.fatsPercent * _animation.value,
-                                strokeWidth:
-                                    20 * scale, // Slightly thinner stroke
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Calories",
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontSize: 18 * scale,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Gap(15 * scale),
+            Row(
+              children: [
+                // Left Side: Segmented Ring
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: EdgeInsets.all(10 * scale),
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          AnimatedBuilder(
+                            animation: _animation,
+                            builder: (context, child) {
+                              return CustomPaint(
+                                size: Size.infinite,
+                                painter: SegmentedRingPainter(
+                                  protein:
+                                      proteinPct *
+                                      overallProgress *
+                                      _animation.value,
+                                  carbs:
+                                      carbsPct *
+                                      overallProgress *
+                                      _animation.value,
+                                  fats:
+                                      fatsPct *
+                                      overallProgress *
+                                      _animation.value,
+                                  strokeWidth: 20 * scale,
+                                ),
+                              );
+                            },
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedBuilder(
+                                animation: _animation,
+                                builder: (context, child) {
+                                  final shown =
+                                      (widget.caloriesEaten * _animation.value)
+                                          .toInt();
+                                  return Text(
+                                    '$shown',
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 22 * scale,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AnimatedBuilder(
-                              animation: _animation,
-                              builder: (context, child) {
-                                final currentCalories =
-                                    (widget.caloriesRemaining *
-                                            _animation.value)
-                                        .toInt();
-                                return Text(
-                                  currentCalories.toString(),
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white,
-                                    fontSize:
-                                        24 *
-                                        scale, // Slightly smaller font for smaller ring
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                );
-                              },
-                            ),
-                            Text(
-                              "Remaining",
-                              style: GoogleFonts.inter(
-                                color: Colors.white60,
-                                fontSize: 12 * scale,
+                              Text(
+                                '/ $goalStr kcal',
+                                style: GoogleFonts.inter(
+                                  color: Colors.white60,
+                                  fontSize: 10 * scale,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Gap(60 * scale),
-              // Right Side: Labels
-              Expanded(
-                flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildMacroLabel(
-                      "Fats",
-                      widget.fatsPercent,
-                      Colors.blueAccent,
-                      scale,
-                    ),
-                    Gap(16 * scale),
-                    _buildMacroLabel(
-                      "Protein",
-                      widget.proteinPercent,
-                      Colors.redAccent,
-                      scale,
-                    ),
-                    Gap(16 * scale),
-                    _buildMacroLabel(
-                      "Carbs",
-                      widget.carbsPercent,
-                      Colors.amberAccent,
-                      scale,
-                    ),
-                  ],
+                Gap(60 * scale),
+                // Right Side: Labels with grams or percentages (relative to Goal)
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildMacroLabel(
+                        "Fats",
+                        _showGrams
+                            ? widget.fatsGrams
+                            : (widget.calorieGoal > 0
+                                  ? (fatsKcal / widget.calorieGoal * 100)
+                                  : 0.0),
+                        _showGrams ? 'g' : '%',
+                        Colors.blueAccent,
+                        scale,
+                      ),
+                      Gap(16 * scale),
+                      _buildMacroLabel(
+                        "Protein",
+                        _showGrams
+                            ? widget.proteinGrams
+                            : (widget.calorieGoal > 0
+                                  ? (proteinKcal / widget.calorieGoal * 100)
+                                  : 0.0),
+                        _showGrams ? 'g' : '%',
+                        Colors.redAccent,
+                        scale,
+                      ),
+                      Gap(16 * scale),
+                      _buildMacroLabel(
+                        "Carbs",
+                        _showGrams
+                            ? widget.carbsGrams
+                            : (widget.calorieGoal > 0
+                                  ? (carbsKcal / widget.calorieGoal * 100)
+                                  : 0.0),
+                        _showGrams ? 'g' : '%',
+                        Colors.amberAccent,
+                        scale,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildMacroLabel(
     String label,
-    double percent,
+    double value,
+    String unit,
     Color color,
     double scale,
   ) {
@@ -362,12 +411,15 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
                 fontWeight: FontWeight.w600,
               ),
             ),
-            Text(
-              "${(percent * 100).toInt()}%",
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
               style: GoogleFonts.inter(
                 color: color,
                 fontSize: 14 * scale,
                 fontWeight: FontWeight.bold,
+              ),
+              child: Text(
+                '${value.toStringAsFixed(unit == '%' ? 0 : 1)} $unit',
               ),
             ),
           ],
@@ -382,12 +434,14 @@ class SegmentedRingPainter extends CustomPainter {
   final double carbs;
   final double fats;
   final double strokeWidth;
+  final Color? backgroundColor;
 
   SegmentedRingPainter({
     required this.protein,
     required this.carbs,
     required this.fats,
     required this.strokeWidth,
+    this.backgroundColor,
   });
 
   @override
@@ -397,7 +451,7 @@ class SegmentedRingPainter extends CustomPainter {
     final rect = Rect.fromCircle(center: center, radius: radius);
 
     final bgPaint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = backgroundColor ?? Colors.white.withOpacity(0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;

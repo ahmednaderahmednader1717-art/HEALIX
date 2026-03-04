@@ -23,7 +23,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
   List<Food> _filteredFoods = [];
   bool _isLoading = true;
   String _searchQuery = '';
-  String _selectedDiet = 'All';
+  String _selectedDiet = 'Standard';
   final Set<String> _selectedCategories = {};
 
   final List<String> _dietTypes = [
@@ -55,7 +55,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
     try {
       List<Food> foods;
 
-      final hasDietFilter = _selectedDiet != 'All';
+      final hasDietFilter = _selectedDiet != 'Standard';
       final hasCategoryFilter = _selectedCategories.isNotEmpty;
 
       if (hasDietFilter || hasCategoryFilter) {

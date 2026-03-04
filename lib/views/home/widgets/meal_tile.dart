@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/food_model.dart';
+import 'package:test_splash/services/nutrition_service.dart';
 
 class MealTile extends StatelessWidget {
   final Food food;
@@ -85,7 +86,15 @@ class MealTile extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(right: 10 * scale),
               child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: AppColors.ContainerColor,
+                    builder: (context) =>
+                        _MealDetailsSheet(food: food, scale: scale),
+                  );
+                },
                 icon: Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: 12 * scale,
@@ -133,9 +142,11 @@ class _MealDetailsSheet extends StatefulWidget {
 }
 
 class _MealDetailsSheetState extends State<_MealDetailsSheet> {
+  final NutritionService _nutritionService = NutritionService();
   late TextEditingController _amountController;
   late String _selectedUnit;
   double _amount = 100.0;
+  bool _isLogging = false;
 
   final List<String> _units = ['g', 'ml', 'piece'];
 
@@ -215,6 +226,35 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
       setState(() {
         _selectedUnit = newUnit;
       });
+    }
+  }
+
+  Future<void> _logFood() async {
+    if (widget.food.id == null || _amount <= 0) return;
+    setState(() => _isLogging = true);
+    try {
+      final log = await _nutritionService.logFood(
+        foodId: widget.food.id!,
+        quantity: _amount,
+      );
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            log != null
+                ? '✓ Added ${widget.food.name} to your diary'
+                : 'Failed to log meal. Please try again.',
+          ),
+          backgroundColor: log != null ? AppColors.primarayColor : Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLogging = false);
     }
   }
 
@@ -462,15 +502,24 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                       ),
                       minimumSize: Size(double.infinity, 56 * scale),
                     ),
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Add to Diary',
-                      style: TextStyle(
-                        fontSize: 18 * scale,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
+                    onPressed: _isLogging ? null : _logFood,
+                    child: _isLogging
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : Text(
+                            'Add to Diary',
+                            style: TextStyle(
+                              fontSize: 18 * scale,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
                   ),
                   SizedBox(height: 20 * scale),
                 ],

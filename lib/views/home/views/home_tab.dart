@@ -4,15 +4,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:test_splash/models/nutrient.dart';
 import 'package:test_splash/widgets/home/charts_widget.dart';
 import 'package:test_splash/views/home/widgets/day_selector.dart';
 import 'package:test_splash/views/home/widgets/meal_tile.dart';
 import 'package:test_splash/views/home/widgets/row_header.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/food_model.dart';
+import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/food_service.dart';
 import 'package:test_splash/services/auth_service.dart';
+import 'package:test_splash/services/nutrition_service.dart';
 
 class HomeTab extends StatefulWidget {
   final void Function(int)? onTabChange;
@@ -26,11 +27,75 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab> {
   DateTime selectedDay = DateTime.now();
   late Future<List<Food>> _foodsFuture;
+  Future<DailySummary?>? _dailySummaryFuture;
+  final NutritionService _nutritionService = NutritionService();
+  Map<DateTime, DaySummary> _monthlyProgress = {};
 
   @override
   void initState() {
     super.initState();
     _foodsFuture = _fetchProcessedFoods();
+    _fetchMonthlySummary().then((_) => _fetchDailySummary(selectedDay));
+    NutritionService.foodLogged.addListener(_onFoodLogged);
+  }
+
+  void _onFoodLogged() {
+    _fetchMonthlySummary().then((_) => _fetchDailySummary(selectedDay));
+  }
+
+  void _fetchDailySummary(DateTime date) {
+    final dateStr =
+        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    final future = _nutritionService.getDailySummary(date: dateStr);
+
+    future.then((summary) {
+      if (summary != null && mounted) {
+        final dateKey = DateTime(date.year, date.month, date.day);
+        setState(() {
+          _monthlyProgress[dateKey] = DaySummary(
+            date: summary.date,
+            totalCalories: summary.totalCalories,
+            calorieGoal: summary.calorieGoal,
+            protein: summary.totalProtein,
+            carbs: summary.totalCarbs,
+            fats: summary.totalFats,
+            goalAchieved:
+                summary.calorieGoal > 0 &&
+                summary.totalCalories >= summary.calorieGoal,
+            hasData: summary.logs.isNotEmpty || summary.totalCalories > 0,
+          );
+        });
+      }
+    });
+
+    setState(() {
+      _dailySummaryFuture = future;
+    });
+  }
+
+  Future<void> _fetchMonthlySummary() async {
+    final summary = await _nutritionService.getMonthlySummary(days: 28);
+    if (summary != null) {
+      final Map<DateTime, DaySummary> progress = {};
+      for (var day in summary.days) {
+        try {
+          final dt = DateTime.parse(day.date);
+          final dateKey = DateTime(dt.year, dt.month, dt.day);
+          progress[dateKey] = day;
+        } catch (_) {}
+      }
+      if (mounted) {
+        setState(() {
+          _monthlyProgress = progress;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    NutritionService.foodLogged.removeListener(_onFoodLogged);
+    super.dispose();
   }
 
   Future<List<Food>> _fetchProcessedFoods() async {
@@ -43,13 +108,14 @@ class _HomeTabState extends State<HomeTab> {
     setState(() {
       selectedDay = day;
     });
+    _fetchDailySummary(day);
   }
 
   Future<void> _onRefresh() async {
     await AuthService().refreshToken();
-    setState(() {
-      _foodsFuture = _fetchProcessedFoods();
-    });
+    _foodsFuture = _fetchProcessedFoods();
+    _fetchDailySummary(selectedDay);
+    _fetchMonthlySummary();
     await _foodsFuture;
   }
 
@@ -163,14 +229,14 @@ class _HomeTabState extends State<HomeTab> {
                 DaySelector(
                   selectedDay: selectedDay,
                   onDaySelected: onDaySelected,
-                  caloriesProgress: {DateTime(2026, 2, 16): .75},
+                  caloriesProgress: _monthlyProgress,
                 ),
 
                 SizedBox(height: 8 * h),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12 * w),
                   child: RowHeader(
-                    title: "Todays's Total Nutrations",
+                    title: "Today's Total Nutrition",
                     actionText: "",
                     onAction: null,
                     scale: w,
@@ -179,33 +245,16 @@ class _HomeTabState extends State<HomeTab> {
                 SizedBox(height: 12 * h),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16 * w),
-                  child: Builder(
-                    builder: (context) {
-                      final calories = Nutrient.nutrients.firstWhere(
-                        (n) => n.name == "Calories",
-                        orElse: () => Nutrient.nutrients[0],
-                      );
-                      final protein = Nutrient.nutrients.firstWhere(
-                        (n) => n.name == "Protein",
-                        orElse: () => Nutrient.nutrients[1],
-                      );
-                      final carbs = Nutrient.nutrients.firstWhere(
-                        (n) => n.name == "Carbs",
-                        orElse: () => Nutrient.nutrients[2],
-                      );
-                      final fats = Nutrient.nutrients.firstWhere(
-                        (n) => n.name == "Fats",
-                        orElse: () => Nutrient.nutrients[3],
-                      );
-
+                  child: FutureBuilder<DailySummary?>(
+                    future: _dailySummaryFuture,
+                    builder: (context, snapshot) {
+                      final summary = snapshot.data;
                       return UnifiedMacroChart(
-                        caloriesRemaining:
-                            2500 *
-                            (1 - calories.value), // Example total goal 2500
-                        proteinPercent:
-                            protein.value * 0.3, // Scaling for visual segments
-                        carbsPercent: carbs.value * 0.4,
-                        fatsPercent: fats.value * 0.2,
+                        caloriesEaten: summary?.totalCalories ?? 0,
+                        calorieGoal: summary?.calorieGoal ?? 0,
+                        proteinGrams: summary?.totalProtein ?? 0,
+                        carbsGrams: summary?.totalCarbs ?? 0,
+                        fatsGrams: summary?.totalFats ?? 0,
                         scale: scale,
                       );
                     },

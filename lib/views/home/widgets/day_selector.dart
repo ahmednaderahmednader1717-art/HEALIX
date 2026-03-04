@@ -1,12 +1,13 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:test_splash/models/nutrition_models.dart';
+import 'package:test_splash/widgets/home/charts_widget.dart';
 
 class DaySelector extends StatefulWidget {
   final DateTime selectedDay;
   final Function(DateTime) onDaySelected;
   final int totalDays;
-  final Map<DateTime, double>
+  final Map<DateTime, DaySummary>
   caloriesProgress; // نسبة الإنجاز لكل يوم (من 0.0 إلى 1.0)
 
   const DaySelector({
@@ -76,6 +77,7 @@ class _DaySelectorState extends State<DaySelector> {
             padding: EdgeInsets.symmetric(horizontal: 8 * w),
             itemBuilder: (context, dayIndex) {
               final day = week[dayIndex];
+              final dateKey = DateTime(day.year, day.month, day.day);
               final isSelected =
                   day.day == widget.selectedDay.day &&
                   day.month == widget.selectedDay.month &&
@@ -87,7 +89,7 @@ class _DaySelectorState extends State<DaySelector> {
                   day.year == now.year;
               final isFuture = day.isAfter(now);
 
-              // ألوان الخلفية حسب الحالة
+              // Background colors
               Color bgColor;
               if (isSelected) {
                 bgColor = const Color.fromARGB(
@@ -107,26 +109,18 @@ class _DaySelectorState extends State<DaySelector> {
                 bgColor = Colors.white.withOpacity(0);
               }
 
-              final caloriesPercent =
-                  widget.caloriesProgress[DateTime(
-                    day.year,
-                    day.month,
-                    day.day,
-                  )] ??
-                  0.0;
+              final summary = widget.caloriesProgress[dateKey];
 
-              Color ringColor = isFuture
-                  ? Colors.grey.withOpacity(0.18)
-                  : const Color.fromARGB(
-                      255,
-                      245,
-                      44,
-                      44,
-                    ); // يمكنك تغيير اللون حسب النسبة
+              // Calculate macro segments relative to goal
+              double proteinPct = 0;
+              double carbsPct = 0;
+              double fatsPct = 0;
 
-              Color ringBgColor = isSelected
-                  ? Colors.white
-                  : Colors.grey.withOpacity(0.15);
+              if (summary != null && summary.calorieGoal > 0) {
+                proteinPct = (summary.protein * 4) / summary.calorieGoal;
+                carbsPct = (summary.carbs * 4) / summary.calorieGoal;
+                fatsPct = (summary.fats * 9) / summary.calorieGoal;
+              }
 
               Color dateColor = isSelected
                   ? Colors.white
@@ -172,21 +166,44 @@ class _DaySelectorState extends State<DaySelector> {
                         ),
                       ),
                       SizedBox(height: 7 * h),
-                      CircularPercentIndicator(
-                        radius: 20 * scale,
-                        percent: caloriesPercent.clamp(0.0, 1.0),
-                        lineWidth: 3,
-                        animation: true,
-                        circularStrokeCap: CircularStrokeCap.round,
-                        backgroundColor: ringBgColor,
-                        progressColor: ringColor,
-                        center: Text(
-                          day.day.toString(),
-                          style: TextStyle(
-                            color: dateColor,
-                            fontSize: 18 * scale,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      SizedBox(
+                        width: 40 * scale,
+                        height: 40 * scale,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Background ring
+                            CustomPaint(
+                              size: Size.infinite,
+                              painter: SegmentedRingPainter(
+                                protein: 0,
+                                carbs: 0,
+                                fats: 0,
+                                strokeWidth: 3,
+                                backgroundColor: isSelected
+                                    ? Colors.white.withOpacity(0.3)
+                                    : Colors.grey.withOpacity(0.15),
+                              ),
+                            ),
+                            // Macro segments
+                            CustomPaint(
+                              size: Size.infinite,
+                              painter: SegmentedRingPainter(
+                                protein: proteinPct.clamp(0.0, 1.0),
+                                carbs: carbsPct.clamp(0.0, 1.0),
+                                fats: fatsPct.clamp(0.0, 1.0),
+                                strokeWidth: 3,
+                              ),
+                            ),
+                            Text(
+                              day.day.toString(),
+                              style: TextStyle(
+                                color: dateColor,
+                                fontSize: 18 * scale,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
