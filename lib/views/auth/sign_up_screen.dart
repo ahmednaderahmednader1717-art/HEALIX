@@ -7,7 +7,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_splash/services/auth_service.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/views/auth/multi_step_signup_page.dart';
 import 'package:test_splash/views/home/home_screen.dart';
@@ -66,8 +66,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         final token =
             response.data['accessToken'] ?? response.data['token'] ?? "";
         final refreshToken = response.data['refreshToken'] ?? "";
-        await _saveTokens(token, refreshToken);
+
+        await AuthService.saveTokens(token, refreshToken);
         UserInfo userObj = UserInfo.fromJson(userJson);
+        await AuthService.saveUserInfo(userObj);
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => MultiStepSignUpPage(user: userObj)),
@@ -102,8 +105,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
               loginResponse.data['token'] ??
               "";
           final refreshToken = loginResponse.data['refreshToken'] ?? "";
-          await _saveTokens(token, refreshToken);
+
+          await AuthService.saveTokens(token, refreshToken);
           UserInfo userObj = UserInfo.fromJson(userJson);
+          await AuthService.saveUserInfo(userObj);
+
           // يدخل مباشرة للـHome
           Navigator.pushAndRemoveUntil(
             context,
@@ -148,12 +154,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } finally {
       setState(() => _loading = false);
     }
-  }
-
-  Future<void> _saveTokens(String token, String refreshToken) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("token", token);
-    await prefs.setString("refreshToken", refreshToken);
   }
 
   void _showCupertinoDialog(String message) {

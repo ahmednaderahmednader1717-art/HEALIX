@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:test_splash/services/auth_service.dart';
+import 'package:test_splash/views/home/home_screen.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/widgets/common/healix_logo.dart';
 import 'package:test_splash/views/splash/welcome_screen.dart';
@@ -24,12 +26,34 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(seconds: 3),
     )..forward();
 
-    Timer(const Duration(milliseconds: 3500), () {
+    _checkLogin();
+  }
+
+  Future<void> _checkLogin() async {
+    // Wait for the animation to finish (at least partially)
+    await Future.delayed(const Duration(milliseconds: 3000));
+
+    final userInfo = await AuthService.getUserInfo();
+    bool loggedIn = false;
+
+    if (userInfo != null) {
+      // Attempt to refresh token to see if session is still valid
+      loggedIn = await AuthService().refreshToken();
+    }
+
+    if (!mounted) return;
+
+    if (loggedIn && userInfo != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen(user: userInfo)),
+      );
+    } else {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const WelcomeScreen()),
       );
-    });
+    }
   }
 
   @override

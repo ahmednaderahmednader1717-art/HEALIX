@@ -10,10 +10,13 @@ import 'package:ionicons/ionicons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
+import 'package:test_splash/views/home/views/edit_nutration_goals.dart';
 import 'package:test_splash/views/home/views/edit_profile.dart';
 import 'package:test_splash/views/home/views/personal_details_page.dart';
+import 'package:test_splash/views/home/views/preferences_page.dart';
 import 'package:test_splash/views/home/widgets/profile_card_group.dart';
 import 'package:test_splash/views/splash/welcome_screen.dart';
+import 'package:test_splash/services/auth_service.dart';
 
 // مودل الكارت كما لديك
 
@@ -80,7 +83,7 @@ class _ProfileTabState extends State<ProfileTab> {
 
       if (response.statusCode == 200) {
         // حذف البيانات المحلية وتسجيل الخروج
-        await prefs.clear();
+        await AuthService.clearSession();
         if (mounted) {
           Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const WelcomeScreen()),
@@ -99,6 +102,36 @@ class _ProfileTabState extends State<ProfileTab> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  void _showLogoutDialog() {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text("Logout"),
+        content: const Text("Are you sure you want to logout?"),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(context);
+              await AuthService.clearSession();
+              if (mounted) {
+                Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                  (route) => false,
+                );
+              }
+            },
+            child: const Text("Logout"),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showErrorDialog(String message) {
@@ -226,7 +259,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.user.fullName ?? "No Name",
+                            widget.user.fullName,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20 * w,
@@ -283,7 +316,12 @@ class _ProfileTabState extends State<ProfileTab> {
                   ProfileCardItem(
                     title: "Preferences",
                     icon: FontAwesomeIcons.gears,
-                    onTap: () => print("Preferences clicked"),
+                    onTap: () => Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => const PreferencesPage(),
+                      ),
+                    ),
                   ),
                   ProfileCardItem(
                     title: "Language",
@@ -318,7 +356,13 @@ class _ProfileTabState extends State<ProfileTab> {
                   ProfileCardItem(
                     title: "Edit Nutrition Goals",
                     icon: Ionicons.nutrition_outline,
-                    onTap: () => print("Edit Nutrition Goals clicked"),
+                    onTap: () => Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) =>
+                            EditNutrationGoals(user: widget.user),
+                      ),
+                    ),
                   ),
                   ProfileCardItem(
                     title: "Track Daily Intake",
@@ -432,10 +476,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   ProfileCardItem(
                     title: "Logout",
                     icon: Ionicons.log_out_outline,
-                    onTap: () => Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-                    ),
+                    onTap: _showLogoutDialog,
                   ),
                   ProfileCardItem(
                     title: "Delete Account",

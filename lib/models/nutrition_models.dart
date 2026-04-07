@@ -116,6 +116,23 @@ class NutritionLog {
       date: first(['date', 'logDate', 'log_date'])?.toString() ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'foodId': foodId,
+      'foodName': foodName,
+      'imageUrl': imageUrl,
+      'quantity': quantity,
+      'unitName': unitName,
+      'measurementType': measurementType,
+      'protein': protein,
+      'carbs': carbs,
+      'fats': fats,
+      'calories': calories,
+      'date': date,
+    };
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -129,8 +146,11 @@ class DailySummary {
   final double calorieGoal;
   final double remainingCalories;
   final double totalProtein;
+  final double proteinGoal;
   final double totalCarbs;
+  final double carbsGoal;
   final double totalFats;
+  final double fatsGoal;
   final List<NutritionLog> logs;
 
   DailySummary({
@@ -139,8 +159,11 @@ class DailySummary {
     required this.calorieGoal,
     required this.remainingCalories,
     required this.totalProtein,
+    required this.proteinGoal,
     required this.totalCarbs,
+    required this.carbsGoal,
     required this.totalFats,
+    required this.fatsGoal,
     required this.logs,
   });
 
@@ -259,6 +282,26 @@ class DailySummary {
       'daily_calorie_goal',
     ], 0);
 
+    // Dynamic fallbacks if macros aren't explicitly provided by backend
+    // Common split: 25% Protein, 45% Carbs, 30% Fat
+    final proteinGoal = _pick([
+      'proteinGoal',
+      'dailyProteinGoal',
+      'protein_goal',
+    ], (calorieGoal * 0.25) / 4);
+
+    final carbsGoal = _pick([
+      'carbsGoal',
+      'dailyCarbsGoal',
+      'carbs_goal',
+    ], (calorieGoal * 0.45) / 4);
+
+    final fatsGoal = _pick([
+      'fatsGoal',
+      'dailyFatsGoal',
+      'fats_goal',
+    ], (calorieGoal * 0.30) / 9);
+
     final remainingCalories =
         (get('remainingCalories') as num?)?.toDouble() ??
         (calorieGoal - totalCalories);
@@ -269,8 +312,11 @@ class DailySummary {
       calorieGoal: calorieGoal,
       remainingCalories: remainingCalories,
       totalProtein: totalProtein,
+      proteinGoal: proteinGoal,
       totalCarbs: totalCarbs,
+      carbsGoal: carbsGoal,
       totalFats: totalFats,
+      fatsGoal: fatsGoal,
       logs: logs,
     );
   }
@@ -282,8 +328,11 @@ class DailySummary {
     calorieGoal: 0,
     remainingCalories: 0,
     totalProtein: 0,
+    proteinGoal: 0,
     totalCarbs: 0,
+    carbsGoal: 0,
     totalFats: 0,
+    fatsGoal: 0,
     logs: [],
   );
 }
@@ -399,6 +448,25 @@ class MonthlySummary {
       days: list
           .map((e) => DaySummary.fromJson(e as Map<String, dynamic>))
           .toList(),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Streak Info
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Response from GET /api/nutrition/streak
+class StreakInfo {
+  final int streakCount;
+  final String? lastLogDate;
+
+  StreakInfo({required this.streakCount, this.lastLogDate});
+
+  factory StreakInfo.fromJson(Map<String, dynamic> json) {
+    return StreakInfo(
+      streakCount: (json['streakCount'] ?? json['streak_count'] ?? 0) as int,
+      lastLogDate: json['lastLogDate'] ?? json['last_log_date'],
     );
   }
 }

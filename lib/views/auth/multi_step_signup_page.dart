@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
@@ -16,6 +15,7 @@ import 'package:test_splash/views/auth/sign_up_steps/stepaccountinfo.dart';
 import 'package:test_splash/views/auth/sign_up_steps/stepextradetails.dart';
 import 'package:test_splash/views/auth/sign_up_steps/steppassword.dart';
 import 'package:test_splash/views/auth/sign_up_steps/step_profile_photo.dart';
+import 'package:test_splash/services/auth_service.dart';
 import 'package:test_splash/views/home/home_screen.dart';
 import 'package:test_splash/widgets/common/healix_primary_button.dart';
 import 'package:gap/gap.dart';
@@ -234,13 +234,9 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
           refreshToken = signupResp.data['refreshToken'] ?? "";
         }
 
-        // 👇 حفظ التوكن في SharedPreferences
+        // 👇 حفظ التوكن والمعلومات
         if (accessToken != null && accessToken.isNotEmpty) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString("token", accessToken);
-          if (refreshToken != null && refreshToken.isNotEmpty) {
-            await prefs.setString("refreshToken", refreshToken);
-          }
+          await AuthService.saveTokens(accessToken, refreshToken ?? "");
           print("✅ Token saved successfully");
         } else {
           print("⚠️ No token received from server");
@@ -408,25 +404,25 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         }
 
         // 3. المتابعة للصفحة الرئيسية
+        final userInfo = UserInfo(
+          username: _userNameController.text.trim(),
+          email: _emailController.text.trim(),
+          fullName: _fullNameController.text.trim(),
+          phoneNumber: _phoneController.text.trim(),
+          dateOfBirth: _selectedDate,
+          gender: _selectedGender,
+          bodyType: _selectedBodyType,
+          userHeight: _selectedHeight,
+          userWeight: _selectedWeight,
+          userGoalWeight: _selectedGoalWeight,
+          profilePictureUrl: uploadedProfileUrl,
+        );
+
+        await AuthService.saveUserInfo(userInfo);
+
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(
-            builder: (_) => HomeScreen(
-              user: UserInfo(
-                username: _userNameController.text.trim(),
-                email: _emailController.text.trim(),
-                fullName: _fullNameController.text.trim(),
-                phoneNumber: _phoneController.text.trim(),
-                dateOfBirth: _selectedDate,
-                gender: _selectedGender,
-                bodyType: _selectedBodyType,
-                userHeight: _selectedHeight,
-                userWeight: _selectedWeight,
-                userGoalWeight: _selectedGoalWeight,
-                profilePictureUrl: uploadedProfileUrl,
-              ),
-            ),
-          ),
+          MaterialPageRoute(builder: (_) => HomeScreen(user: userInfo)),
           (route) => false,
         );
       } else {

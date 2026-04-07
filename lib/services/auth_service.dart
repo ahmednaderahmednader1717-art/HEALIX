@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer';
+import 'package:test_splash/models/user_info_model.dart';
 
 class AuthService {
   final Dio _dio = Dio(
@@ -9,6 +11,37 @@ class AuthService {
       headers: {"Content-Type": "application/json"},
     ),
   );
+
+  static Future<void> saveTokens(String token, String refreshToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("token", token);
+    await prefs.setString("refreshToken", refreshToken);
+  }
+
+  static Future<void> saveUserInfo(UserInfo user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("user_data", jsonEncode(user.toJson()));
+  }
+
+  static Future<UserInfo?> getUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = prefs.getString("user_data");
+    if (userData != null) {
+      try {
+        return UserInfo.fromJson(jsonDecode(userData));
+      } catch (e) {
+        log('Error decoding user info: $e');
+      }
+    }
+    return null;
+  }
+
+  static Future<void> clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove("token");
+    await prefs.remove("refreshToken");
+    await prefs.remove("user_data");
+  }
 
   Future<bool> refreshToken() async {
     try {

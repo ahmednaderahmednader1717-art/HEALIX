@@ -116,10 +116,23 @@ class _DaySelectorState extends State<DaySelector> {
               double carbsPct = 0;
               double fatsPct = 0;
 
-              if (summary != null && summary.calorieGoal > 0) {
-                proteinPct = (summary.protein * 4) / summary.calorieGoal;
-                carbsPct = (summary.carbs * 4) / summary.calorieGoal;
-                fatsPct = (summary.fats * 9) / summary.calorieGoal;
+              // Fallback goal: if current day summary has 0 goal, try to find any valid goal in the map
+              double effectiveGoal = summary?.calorieGoal ?? 0;
+              if (effectiveGoal <= 0) {
+                for (var daySummary in widget.caloriesProgress.values) {
+                  if (daySummary.calorieGoal > 0) {
+                    effectiveGoal = daySummary.calorieGoal;
+                    break;
+                  }
+                }
+              }
+
+              // Even if summary is null, we might want to show the circle.
+              // But summary contains the actual eaten macros.
+              if (summary != null && effectiveGoal > 0) {
+                proteinPct = (summary.protein * 4) / effectiveGoal;
+                carbsPct = (summary.carbs * 4) / effectiveGoal;
+                fatsPct = (summary.fats * 9) / effectiveGoal;
               }
 
               Color dateColor = isSelected

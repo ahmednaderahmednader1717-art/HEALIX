@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +10,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_splash/core/app_colors.dart';
+import 'package:intl/intl.dart';
 import 'package:test_splash/models/user_info_model.dart';
-import 'package:test_splash/widgets/common/healix_primary_button.dart';
 import 'package:test_splash/widgets/common/healix_text_field.dart';
 
 class EditProfile extends StatefulWidget {
@@ -83,7 +82,6 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  // Add this variable to store picked image (Cross-platform)
   XFile? _pickedImage;
 
   Future<void> _changeProfilePicture() async {
@@ -95,13 +93,11 @@ class _EditProfileState extends State<EditProfile> {
 
     if (image == null) return;
 
-    // ✅ Show local image immediately
     setState(() {
       _pickedImage = image;
     });
 
     try {
-      // Get token
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
@@ -109,14 +105,12 @@ class _EditProfileState extends State<EditProfile> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('جاري حفظ الصورة...')));
+      ).showSnackBar(const SnackBar(content: Text('Saving picture...')));
 
-      // Upload image
       final dio = Dio();
 
       String fileName = image.name.split('/').last;
       String fileExtension = fileName.split('.').last.toLowerCase();
-      // Default to jpeg if extension is missing or weird
       if (fileExtension.isEmpty || fileExtension.length > 4) {
         fileExtension = 'jpg';
       }
@@ -129,7 +123,6 @@ class _EditProfileState extends State<EditProfile> {
           bytes,
           filename:
               "profile_${DateTime.now().millisecondsSinceEpoch}.$fileExtension",
-          // contentType: MediaType('image', fileExtension), // Requires http_parser, letting Dio infer or server handle it for now to avoid import issues if package missing
         );
       } else {
         multipartFile = await MultipartFile.fromFile(
@@ -143,18 +136,10 @@ class _EditProfileState extends State<EditProfile> {
       final response = await dio.post(
         'http://healix26.somee.com/api/User/upload-profile-picture',
         data: formData,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            // 'Content-Type': 'multipart/form-data', // Dio sets this automatically
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
-      // ... rest of upload logic (keep it to update server)
       if (response.statusCode == 200) {
-        // We don't need to update UI from URL anymore since we have local file
-        // But we still save URL to profile for next login
         String? newImageUrl;
         final data = response.data;
         if (data is Map<String, dynamic>) {
@@ -168,10 +153,9 @@ class _EditProfileState extends State<EditProfile> {
 
         if (newImageUrl != null) {
           widget.user.profilePictureUrl = newImageUrl;
-          // Save to profile API
           try {
             await dio.put(
-              'http://healix26.somee.com/api/User/update-profile-picture', // Fixed endpoint from Auth to User based on API spec if needed, but spec says /User/update-profile-picture
+              'http://healix26.somee.com/api/User/update-profile-picture',
               data: {'profilePictureUrl': newImageUrl},
               options: Options(
                 headers: {
@@ -188,22 +172,21 @@ class _EditProfileState extends State<EditProfile> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('تم تحديث الصورة!')));
+          ).showSnackBar(const SnackBar(content: Text('Picture updated!')));
         }
       } else {
-        print("Upload failed: ${response.statusCode} - ${response.data}");
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('فشل رفع الصورة: ${response.statusCode}')),
+            SnackBar(content: Text('Upload failed: ${response.statusCode}')),
           );
         }
       }
     } catch (e) {
       print('Error uploading image: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('حدث خطأ أثناء رفع الصورة')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error uploading picture')),
+        );
       }
     }
   }
@@ -273,234 +256,197 @@ class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     final userProfileImage = widget.user.profilePictureUrl ?? '';
-
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    const baseWidth = 430.0;
-    const baseHeight = 932.0;
-
-    final w = screenWidth / baseWidth;
-    final h = screenHeight / baseHeight;
-    final scale = min(w, h);
+    final w = screenWidth / 430;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF16313B), // Solid background fix
+      backgroundColor: const Color(0xFF16313B),
       appBar: AppBar(
-        backgroundColor: AppColors.ContainerColor,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
         title: Text(
           "Edit Profile",
-          style: GoogleFonts.inriaSans(
+          style: GoogleFonts.outfit(
             color: Colors.white,
-            fontSize: 22 * scale,
+            fontSize: 22 * w,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.white,
+            size: 20 * w,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24 * w, vertical: 16 * h),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Gap(32 * h),
-              // Profile Picture
-              Center(
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey.shade800,
-                      ),
-                      child: GestureDetector(
-                        onTap: () {
-                          if (_pickedImage != null ||
-                              userProfileImage.isNotEmpty) {
-                            Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (_) => FullScreenImage(
-                                  imageUrl: userProfileImage,
-                                  localPath: _pickedImage?.path,
-                                  heroTag: "profile_pic",
-                                ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 24 * w, vertical: 20 * w),
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Gap(20 * w),
+            // Profile Picture
+            Center(
+              child: Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  Container(
+                    width: 140 * w,
+                    height: 140 * w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.05),
+                      border: Border.all(color: Colors.white10, width: 2),
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        if (_pickedImage != null ||
+                            userProfileImage.isNotEmpty) {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (_) => FullScreenImage(
+                                imageUrl: userProfileImage,
+                                localPath: _pickedImage?.path,
+                                heroTag: "profile_pic",
                               ),
-                            );
-                          }
-                        },
-                        child: Hero(
-                          tag: "profile_pic",
-                          child: ClipOval(
-                            child: _pickedImage != null
-                                ? (kIsWeb
-                                      ? Image.network(
-                                          _pickedImage!.path,
-                                          fit: BoxFit.cover,
-                                          width: 140,
-                                          height: 140,
-                                        )
-                                      : Image.file(
-                                          File(_pickedImage!.path),
-                                          fit: BoxFit.cover,
-                                          width: 140,
-                                          height: 140,
-                                        ))
-                                : (userProfileImage.isNotEmpty
-                                      ? (kIsWeb
-                                            ? Image.network(
-                                                'https://corsproxy.io/?${Uri.encodeComponent(userProfileImage)}',
-                                                fit: BoxFit.cover,
-                                                width: 140,
-                                                height: 140,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) {
-                                                      return Center(
-                                                        child: Text(
-                                                          widget
-                                                                  .user
-                                                                  .fullName
-                                                                  .isNotEmpty
-                                                              ? widget
-                                                                    .user
-                                                                    .fullName[0]
-                                                                    .toUpperCase()
-                                                              : '',
-                                                          style:
-                                                              GoogleFonts.inriaSans(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 40,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                              ),
-                                                        ),
-                                                      );
-                                                    },
-                                              )
-                                            : CachedNetworkImage(
-                                                imageUrl: userProfileImage,
-                                                fit: BoxFit.cover,
-                                                width: 140,
-                                                height: 140,
-                                                placeholder: (context, url) =>
-                                                    const CircularProgressIndicator(),
-                                                errorWidget: (context, url, error) {
-                                                  return Center(
-                                                    child: Text(
-                                                      widget
-                                                              .user
-                                                              .fullName
-                                                              .isNotEmpty
-                                                          ? widget
-                                                                .user
-                                                                .fullName[0]
-                                                                .toUpperCase()
-                                                          : '',
-                                                      style:
-                                                          GoogleFonts.inriaSans(
-                                                            color: Colors.white,
-                                                            fontSize: 40,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                          ),
-                                                    ),
-                                                  );
-                                                },
-                                              ))
-                                      : Center(
-                                          child: Text(
-                                            widget.user.fullName.isNotEmpty
-                                                ? widget.user.fullName[0]
-                                                      .toUpperCase()
-                                                : '',
-                                            style: GoogleFonts.inriaSans(
-                                              color: Colors.white,
-                                              fontSize: 40,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        )),
-                          ),
+                            ),
+                          );
+                        }
+                      },
+                      child: Hero(
+                        tag: "profile_pic",
+                        child: ClipOval(
+                          child: _pickedImage != null
+                              ? (kIsWeb
+                                    ? Image.network(
+                                        _pickedImage!.path,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.file(
+                                        File(_pickedImage!.path),
+                                        fit: BoxFit.cover,
+                                      ))
+                              : (userProfileImage.isNotEmpty
+                                    ? (kIsWeb
+                                          ? Image.network(
+                                              'https://corsproxy.io/?${Uri.encodeComponent(userProfileImage)}',
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => _buildPlaceholder(),
+                                            )
+                                          : CachedNetworkImage(
+                                              imageUrl: userProfileImage,
+                                              fit: BoxFit.cover,
+                                              placeholder: (context, url) =>
+                                                  const Center(
+                                                    child:
+                                                        CupertinoActivityIndicator(),
+                                                  ),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      _buildPlaceholder(),
+                                            ))
+                                    : _buildPlaceholder()),
                         ),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: _changeProfilePicture,
-                      child: Container(
-                        height: 32 * h,
-                        width: 32 * w,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.85),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.edit,
-                          color: Colors.white,
-                          size: 18 * scale,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Gap(10 * h),
-              GestureDetector(
-                onTap: _changeProfilePicture,
-                child: Text(
-                  "Change Photo",
-                  style: GoogleFonts.inriaSans(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 15,
                   ),
+                  GestureDetector(
+                    onTap: _changeProfilePicture,
+                    child: Container(
+                      height: 36 * w,
+                      width: 36 * w,
+                      decoration: const BoxDecoration(
+                        color: AppColors.primarayColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 18 * w,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Gap(12 * w),
+            GestureDetector(
+              onTap: _changeProfilePicture,
+              child: Text(
+                "Change Profile Photo",
+                style: GoogleFonts.outfit(
+                  color: Colors.white38,
+                  fontSize: 14 * w,
                 ),
               ),
-              Gap(40 * h),
-              // First Name
-              _buildTextField(
-                label: "First Name",
-                controller: firstNameController,
-                hint: "First Name",
+            ),
+            Gap(40 * w),
+            // Fields
+            _buildTextField(
+              label: "First Name",
+              controller: firstNameController,
+              hint: "Enter first name",
+              scale: w,
+            ),
+            Gap(16 * w),
+            _buildTextField(
+              label: "Last Name",
+              controller: lastNameController,
+              hint: "Enter last name",
+              scale: w,
+            ),
+            Gap(16 * w),
+            _buildTextField(
+              label: "Username",
+              controller: usernameController,
+              hint: "Enter username",
+              scale: w,
+            ),
+            Gap(16 * w),
+            GestureDetector(
+              onTap: _selectDateOfBirth,
+              child: AbsorbPointer(
+                child: _buildTextField(
+                  label: "Date of Birth",
+                  controller: TextEditingController(
+                    text: selectedDateOfBirth != null
+                        ? DateFormat('MMM d, yyyy').format(selectedDateOfBirth!)
+                        : "Not set",
+                  ),
+                  hint: "Select birth date",
+                  scale: w,
+                ),
               ),
-              Gap(16 * h),
-              // Last Name
-              _buildTextField(
-                label: "Last Name",
-                controller: lastNameController,
-                hint: "Last Name",
-              ),
-              Gap(16 * h),
-              // Username
-              _buildTextField(
-                label: "Username",
-                controller: usernameController,
-                hint: "Username",
-              ),
-              // Date of Birth
-              Gap(40 * h),
-              HealixPrimaryButton(
-                text: "SAVE",
-                onPressed: _saveChanges,
-                backgroundColor: Colors.white,
-                textColor: Colors.black,
-              ),
-              Gap(20 * h),
-            ],
-          ),
+            ),
+            Gap(40 * w),
+            _buildSaveButton(w),
+            Gap(20 * w),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Center(
+      child: Text(
+        widget.user.fullName.isNotEmpty
+            ? widget.user.fullName[0].toUpperCase()
+            : '',
+        style: GoogleFonts.outfit(
+          color: Colors.white,
+          fontSize: 40,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -509,6 +455,7 @@ class _EditProfileState extends State<EditProfile> {
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
+    required double scale,
     String? hint,
   }) {
     return Column(
@@ -516,14 +463,42 @@ class _EditProfileState extends State<EditProfile> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inriaSans(
-            color: Colors.white.withOpacity(0.45),
-            fontSize: 14,
+          style: GoogleFonts.outfit(
+            color: Colors.white38,
+            fontSize: 14 * scale,
           ),
         ),
-        const Gap(4),
-        HealixTextField(controller: controller, hint: hint ?? 'Username'),
+        const Gap(8),
+        HealixTextField(controller: controller, hint: hint ?? ''),
       ],
+    );
+  }
+
+  Widget _buildSaveButton(double w) {
+    return Container(
+      width: double.infinity,
+      height: 55 * w,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16 * w),
+        color: AppColors.primarayColor,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _saveChanges,
+          borderRadius: BorderRadius.circular(16 * w),
+          child: Center(
+            child: Text(
+              "Save Changes",
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 18 * w,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -575,7 +550,7 @@ class FullScreenImage extends StatelessWidget {
             child: SafeArea(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
+                  color: Colors.black.withOpacity(0.5),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(

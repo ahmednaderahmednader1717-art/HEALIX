@@ -1,9 +1,12 @@
-import 'dart:math';
+import 'dart:math' as math;
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:test_splash/widgets/home/charts_widget.dart';
 import 'package:test_splash/views/home/widgets/day_selector.dart';
 import 'package:test_splash/views/home/widgets/meal_tile.dart';
@@ -14,6 +17,8 @@ import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/food_service.dart';
 import 'package:test_splash/services/auth_service.dart';
 import 'package:test_splash/services/nutrition_service.dart';
+import 'package:test_splash/services/notification_service.dart';
+import 'package:test_splash/services/live_activity_service.dart';
 
 class HomeTab extends StatefulWidget {
   final void Function(int)? onTabChange;
@@ -30,63 +35,189 @@ class _HomeTabState extends State<HomeTab> {
   Future<DailySummary?>? _dailySummaryFuture;
   final NutritionService _nutritionService = NutritionService();
   Map<DateTime, DaySummary> _monthlyProgress = {};
+  int _streakCount = 0;
 
   @override
   void initState() {
     super.initState();
     _foodsFuture = _fetchProcessedFoods();
-    _fetchMonthlySummary().then((_) => _fetchDailySummary(selectedDay));
+    _refreshAllData();
     NutritionService.foodLogged.addListener(_onFoodLogged);
   }
 
   void _onFoodLogged() {
-    _fetchMonthlySummary().then((_) => _fetchDailySummary(selectedDay));
+    setState(() {
+      selectedDay = DateTime.now();
+    });
+    _refreshAllData();
   }
 
-  void _fetchDailySummary(DateTime date) {
+  Future<void> _refreshAllData() async {
+    // 1. Fetch monthly summary for the broad 35-day range
+    await _fetchMonthlySummary();
+
+    // 2. Proactively fetch the last 7 days of daily summaries to ensure accuracy
+    // This fixes the issue where monthly summary might miss data for recent days.
+    final today = DateTime.now();
+    final List<Future> dailyFetches = [];
+    for (int i = 0; i < 7; i++) {
+      dailyFetches.add(_fetchDailySummary(today.subtract(Duration(days: i))));
+    }
+
+    await Future.wait(dailyFetches);
+
+    // 3. Ensure selected day is also refreshed (already included in loop above if selectedDay is recent)
+    if (selectedDay.isBefore(today.subtract(const Duration(days: 6)))) {
+      await _fetchDailySummary(selectedDay);
+    }
+
+    // 4. Fetch the current streak
+    await _fetchStreak();
+
+    // 5. Update streak reminder
+
+    final todayKey = DateTime(today.year, today.month, today.day);
+    final hasLoggedToday = _monthlyProgress[todayKey]?.hasData ?? false;
+    LocalNotificationService.updateStreakReminder(hasLoggedToday);
+  }
+
+  Future<void> _fetchStreak() async {
+    final streak = await _nutritionService.getStreak();
+    if (streak != null && mounted) {
+      setState(() {
+        _streakCount = streak.streakCount;
+      });
+    }
+  }
+
+  Future<void> _fetchDailySummary(DateTime date) async {
     final dateStr =
         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-    final future = _nutritionService.getDailySummary(date: dateStr);
+    final summary = await _nutritionService.getDailySummary(date: dateStr);
 
-    future.then((summary) {
-      if (summary != null && mounted) {
-        final dateKey = DateTime(date.year, date.month, date.day);
-        setState(() {
-          _monthlyProgress[dateKey] = DaySummary(
-            date: summary.date,
-            totalCalories: summary.totalCalories,
-            calorieGoal: summary.calorieGoal,
-            protein: summary.totalProtein,
-            carbs: summary.totalCarbs,
-            fats: summary.totalFats,
-            goalAchieved:
-                summary.calorieGoal > 0 &&
-                summary.totalCalories >= summary.calorieGoal,
-            hasData: summary.logs.isNotEmpty || summary.totalCalories > 0,
-          );
-        });
+    if (summary != null && mounted) {
+      final dateKey = DateTime(date.year, date.month, date.day);
+      setState(() {
+        _monthlyProgress[dateKey] = DaySummary(
+          date: summary.date,
+          totalCalories: summary.totalCalories,
+          calorieGoal: summary.calorieGoal,
+          protein: summary.totalProtein,
+          carbs: summary.totalCarbs,
+          fats: summary.totalFats,
+          goalAchieved:
+              summary.calorieGoal > 0 &&
+              summary.totalCalories >= summary.calorieGoal,
+          hasData: summary.logs.isNotEmpty || summary.totalCalories > 0,
+        );
+        // If we have a valid goal now, apply it to other days with 0 goal
+        if (summary.calorieGoal > 0) {
+          _monthlyProgress.updateAll((key, day) {
+            if (day.calorieGoal == 0) {
+              return DaySummary(
+                date: day.date,
+                totalCalories: day.totalCalories,
+                calorieGoal: summary.calorieGoal,
+                protein: day.protein,
+                carbs: day.carbs,
+                fats: day.fats,
+                goalAchieved: day.goalAchieved,
+                hasData: day.hasData,
+              );
+            }
+            return day;
+          });
+        }
+      });
+    }
+
+    // Update the future specifically for the chart widget if it matches the current selection
+    final selectedDayKey = DateTime(
+      selectedDay.year,
+      selectedDay.month,
+      selectedDay.day,
+    );
+    final currentFetchKey = DateTime(date.year, date.month, date.day);
+    if (selectedDayKey == currentFetchKey) {
+      setState(() {
+        _dailySummaryFuture = Future.value(summary);
+      });
+
+      // Update Live Activity if it's today
+      if (summary != null) {
+        print("======== LIVE ACTIVITY DEBUG: SUMMARY FETCHED ========");
+        final now = DateTime.now();
+        if (currentFetchKey.year == now.year &&
+            currentFetchKey.month == now.month &&
+            currentFetchKey.day == now.day) {
+          print("======== LIVE ACTIVITY DEBUG: DATE MATCH (TODAY) ========");
+          SharedPreferences.getInstance().then((prefs) {
+            final bool isLiveActivityEnabled =
+                prefs.getBool('live_activities_enabled') ?? true;
+
+            print(
+              "======== LIVE ACTIVITY DEBUG: ENABLED FLAG = $isLiveActivityEnabled ========",
+            );
+
+            // FORCE TRIGGER FOR DEBUGGING
+            if (isLiveActivityEnabled || true) {
+              final double calGoal = summary.calorieGoal;
+              final double pGoal = summary.proteinGoal;
+              final double cGoal = summary.carbsGoal;
+              final double fGoal = summary.fatsGoal;
+
+              print(
+                "======== LIVE ACTIVITY DEBUG: CALLING updateActivity() cal=$calGoal p=$pGoal c=$cGoal f=$fGoal ========",
+              );
+
+              LiveActivityService.updateActivity(
+                caloriesLeft: (calGoal - summary.totalCalories).clamp(
+                  0,
+                  double.infinity,
+                ),
+                proteinLeft: (pGoal - summary.totalProtein).clamp(
+                  0,
+                  double.infinity,
+                ),
+                carbsLeft: (cGoal - summary.totalCarbs).clamp(
+                  0,
+                  double.infinity,
+                ),
+                fatsLeft: (fGoal - summary.totalFats).clamp(0, double.infinity),
+              );
+            }
+          });
+        }
       }
-    });
-
-    setState(() {
-      _dailySummaryFuture = future;
-    });
+    }
   }
 
   Future<void> _fetchMonthlySummary() async {
-    final summary = await _nutritionService.getMonthlySummary(days: 28);
+    // Match DaySelector logic: 35 days starting from (today - 27 days)
+    final today = DateTime.now();
+    final startDate = today.subtract(const Duration(days: 27));
+    final startDateStr =
+        "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}";
+
+    final summary = await _nutritionService.getMonthlySummary(
+      startDate: startDateStr,
+      days: 35,
+    );
     if (summary != null) {
-      final Map<DateTime, DaySummary> progress = {};
-      for (var day in summary.days) {
-        try {
-          final dt = DateTime.parse(day.date);
-          final dateKey = DateTime(dt.year, dt.month, dt.day);
-          progress[dateKey] = day;
-        } catch (_) {}
-      }
       if (mounted) {
         setState(() {
-          _monthlyProgress = progress;
+          for (var day in summary.days) {
+            try {
+              final dt = DateTime.parse(day.date);
+              final dateKey = DateTime(dt.year, dt.month, dt.day);
+              // Only add if not already present or if we want to refresh
+              // (but don't overwrite days we might have fetched explicitly with more detail)
+              if (!_monthlyProgress.containsKey(dateKey) ||
+                  _monthlyProgress[dateKey]!.calorieGoal == 0) {
+                _monthlyProgress[dateKey] = day;
+              }
+            } catch (_) {}
+          }
         });
       }
     }
@@ -119,6 +250,20 @@ class _HomeTabState extends State<HomeTab> {
     await _foodsFuture;
   }
 
+  String _getNutritionHeader() {
+    final now = DateTime.now();
+    final isToday =
+        selectedDay.year == now.year &&
+        selectedDay.month == now.month &&
+        selectedDay.day == now.day;
+
+    if (isToday) {
+      return "Today's Total Nutrition";
+    }
+
+    return "Nutrition for ${DateFormat('EEE, MMM d').format(selectedDay)}";
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -129,7 +274,7 @@ class _HomeTabState extends State<HomeTab> {
 
     final w = screenWidth / baseWidth;
     final h = screenHeight / baseHeight;
-    final scale = min(w, h);
+    final scale = math.min(w, h);
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(
@@ -213,7 +358,7 @@ class _HomeTabState extends State<HomeTab> {
                             ),
                             Gap(5 * w),
                             Text(
-                              "0",
+                              "$_streakCount",
                               style: GoogleFonts.inriaSans(
                                 fontSize: 20 * scale,
                                 color: Colors.white,
@@ -236,7 +381,7 @@ class _HomeTabState extends State<HomeTab> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12 * w),
                   child: RowHeader(
-                    title: "Today's Total Nutrition",
+                    title: _getNutritionHeader(),
                     actionText: "",
                     onAction: null,
                     scale: w,

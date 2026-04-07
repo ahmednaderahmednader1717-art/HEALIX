@@ -233,9 +233,14 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
     if (widget.food.id == null || _amount <= 0) return;
     setState(() => _isLogging = true);
     try {
+      final now = DateTime.now();
+      final dateStr =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
       final log = await _nutritionService.logFood(
         foodId: widget.food.id!,
         quantity: _amount,
+        date: dateStr,
       );
       if (!mounted) return;
       Navigator.pop(context);

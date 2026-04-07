@@ -16,7 +16,7 @@ class _ProgressTabState extends State<ProgressTab> {
   final NutritionService _nutritionService = NutritionService();
 
   // ── static / demo data ──────────────────────────────────────────────────────
-  final int dayStreak = 0;
+  int _streakCount = 0;
   final double startWeight = 60.0;
   final double goalWeight = 65.0;
   final double currentWeight = 60.0;
@@ -61,11 +61,16 @@ class _ProgressTabState extends State<ProgressTab> {
     final results = await Future.wait([
       _nutritionService.getDailySummary(date: _selectedDate),
       _nutritionService.getMonthlySummary(startDate: startDateStr, days: 28),
+      _nutritionService.getStreak(),
     ]);
 
     setState(() {
       _dailySummary = results[0] as DailySummary?;
       _monthlySummary = results[1] as MonthlySummary?;
+      final streakInfo = results[2] as StreakInfo?;
+      if (streakInfo != null) {
+        _streakCount = streakInfo.streakCount;
+      }
       _nutritionLoading = false;
     });
   }
@@ -131,7 +136,7 @@ class _ProgressTabState extends State<ProgressTab> {
             SizedBox(height: 20 * h),
 
             // ── Streak ──────────────────────────────────────────────────────
-            _DayStreakCard(streak: dayStreak, w: w, h: h, scale: scale),
+            _DayStreakCard(streak: _streakCount, w: w, h: h, scale: scale),
             SizedBox(height: 16 * h),
 
             // ── Nutrition Donut Chart ────────────────────────────────────────
@@ -1272,49 +1277,5 @@ class _LineChartPainter extends CustomPainter {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Heptagon badge painter (kept for later use)
 // ─────────────────────────────────────────────────────────────────────────────
-class _HeptagonPainter extends CustomPainter {
-  _HeptagonPainter({
-    required this.fillColor,
-    required this.strokeColor,
-    required this.strokeWidth,
-  });
-
-  final Color fillColor, strokeColor;
-  final double strokeWidth;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const int sides = 7;
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-    final r = size.width / 2 - strokeWidth;
-    final startAngle = -pi / 2;
-
-    final path = Path();
-    for (int i = 0; i < sides; i++) {
-      final angle = startAngle + (2 * pi / sides) * i;
-      final x = cx + r * cos(angle);
-      final y = cy + r * sin(angle);
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-    path.close();
-
-    canvas.drawPath(path, Paint()..color = fillColor);
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = strokeColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_HeptagonPainter old) => false;
-}
+// END OF FILE

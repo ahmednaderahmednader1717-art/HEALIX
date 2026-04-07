@@ -16,6 +16,7 @@ import 'package:test_splash/widgets/common/healix_primary_button.dart';
 import 'package:test_splash/views/auth/sign_up_screen.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/src/web_wrapper.dart' as web;
+import 'package:test_splash/services/auth_service.dart';
 
 // ===== LogInScreen =====
 class LogInScreen extends StatefulWidget {
@@ -95,18 +96,21 @@ class _LogInScreenState extends State<LogInScreen> {
           "🔄 RefreshToken: '${refreshToken.isEmpty ? 'EMPTY' : 'EXISTS'}'",
         );
 
-        // حفظ التوكن
-        await _saveTokens(token, refreshToken);
-
-        // تحقق من الحفظ
-        final prefs = await SharedPreferences.getInstance();
-        final savedToken = prefs.getString("token");
-        print(
-          "💾 Token saved successfully: ${savedToken?.isNotEmpty ?? false}",
-        );
+        // حفظ التوكن والمعلومات
+        await AuthService.saveTokens(token, refreshToken);
 
         if (userJson != null) {
           UserInfo user = UserInfo.fromJson(userJson);
+          await AuthService.saveUserInfo(user);
+
+          // تحقق من الحفظ
+          final savedToken = (await SharedPreferences.getInstance()).getString(
+            "token",
+          );
+          print(
+            "💾 Token saved successfully: ${savedToken?.isNotEmpty ?? false}",
+          );
+
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
@@ -146,10 +150,11 @@ class _LogInScreenState extends State<LogInScreen> {
             response.data['accessToken'] ?? response.data['token'] ?? "";
         final refreshToken = response.data['refreshToken'] ?? "";
 
-        await _saveTokens(token, refreshToken);
+        await AuthService.saveTokens(token, refreshToken);
 
         // حمّل المستخدم من الرد
         UserInfo userObj = UserInfo.fromJson(userJson);
+        await AuthService.saveUserInfo(userObj);
 
         // إذا كانت صورة Google متاحة وليست محلية، قم بتحميلها ورفعها للسيرفر
         if (userObj.profilePictureUrl != null &&
@@ -171,6 +176,7 @@ class _LogInScreenState extends State<LogInScreen> {
             final prefs = await SharedPreferences.getInstance();
             if (newUrl != null) {
               await prefs.setString('profilePictureUrl', newUrl);
+              await AuthService.saveUserInfo(userObj); // Update cached info
             }
           }
         }
@@ -238,12 +244,6 @@ class _LogInScreenState extends State<LogInScreen> {
     } finally {
       setState(() => _loading = false);
     }
-  }
-
-  Future<void> _saveTokens(String token, String refreshToken) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("token", token);
-    await prefs.setString("refreshToken", refreshToken);
   }
 
   void _showCupertinoDialog(String message) {

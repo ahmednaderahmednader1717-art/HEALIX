@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,25 +27,82 @@ class NutritionService {
   /// Returns today's summary when [date] is null, otherwise the summary for
   /// the given date (format: 'yyyy-MM-dd').
   Future<DailySummary?> getDailySummary({String? date}) async {
+    final effectiveDate = date ?? DateTime.now().toString().split(' ')[0];
+    
     try {
       final options = await _authOptions();
       final params = <String, dynamic>{};
       if (date != null) params['date'] = date;
 
-      final response = await _dio.get(
-        '/nutrition/daily-summary',
-        queryParameters: params.isEmpty ? null : params,
-        options: options,
-      );
+      DailySummary? summary;
 
-      if (response.statusCode == 200) {
-        log('DailySummary: ${response.data}');
-        return DailySummary.fromJson(response.data as Map<String, dynamic>);
+      try {
+        final response = await _dio.get(
+          '/nutrition/daily-summary',
+          queryParameters: params.isEmpty ? null : params,
+          options: options,
+        );
+
+        if (response.statusCode == 200) {
+          log('DailySummary: ${response.data}');
+          summary = DailySummary.fromJson(response.data as Map<String, dynamic>);
+        }
+      } catch (dioError) {
+        log('Error fetching from backend: $dioError');
       }
+
+      summary ??= DailySummary.empty(effectiveDate);
+
+      // ── Merge Local Logs ──
+      final prefs = await SharedPreferences.getInstance();
+      final key = 'local_logs_$effectiveDate';
+      final localRaw = prefs.getStringList(key) ?? [];
+
+      if (localRaw.isNotEmpty) {
+        final localLogs = localRaw.map((e) => NutritionLog.fromJson(jsonDecode(e))).toList();
+        final allLogs = List<NutritionLog>.from(summary.logs)..addAll(localLogs);
+
+        final totalLocalCals = localLogs.fold(0.0, (s, l) => s + l.calories);
+        final totalLocalProtein = localLogs.fold(0.0, (s, l) => s + l.protein);
+        final totalLocalCarbs = localLogs.fold(0.0, (s, l) => s + l.carbs);
+        final totalLocalFats = localLogs.fold(0.0, (s, l) => s + l.fats);
+
+        summary = DailySummary(
+          date: summary.date.isNotEmpty ? summary.date : effectiveDate,
+          totalCalories: summary.totalCalories + totalLocalCals,
+          calorieGoal: summary.calorieGoal,
+          remainingCalories: summary.remainingCalories - totalLocalCals,
+          totalProtein: summary.totalProtein + totalLocalProtein,
+          proteinGoal: summary.proteinGoal,
+          totalCarbs: summary.totalCarbs + totalLocalCarbs,
+          carbsGoal: summary.carbsGoal,
+          totalFats: summary.totalFats + totalLocalFats,
+          fatsGoal: summary.fatsGoal,
+          logs: allLogs,
+        );
+      }
+
+      return summary;
+
     } catch (e) {
-      log('Error fetching daily summary: $e');
+      log('Error getting combined daily summary: $e');
     }
     return null;
+  }
+
+  // ─── Local Log (AI Cache) ─────────────────────────────────────────────────
+
+  Future<void> saveLocalLog(NutritionLog logItem, String date) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = 'local_logs_$date';
+      final existing = prefs.getStringList(key) ?? [];
+      existing.add(jsonEncode(logItem.toJson()));
+      await prefs.setStringList(key, existing);
+      NutritionService.foodLogged.value++;
+    } catch (e) {
+      log('Error saving local log: $e');
+    }
   }
 
   // ─── Monthly Summary ──────────────────────────────────────────────────────
@@ -170,6 +228,24 @@ class NutritionService {
       }
     } catch (e) {
       log('Error updating log $logId: $e');
+    }
+    return null;
+  }
+
+  // ─── Streak ───────────────────────────────────────────────────────────────
+
+  /// Returns the current nutrition streak count and last log date.
+  Future<StreakInfo?> getStreak() async {
+    try {
+      final options = await _authOptions();
+      final response = await _dio.get('/nutrition/streak', options: options);
+
+      if (response.statusCode == 200) {
+        log('StreakInfo: ${response.data}');
+        return StreakInfo.fromJson(response.data as Map<String, dynamic>);
+      }
+    } catch (e) {
+      log('Error fetching streak: $e');
     }
     return null;
   }

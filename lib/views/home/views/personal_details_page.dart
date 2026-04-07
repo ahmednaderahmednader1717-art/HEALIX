@@ -737,7 +737,11 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
         backgroundColor: AppColors.ContainerColor,
         title: Text(
           "Personal Details",
-          style: GoogleFonts.inriaSans(color: Colors.white, fontSize: 22),
+          style: GoogleFonts.outfit(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
