@@ -208,45 +208,45 @@ class _ProfileTabState extends State<ProfileTab> {
                           color: Colors.grey[800],
                         ),
                         child: ClipOval(
-                          child:
-                              (widget.user.profilePictureUrl != null &&
+                          child: (widget.user.profilePictureUrl != null &&
                                   widget.user.profilePictureUrl!.isNotEmpty)
-                              ? (kIsWeb
-                                    ? Image.network(
-                                        // CORS Proxy for development only
-                                        'https://corsproxy.io/?${Uri.encodeComponent(widget.user.profilePictureUrl!)}',
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                              print(
-                                                "❌ Error loading image: $error",
-                                              );
+                              ? Builder(
+                                  builder: (context) {
+                                    String rawUrl = widget.user.profilePictureUrl!;
+                                    String finalUrl = rawUrl.startsWith('http')
+                                        ? rawUrl
+                                        : 'http://healix26.somee.com${rawUrl.startsWith('/') ? '' : '/'}$rawUrl';
+
+                                    return kIsWeb
+                                        ? Image.network(
+                                            'https://corsproxy.io/?${Uri.encodeComponent(finalUrl)}',
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              print("❌ Error loading image: $error");
                                               return Image.asset(
                                                 "assets/logo/person_icon.png",
                                                 fit: BoxFit.cover,
                                               );
                                             },
-                                        loadingBuilder:
-                                            (context, child, loadingProgress) {
-                                              if (loadingProgress == null) {
-                                                return child;
-                                              }
+                                            loadingBuilder: (context, child, loadingProgress) {
+                                              if (loadingProgress == null) return child;
                                               return const CupertinoActivityIndicator();
                                             },
-                                      )
-                                    : CachedNetworkImage(
-                                        imageUrl:
-                                            widget.user.profilePictureUrl!,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) =>
-                                            const CupertinoActivityIndicator(),
-                                        errorWidget: (context, url, error) {
-                                          return Image.asset(
-                                            "assets/logo/person_icon.png",
+                                          )
+                                        : CachedNetworkImage(
+                                            imageUrl: finalUrl,
                                             fit: BoxFit.cover,
+                                            placeholder: (context, url) =>
+                                                const CupertinoActivityIndicator(),
+                                            errorWidget: (context, url, error) {
+                                              return Image.asset(
+                                                "assets/logo/person_icon.png",
+                                                fit: BoxFit.cover,
+                                              );
+                                            },
                                           );
-                                        },
-                                      ))
+                                  },
+                                )
                               : Image.asset(
                                   "assets/logo/person_icon.png",
                                   fit: BoxFit.cover,

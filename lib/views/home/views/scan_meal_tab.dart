@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:test_splash/core/app_colors.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:test_splash/models/food_model.dart';
 import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/meal_scan_service.dart';
@@ -100,9 +101,21 @@ class _ScanMealTabState extends State<ScanMealTab>
       setState(() {
         _result = food;
         _isAnalyzing = false;
-        _amount = 100.0;
-        _selectedUnit = 'g';
-        _amountController.text = '100';
+        
+        final unitStr = (food.unitName ?? '').toLowerCase();
+        if (unitStr.contains('piece') || unitStr.contains('slice') || unitStr.contains('bowl') || unitStr.contains('cup')) {
+          _selectedUnit = 'piece';
+          _amount = 1.0;
+          _amountController.text = '1';
+        } else if (unitStr == 'ml') {
+          _selectedUnit = 'ml';
+          _amount = 100.0;
+          _amountController.text = '100';
+        } else {
+          _selectedUnit = 'g';
+          _amount = 100.0;
+          _amountController.text = '100';
+        }
       });
     } catch (e, stack) {
       debugPrint('=== Gemini analysis FAILED ===');
@@ -118,7 +131,16 @@ class _ScanMealTabState extends State<ScanMealTab>
 
   // ── Nutrition helpers (same logic as MealTile detail sheet) ──────────────
 
-  double get _multiplier => _amount / 100.0;
+  double get _multiplier {
+    if (_selectedUnit == 'piece') {
+      final weightToUse = (_result?.weightPerUnit != null && _result!.weightPerUnit! > 0)
+          ? _result!.weightPerUnit!
+          : 100.0;
+      return (_amount * weightToUse) / 100.0;
+    }
+    return _amount / 100.0;
+  }
+
   int get _adjustedCalories =>
       ((_adjustedProtein * 4) + (_adjustedCarbs * 4) + (_adjustedFats * 9))
           .round();
@@ -137,6 +159,11 @@ class _ScanMealTabState extends State<ScanMealTab>
       final dateStr =
           "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
+      final docDir = await getApplicationDocumentsDirectory();
+      final String fileName = "scan_${DateTime.now().millisecondsSinceEpoch}.jpg";
+      final String localImagePath = '${docDir.path}/$fileName';
+      final savedImage = await _capturedImage!.copy(localImagePath);
+
       // Negative IDs distinguish them from real backend IDs
       final randomId = -1 * (DateTime.now().millisecondsSinceEpoch % 1000000);
 
@@ -144,7 +171,7 @@ class _ScanMealTabState extends State<ScanMealTab>
         id: randomId,
         foodId: randomId,
         foodName: _result!.name ?? 'Unknown AI Meal',
-        imageUrl: _result!.imageUrl,
+        imageUrl: savedImage.path,
         quantity: _amount,
         unitName: _selectedUnit,
         measurementType: 'Unit',

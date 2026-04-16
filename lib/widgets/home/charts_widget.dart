@@ -242,6 +242,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -255,76 +256,74 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
             Gap(15 * scale),
             Row(
               children: [
+                const Spacer(flex: 1),
                 // Left Side: Segmented Ring
                 Expanded(
-                  flex: 2,
-                  child: Padding(
-                    padding: EdgeInsets.all(10 * scale),
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          AnimatedBuilder(
-                            animation: _animation,
-                            builder: (context, child) {
-                              return CustomPaint(
-                                size: Size.infinite,
-                                painter: SegmentedRingPainter(
-                                  protein:
-                                      proteinPct *
-                                      overallProgress *
-                                      _animation.value,
-                                  carbs:
-                                      carbsPct *
-                                      overallProgress *
-                                      _animation.value,
-                                  fats:
-                                      fatsPct *
-                                      overallProgress *
-                                      _animation.value,
-                                  strokeWidth: 20 * scale,
-                                ),
-                              );
-                            },
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              AnimatedBuilder(
-                                animation: _animation,
-                                builder: (context, child) {
-                                  final shown =
-                                      (widget.caloriesEaten * _animation.value)
-                                          .toInt();
-                                  return Text(
-                                    '$shown',
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white,
-                                      fontSize: 22 * scale,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  );
-                                },
+                  flex: 5,
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        AnimatedBuilder(
+                          animation: _animation,
+                          builder: (context, child) {
+                            return CustomPaint(
+                              size: Size.infinite,
+                              painter: SegmentedRingPainter(
+                                protein:
+                                    proteinPct *
+                                    overallProgress *
+                                    _animation.value,
+                                carbs:
+                                    carbsPct *
+                                    overallProgress *
+                                    _animation.value,
+                                fats:
+                                    fatsPct *
+                                    overallProgress *
+                                    _animation.value,
+                                strokeWidth: 20 * scale,
                               ),
-                              Text(
-                                '/ $goalStr kcal',
-                                style: GoogleFonts.inter(
-                                  color: Colors.white60,
-                                  fontSize: 10 * scale,
-                                ),
+                            );
+                          },
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedBuilder(
+                              animation: _animation,
+                              builder: (context, child) {
+                                final shown =
+                                    (widget.caloriesEaten * _animation.value)
+                                        .toInt();
+                                return Text(
+                                  '$shown',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontSize: 22 * scale,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              },
+                            ),
+                            Text(
+                              '/ $goalStr kcal',
+                              style: GoogleFonts.inter(
+                                color: Colors.white60,
+                                fontSize: 10 * scale,
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                Gap(60 * scale),
+                Gap(30 * scale),
                 // Right Side: Labels with grams or percentages (relative to Goal)
                 Expanded(
-                  flex: 1,
+                  flex: 4,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -435,6 +434,8 @@ class SegmentedRingPainter extends CustomPainter {
   final double fats;
   final double strokeWidth;
   final Color? backgroundColor;
+  final double? genericProgress;
+  final Color? genericColor;
 
   SegmentedRingPainter({
     required this.protein,
@@ -442,6 +443,8 @@ class SegmentedRingPainter extends CustomPainter {
     required this.fats,
     required this.strokeWidth,
     this.backgroundColor,
+    this.genericProgress,
+    this.genericColor,
   });
 
   @override
@@ -460,6 +463,17 @@ class SegmentedRingPainter extends CustomPainter {
     canvas.drawCircle(center, radius, bgPaint);
 
     double startAngle = -pi / 2;
+
+    if (genericProgress != null && genericProgress! > 0) {
+      _drawSegment(
+        canvas,
+        rect,
+        startAngle,
+        genericProgress!,
+        genericColor ?? AppColors.primarayColor,
+      );
+      return;
+    }
 
     _drawSegment(canvas, rect, startAngle, fats, Colors.blueAccent);
     startAngle += (fats * 2 * pi);

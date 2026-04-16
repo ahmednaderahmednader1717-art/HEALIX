@@ -27,12 +27,13 @@ Return a JSON object with these exact keys (no markdown, no extra text):
 {
   "name": "meal name",
   "description": "short 1-sentence description of the meal",
-  "calories": <number, estimated kcal per 100g>,
-  "protein": <number, grams per 100g>,
-  "carbs": <number, grams per 100g>,
-  "fats": <number, grams per 100g>,
+  "calories": <number, estimated kcal per 100g or 100ml>,
+  "protein": <number, grams per 100g or 100ml>,
+  "carbs": <number, grams per 100g or 100ml>,
+  "fats": <number, grams per 100g or 100ml>,
   "category": "one of: Protein, Carbs, Fats, Dairy, Fruits, Vegetables, Drinks, Snacks",
-  "unitName": "g"
+  "unitName": "one of: g, ml, piece",
+  "weightPerUnit": <number, estimated weight of 1 piece in grams. If the food is not typically counted in pieces, return 100>
 }
 Only return the JSON. No explanation.''',
     );
@@ -64,6 +65,7 @@ Only return the JSON. No explanation.''',
       protein: (json['protein'] ?? 0).toDouble(),
       carbs: (json['carbs'] ?? 0).toDouble(),
       fats: (json['fats'] ?? 0).toDouble(),
+      weightPerUnit: (json['weightPerUnit'] ?? 100.0).toDouble(),
     );
   }
 

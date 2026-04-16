@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/food_model.dart';
+import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/nutrition_service.dart';
 
 class MealTile extends StatelessWidget {
@@ -34,14 +36,23 @@ class MealTile extends StatelessWidget {
                 bottomLeft: Radius.circular(16 * scale),
               ),
               child: (food.imageUrl != null && food.imageUrl!.isNotEmpty)
-                  ? Image.network(
-                      food.imageUrl!,
-                      width: 110 * scale,
-                      height: 90 * scale,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildPlaceholder(scale, width: 110, height: 90),
-                    )
+                  ? (food.imageUrl!.startsWith('http') || food.imageUrl!.startsWith('https')
+                      ? Image.network(
+                          food.imageUrl!,
+                          width: 110 * scale,
+                          height: 90 * scale,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              _buildPlaceholder(scale, width: 110, height: 90),
+                        )
+                      : Image.file(
+                          File(food.imageUrl!),
+                          width: 110 * scale,
+                          height: 90 * scale,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              _buildPlaceholder(scale, width: 110, height: 90),
+                        ))
                   : _buildPlaceholder(scale, width: 110, height: 90),
             ),
             Expanded(
@@ -237,21 +248,46 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
       final dateStr =
           "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-      final log = await _nutritionService.logFood(
-        foodId: widget.food.id!,
+      final localLogId = -1 * (DateTime.now().millisecondsSinceEpoch % 1000000);
+      final localLog = NutritionLog(
+        id: localLogId,
+        foodId: widget.food.id ?? localLogId,
+        foodName: widget.food.name ?? 'Unknown Meal',
+        imageUrl: widget.food.imageUrl,
         quantity: _amount,
+        unitName: _selectedUnit,
+        measurementType: widget.food.measurementType,
+        protein: _adjustedProtein,
+        carbs: _adjustedCarbs,
+        fats: _adjustedFats,
+        calories: _adjustedCalories.toDouble(),
         date: dateStr,
       );
+
+      await _nutritionService.saveLocalLog(localLog, dateStr);
+
+      // 💥 Fire and forget sync to the backend to ensure cross-device compatibility 
+      _nutritionService.syncLocalLogToServer(localLog, dateStr);
+
       if (!mounted) return;
       Navigator.pop(context);
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            log != null
-                ? '✓ Added ${widget.food.name} to your diary'
-                : 'Failed to log meal. Please try again.',
+          content: Text('✓ Saved ${widget.food.name} to your diary locally'),
+          backgroundColor: AppColors.primarayColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
-          backgroundColor: log != null ? AppColors.primarayColor : Colors.red,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Failed to log meal locally. Please try again.'),
+          backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -309,13 +345,22 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                       child:
                           (widget.food.imageUrl != null &&
                               widget.food.imageUrl!.isNotEmpty)
-                          ? Image.network(
-                              widget.food.imageUrl!,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  _buildPlaceholder(scale),
-                            )
+                          ? (widget.food.imageUrl!.startsWith('http') ||
+                                  widget.food.imageUrl!.startsWith('https')
+                              ? Image.network(
+                                  widget.food.imageUrl!,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildPlaceholder(scale),
+                                )
+                              : Image.file(
+                                  File(widget.food.imageUrl!),
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildPlaceholder(scale),
+                                ))
                           : _buildPlaceholder(scale),
                     ),
                   ),

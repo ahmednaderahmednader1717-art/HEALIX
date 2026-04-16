@@ -35,17 +35,17 @@ class UserInfo {
   // تحويل JSON إلى كائن مع علاج النوع
   factory UserInfo.fromJson(Map<String, dynamic> json) {
     return UserInfo(
-      username: json['username'] ?? "",
-      email: json['email'] ?? "",
-      fullName: json['fullName'] ?? "",
-      phoneNumber: json['phoneNumber'],
-      dateOfBirth: json['dateOfBirth'] != null
-          ? DateTime.tryParse(json['dateOfBirth'])
+      username: json['username'] ?? json['Username'] ?? "",
+      email: json['email'] ?? json['Email'] ?? "",
+      fullName: json['fullName'] ?? json['FullName'] ?? "",
+      phoneNumber: json['phoneNumber'] ?? json['PhoneNumber'],
+      dateOfBirth: (json['dateOfBirth'] ?? json['DateOfBirth']) != null
+          ? DateTime.tryParse(json['dateOfBirth'] ?? json['DateOfBirth'])
           : null,
-      gender: json['gender'],
-      profilePictureUrl: json['profilePictureUrl'],
-      bodyType: json['bodyType'],
-      dietType: json['dietType'],
+      gender: json['gender'] ?? json['Gender'],
+      profilePictureUrl: json['profilePictureUrl'] ?? json['ProfilePictureUrl'] ?? json['profilePicture'] ?? json['ProfilePicture'] ?? json['profileImageUrl'] ?? json['pictureUrl'],
+      bodyType: json['bodyType'] ?? json['BodyType'],
+      dietType: json['dietType'] ?? json['DietType'],
       userHeight: (json['height'] as num?)?.toDouble(),
       userWeight: (json['weight'] as num?)?.toDouble(),
       userGoalWeight: (json['goalWeight'] as num?)?.toDouble(),

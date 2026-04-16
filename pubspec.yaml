@@ -41,6 +41,7 @@ dependencies:
   timezone: ^0.10.0
   live_activities: ^2.4.7
   google_generative_ai: ^0.4.6
+  health: ^12.2.0
 
 
 dev_dependencies:

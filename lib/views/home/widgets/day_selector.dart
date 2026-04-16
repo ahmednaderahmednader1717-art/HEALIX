@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/widgets/home/charts_widget.dart';
 
@@ -115,6 +116,7 @@ class _DaySelectorState extends State<DaySelector> {
               double proteinPct = 0;
               double carbsPct = 0;
               double fatsPct = 0;
+              double? genericProgress; // NEW: fallback for total calories
 
               // Fallback goal: if current day summary has 0 goal, try to find any valid goal in the map
               double effectiveGoal = summary?.calorieGoal ?? 0;
@@ -130,9 +132,17 @@ class _DaySelectorState extends State<DaySelector> {
               // Even if summary is null, we might want to show the circle.
               // But summary contains the actual eaten macros.
               if (summary != null && effectiveGoal > 0) {
-                proteinPct = (summary.protein * 4) / effectiveGoal;
-                carbsPct = (summary.carbs * 4) / effectiveGoal;
-                fatsPct = (summary.fats * 9) / effectiveGoal;
+                if (summary.protein == 0 &&
+                    summary.carbs == 0 &&
+                    summary.fats == 0 &&
+                    summary.totalCalories > 0) {
+                  // Fallback: Month API doesn't return macros, but we have calories
+                  genericProgress = (summary.totalCalories / effectiveGoal).clamp(0.0, 1.0);
+                } else {
+                  proteinPct = (summary.protein * 4) / effectiveGoal;
+                  carbsPct = (summary.carbs * 4) / effectiveGoal;
+                  fatsPct = (summary.fats * 9) / effectiveGoal;
+                }
               }
 
               Color dateColor = isSelected
@@ -205,6 +215,8 @@ class _DaySelectorState extends State<DaySelector> {
                                 protein: proteinPct.clamp(0.0, 1.0),
                                 carbs: carbsPct.clamp(0.0, 1.0),
                                 fats: fatsPct.clamp(0.0, 1.0),
+                                genericProgress: genericProgress,
+                                genericColor: AppColors.primarayColor,
                                 strokeWidth: 3,
                               ),
                             ),

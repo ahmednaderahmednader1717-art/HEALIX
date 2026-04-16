@@ -6,8 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:test_splash/views/home/widgets/custom_search_bar.dart';
 import 'package:test_splash/views/home/widgets/meal_tile.dart';
 import 'package:test_splash/models/food_model.dart';
+import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/food_service.dart';
 import 'package:test_splash/services/auth_service.dart';
+import 'package:test_splash/services/nutrition_service.dart';
 import 'package:test_splash/core/app_colors.dart';
 
 class SearchMealTab extends StatefulWidget {
@@ -21,6 +23,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
   final FoodService _foodService = FoodService();
 
   List<Food> _filteredFoods = [];
+  List<Food> _recentFoods = [];
   bool _isLoading = true;
   String _searchQuery = '';
   String _selectedDiet = 'Standard';
@@ -77,6 +80,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
         foods = await _foodService.searchFoods(_searchQuery);
       } else {
         foods = await _foodService.getFoods();
+        _calculateRecentFoods(foods);
       }
 
       setState(() {
@@ -86,6 +90,41 @@ class _SearchMealTabState extends State<SearchMealTab> {
       debugPrint('Error fetching foods: $e');
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _calculateRecentFoods(List<Food> allFoods) async {
+    final today = DateTime.now();
+    final futures = <Future<DailySummary?>>[];
+    for (int i = 0; i < 5; i++) {
+      final d = today.subtract(Duration(days: i));
+      futures.add(
+        NutritionService().getDailySummary(
+          date:
+              '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}',
+        ),
+      );
+    }
+    final summaries = await Future.wait(futures);
+
+    final ids = <int>{};
+    for (final summary in summaries) {
+      if (summary != null) {
+        for (final log in summary.logs) {
+          if (log.foodId > 0) ids.add(log.foodId);
+        }
+      }
+    }
+
+    final recent = <Food>[];
+    for (final id in ids) {
+      try {
+        recent.add(allFoods.firstWhere((f) => f.id == id));
+      } catch (_) {}
+    }
+
+    if (mounted) {
+      setState(() => _recentFoods = recent);
     }
   }
 
@@ -399,6 +438,56 @@ class _SearchMealTabState extends State<SearchMealTab> {
           ),
         ],
         Gap(12 * h),
+        
+        if (_recentFoods.isNotEmpty &&
+            _searchQuery.isEmpty &&
+            _selectedCategories.isEmpty &&
+            _selectedDiet == 'Standard') ...[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16 * w),
+            child: Text(
+              'Recently Logged',
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontSize: 18 * scale,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Gap(12 * h),
+          SizedBox(
+            height: 96 * scale,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 16 * w),
+              itemCount: _recentFoods.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: EdgeInsets.only(right: 12 * w),
+                  child: SizedBox(
+                    width: 280 * w,
+                    child: MealTile(food: _recentFoods[index], scale: scale),
+                  ),
+                );
+              },
+            ),
+          ),
+          Gap(16 * h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16 * w),
+            child: Text(
+              'All Meals',
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontSize: 18 * scale,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Gap(12 * h),
+        ],
+
         Expanded(
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(

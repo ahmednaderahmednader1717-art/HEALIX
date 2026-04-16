@@ -5,12 +5,10 @@ import 'package:test_splash/services/live_activity_service.dart';
 import 'package:test_splash/views/splash/splash_screen.dart';
 
 void main() async {
-  // تهيئة Flutter bindings قبل تعيين إعدادات النظام
   WidgetsFlutterBinding.ensureInitialized();
   await LocalNotificationService.init();
   await LiveActivityService.init();
 
-  // تعيين لون الـ status bar لأبيض على مستوى التطبيق بالكامل
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarBrightness: Brightness.dark, // For iOS

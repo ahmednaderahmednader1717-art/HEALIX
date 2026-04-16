@@ -101,6 +101,21 @@ class _LogInScreenState extends State<LogInScreen> {
 
         if (userJson != null) {
           UserInfo user = UserInfo.fromJson(userJson);
+          
+          // Fetch FULL User Profile to ensure fields like profilePictureUrl are included
+          try {
+            final profileResponse = await dio.get(
+              '/User/profile',
+              options: Options(headers: {'Authorization': 'Bearer $token'}),
+            );
+            if (profileResponse.statusCode == 200) {
+              user = UserInfo.fromJson(profileResponse.data);
+              print("✅ Successfully fetched full user profile after login.");
+            }
+          } catch (profileError) {
+            print("⚠️ Failed to fetch full profile after login: $profileError");
+          }
+
           await AuthService.saveUserInfo(user);
 
           // تحقق من الحفظ

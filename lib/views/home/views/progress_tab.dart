@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -439,11 +440,31 @@ class _NutritionCard extends StatelessWidget {
                 padding: EdgeInsets.only(bottom: 6 * h),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.restaurant_rounded,
-                      color: AppColors.primarayColor,
-                      size: 14 * scale,
-                    ),
+                    if (log.imageUrl != null && log.imageUrl!.isNotEmpty)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6 * scale),
+                        child: (log.imageUrl!.startsWith('http') || log.imageUrl!.startsWith('https'))
+                            ? Image.network(
+                                log.imageUrl!,
+                                width: 24 * scale,
+                                height: 24 * scale,
+                                fit: BoxFit.cover,
+                                errorBuilder: (c, e, st) => Icon(Icons.restaurant_rounded, color: AppColors.primarayColor, size: 14 * scale),
+                              )
+                            : Image.file(
+                                File(log.imageUrl!),
+                                width: 24 * scale,
+                                height: 24 * scale,
+                                fit: BoxFit.cover,
+                                errorBuilder: (c, e, st) => Icon(Icons.restaurant_rounded, color: AppColors.primarayColor, size: 14 * scale),
+                              ),
+                      )
+                    else
+                      Icon(
+                        Icons.restaurant_rounded,
+                        color: AppColors.primarayColor,
+                        size: 14 * scale,
+                      ),
                     SizedBox(width: 8 * w),
                     Expanded(
                       child: Text(

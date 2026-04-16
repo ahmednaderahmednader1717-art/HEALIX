@@ -48,6 +48,10 @@
 	<string>HEALIX needs camera access to scan your meal and identify nutrition information.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>HEALIX needs photo library access to let you pick a meal photo.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>HEALIX would like to read your step count and activity data to display your daily progress.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>HEALIX would like to write health data to help track your activity.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

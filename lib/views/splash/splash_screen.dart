@@ -34,16 +34,14 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(milliseconds: 3000));
 
     final userInfo = await AuthService.getUserInfo();
-    bool loggedIn = false;
-
-    if (userInfo != null) {
-      // Attempt to refresh token to see if session is still valid
-      loggedIn = await AuthService().refreshToken();
-    }
 
     if (!mounted) return;
 
-    if (loggedIn && userInfo != null) {
+    if (userInfo != null) {
+      // Fire and forget: refresh token silently in the background
+      // This prevents the splash screen from hanging if the backend is slow
+      AuthService().refreshToken();
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => HomeScreen(user: userInfo)),

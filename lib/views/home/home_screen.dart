@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // iOS Tab Bar with cupertino_native package (from reference image)
+  // iOS Tab Bar with cupertino_native package
   Widget _buildIOSTabBar() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -181,33 +181,40 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.grey[800],
                           ),
                           child: ClipOval(
-                            child:
-                                (user.profilePictureUrl != null &&
+                            child: (user.profilePictureUrl != null &&
                                     user.profilePictureUrl!.isNotEmpty)
-                                ? (kIsWeb
-                                      ? Image.network(
-                                          'https://corsproxy.io/?${Uri.encodeComponent(user.profilePictureUrl!)}',
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
+                                ? Builder(
+                                    builder: (context) {
+                                      String rawUrl = user.profilePictureUrl!;
+                                      String finalUrl = rawUrl.startsWith('http')
+                                          ? rawUrl
+                                          : 'http://healix26.somee.com${rawUrl.startsWith('/') ? '' : '/'}$rawUrl';
+
+                                      return kIsWeb
+                                          ? Image.network(
+                                              'https://corsproxy.io/?${Uri.encodeComponent(finalUrl)}',
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) {
                                                 return Image.asset(
                                                   "assets/logo/person_icon.png",
                                                   fit: BoxFit.cover,
                                                 );
                                               },
-                                        )
-                                      : CachedNetworkImage(
-                                          imageUrl: user.profilePictureUrl!,
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) =>
-                                              const CupertinoActivityIndicator(),
-                                          errorWidget: (context, url, error) {
-                                            return Image.asset(
-                                              "assets/logo/person_icon.png",
+                                            )
+                                          : CachedNetworkImage(
+                                              imageUrl: finalUrl,
                                               fit: BoxFit.cover,
+                                              placeholder: (context, url) =>
+                                                  const CupertinoActivityIndicator(),
+                                              errorWidget: (context, url, error) {
+                                                return Image.asset(
+                                                  "assets/logo/person_icon.png",
+                                                  fit: BoxFit.cover,
+                                                );
+                                              },
                                             );
-                                          },
-                                        ))
+                                    },
+                                  )
                                 : Image.asset(
                                     "assets/logo/person_icon.png",
                                     fit: BoxFit.cover,

@@ -105,6 +105,91 @@ class NutritionService {
     }
   }
 
+  Future<void> removeLocalLog(int logId, String date) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = 'local_logs_$date';
+      final existing = prefs.getStringList(key) ?? [];
+      
+      final updatedList = existing.where((raw) {
+        try {
+           final item = NutritionLog.fromJson(jsonDecode(raw));
+           return item.id != logId;
+        } catch (_) { return true; }
+      }).toList();
+      
+      await prefs.setStringList(key, updatedList);
+      NutritionService.foodLogged.value++;
+    } catch (e) {
+      log('Error removing local log: $e');
+    }
+  }
+
+  Future<void> syncLocalLogToServer(NutritionLog logItem, String date) async {
+    try {
+      final serverLog = await logFood(
+        foodId: logItem.foodId,
+        quantity: logItem.quantity,
+        date: date,
+      );
+      if (serverLog != null) {
+        await removeLocalLog(logItem.id, date);
+      }
+    } catch (e) {
+      log('Background sync failed: $e');
+    }
+  }
+
+  Future<void> syncPendingLogs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final today = DateTime.now();
+      
+      // Look back 7 days for pending local logs
+      for (int i = 0; i < 7; i++) {
+        final d = today.subtract(Duration(days: i));
+        final dateStr = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+        final key = 'local_logs_$dateStr';
+        
+        final localRaw = prefs.getStringList(key) ?? [];
+        for (final raw in localRaw) {
+          try {
+            final logItem = NutritionLog.fromJson(jsonDecode(raw));
+            // Only DB foods (foodId > 0) can be synced to backend. AI custom foods remain local.
+            if (logItem.foodId > 0) {
+              await syncLocalLogToServer(logItem, dateStr);
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (e) {
+      log('Error syncing pending logs: $e');
+    }
+  }
+
+  /// Returns up to the past 14 days of local AI scan logs that have a valid image
+  Future<List<NutritionLog>> getRecentLocalLogs() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<NutritionLog> allLocalLogs = [];
+    final today = DateTime.now();
+
+    for (int i = 0; i < 14; i++) {
+      final d = today.subtract(Duration(days: i));
+      final dateStr = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+      final key = 'local_logs_$dateStr';
+      final localRaw = prefs.getStringList(key) ?? [];
+      for (final raw in localRaw) {
+        try {
+          final logItem = NutritionLog.fromJson(jsonDecode(raw));
+          if (logItem.imageUrl != null && logItem.imageUrl!.isNotEmpty) {
+            allLocalLogs.add(logItem);
+          }
+        } catch (_) {}
+      }
+    }
+    return allLocalLogs.reversed.toList();
+  }
+
   // ─── Monthly Summary ──────────────────────────────────────────────────────
 
   /// Returns a 28-day (or [days]-day) summary starting from [startDate]
@@ -242,11 +327,33 @@ class NutritionService {
 
       if (response.statusCode == 200) {
         log('StreakInfo: ${response.data}');
-        return StreakInfo.fromJson(response.data as Map<String, dynamic>);
+        final serverStreak = StreakInfo.fromJson(response.data as Map<String, dynamic>);
+        return await _computeEffectiveStreak(serverStreak);
       }
     } catch (e) {
       log('Error fetching streak: $e');
     }
     return null;
+  }
+
+  Future<StreakInfo> _computeEffectiveStreak(StreakInfo server) async {
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    final yesterday = today.subtract(const Duration(days: 1));
+    final yesterdayStr = '${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}';
+
+    final prefs = await SharedPreferences.getInstance();
+    final todayLocal = prefs.getStringList('local_logs_$todayStr') ?? [];
+
+    if (todayLocal.isNotEmpty) {
+      if (server.lastLogDate == yesterdayStr) {
+        return StreakInfo(streakCount: server.streakCount + 1, lastLogDate: todayStr);
+      } else if (server.lastLogDate != todayStr) {
+        // If they didn't log yesterday on server, but logged locally today, reset to 1
+        return StreakInfo(streakCount: 1, lastLogDate: todayStr);
+      }
+    }
+
+    return server;
   }
 }

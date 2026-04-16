@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,11 +6,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:test_splash/widgets/home/charts_widget.dart';
 import 'package:test_splash/views/home/widgets/day_selector.dart';
 import 'package:test_splash/views/home/widgets/meal_tile.dart';
 import 'package:test_splash/views/home/widgets/row_header.dart';
 import 'package:test_splash/core/app_colors.dart';
+import 'package:test_splash/views/home/widgets/health_metrics_pager.dart';
 import 'package:test_splash/models/food_model.dart';
 import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/food_service.dart';
@@ -36,6 +35,7 @@ class _HomeTabState extends State<HomeTab> {
   final NutritionService _nutritionService = NutritionService();
   Map<DateTime, DaySummary> _monthlyProgress = {};
   int _streakCount = 0;
+  int _pagerPage = 0;
 
   @override
   void initState() {
@@ -53,6 +53,9 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Future<void> _refreshAllData() async {
+    // 0. Sync any pending offline standard DB logs
+    _nutritionService.syncPendingLogs();
+
     // 1. Fetch monthly summary for the broad 35-day range
     await _fetchMonthlySummary();
 
@@ -251,17 +254,15 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   String _getNutritionHeader() {
+    if (_pagerPage == 1) return "Today's Activity";
     final now = DateTime.now();
     final isToday =
         selectedDay.year == now.year &&
         selectedDay.month == now.month &&
         selectedDay.day == now.day;
-
-    if (isToday) {
-      return "Today's Total Nutrition";
-    }
-
-    return "Nutrition for ${DateFormat('EEE, MMM d').format(selectedDay)}";
+    return isToday
+        ? "Today's Total Nutrition"
+        : "Nutrition for ${DateFormat('EEE, MMM d').format(selectedDay)}";
   }
 
   @override
@@ -388,22 +389,17 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                 ),
                 SizedBox(height: 12 * h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16 * w),
-                  child: FutureBuilder<DailySummary?>(
-                    future: _dailySummaryFuture,
-                    builder: (context, snapshot) {
-                      final summary = snapshot.data;
-                      return UnifiedMacroChart(
-                        caloriesEaten: summary?.totalCalories ?? 0,
-                        calorieGoal: summary?.calorieGoal ?? 0,
-                        proteinGrams: summary?.totalProtein ?? 0,
-                        carbsGrams: summary?.totalCarbs ?? 0,
-                        fatsGrams: summary?.totalFats ?? 0,
-                        scale: scale,
-                      );
-                    },
-                  ),
+                FutureBuilder<DailySummary?>(
+                  future: _dailySummaryFuture,
+                  builder: (context, snapshot) {
+                    return HealthMetricsPager(
+                      scale: scale,
+                      snapshot: snapshot,
+                      onPageChanged: (page) {
+                        setState(() => _pagerPage = page);
+                      },
+                    );
+                  },
                 ),
                 SizedBox(height: 16 * h),
                 Padding(
