@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:test_splash/models/food_model.dart';
 import 'package:test_splash/models/nutrition_models.dart';
@@ -188,7 +187,7 @@ class _ScanMealTabState extends State<ScanMealTab>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('✓ Saved ${_result!.name} to your diary locally'),
-          backgroundColor: AppColors.primarayColor,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -225,17 +224,19 @@ class _ScanMealTabState extends State<ScanMealTab>
 
     // Decide which view to show
     if (_capturedImage == null) {
-      return _buildScanPrompt(w, h, scale);
+      return _buildScanPrompt(context, w, h, scale);
     }
     if (_result != null) {
-      return _buildResults(w, h, scale);
+      return _buildResults(context, w, h, scale);
     }
-    return _buildPreview(w, h, scale);
+    return _buildPreview(context, w, h, scale);
   }
 
   // ── 1. No image yet ─────────────────────────────────────────────────────
 
-  Widget _buildScanPrompt(double w, double h, double scale) {
+  Widget _buildScanPrompt(BuildContext context, double w, double h, double scale) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -251,7 +252,7 @@ class _ScanMealTabState extends State<ScanMealTab>
             Text(
               'Scan Meal',
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 32 * scale,
                 fontWeight: FontWeight.bold,
               ),
@@ -260,7 +261,7 @@ class _ScanMealTabState extends State<ScanMealTab>
             Text(
               'Take a photo to identify your meal and its nutrition.',
               style: GoogleFonts.inter(
-                color: Colors.grey[400],
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 14 * scale,
                 height: 1.5,
               ),
@@ -274,10 +275,10 @@ class _ScanMealTabState extends State<ScanMealTab>
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: AppColors.ContainerColor,
+                    color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(24 * scale),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08),
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.2),
                       width: 1.5,
                     ),
                   ),
@@ -289,10 +290,10 @@ class _ScanMealTabState extends State<ScanMealTab>
                         height: 80 * scale,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.06),
+                          color: colorScheme.onSurface.withValues(alpha: 0.06),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.white.withValues(alpha: 0.08),
+                              color: colorScheme.onSurface.withValues(alpha: 0.08),
                               blurRadius: 20,
                               spreadRadius: 4,
                             ),
@@ -300,7 +301,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                         ),
                         child: Icon(
                           Icons.camera_alt_outlined,
-                          color: Colors.white,
+                          color: colorScheme.onSurface,
                           size: 36 * scale,
                         ),
                       ),
@@ -308,7 +309,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                       Text(
                         'Tap to open camera',
                         style: GoogleFonts.inter(
-                          color: Colors.white,
+                          color: colorScheme.onSurface,
                           fontSize: 18 * scale,
                           fontWeight: FontWeight.w600,
                         ),
@@ -317,7 +318,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                       Text(
                         'Point at your meal and snap a photo',
                         style: GoogleFonts.inter(
-                          color: Colors.grey[500],
+                          color: colorScheme.onSurfaceVariant,
                           fontSize: 13 * scale,
                         ),
                       ),
@@ -333,21 +334,21 @@ class _ScanMealTabState extends State<ScanMealTab>
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: _pickFromGallery,
-                icon: const Icon(
+                icon: Icon(
                   Icons.photo_library_outlined,
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                 ),
                 label: Text(
                   'Pick from Gallery',
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: colorScheme.onSurface,
                     fontSize: 16 * scale,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
                   side:
-                      BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                      BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14 * scale),
                   ),
@@ -363,7 +364,9 @@ class _ScanMealTabState extends State<ScanMealTab>
 
   // ── 2. Image preview (before / during analysis) ─────────────────────────
 
-  Widget _buildPreview(double w, double h, double scale) {
+  Widget _buildPreview(BuildContext context, double w, double h, double scale) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -382,13 +385,14 @@ class _ScanMealTabState extends State<ScanMealTab>
                 Text(
                   'Meal Photo',
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: colorScheme.onSurface,
                     fontSize: 28 * scale,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const Spacer(),
                 _chipButton(
+                  context,
                   icon: Icons.refresh_rounded,
                   label: 'Retake',
                   onTap: _reset,
@@ -431,7 +435,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                                       0),
                                   colors: [
                                     Colors.black.withValues(alpha: 0.3),
-                                    Colors.white.withValues(alpha: 0.08),
+                                    colorScheme.onSurface.withValues(alpha: 0.1),
                                     Colors.black.withValues(alpha: 0.3),
                                   ],
                                 ),
@@ -443,16 +447,16 @@ class _ScanMealTabState extends State<ScanMealTab>
                                     SizedBox(
                                       width: 32 * scale,
                                       height: 32 * scale,
-                                      child: const CircularProgressIndicator(
+                                      child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
-                                        color: Colors.white,
+                                        color: colorScheme.onSurface,
                                       ),
                                     ),
                                     SizedBox(height: 16 * h),
                                     Text(
                                       'Analysing meal…',
                                       style: GoogleFonts.inter(
-                                        color: Colors.white,
+                                        color: colorScheme.onSurface,
                                         fontSize: 16 * scale,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -476,9 +480,9 @@ class _ScanMealTabState extends State<ScanMealTab>
                 width: double.infinity,
                 padding: EdgeInsets.all(12 * scale),
                 decoration: BoxDecoration(
-                  color: Colors.redAccent.withValues(alpha: 0.15),
+                  color: colorScheme.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12 * scale),
-                  border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+                  border: Border.all(color: colorScheme.error.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -486,13 +490,13 @@ class _ScanMealTabState extends State<ScanMealTab>
                     Row(
                       children: [
                         Icon(Icons.error_outline,
-                            color: Colors.redAccent, size: 20 * scale),
+                            color: colorScheme.error, size: 20 * scale),
                         SizedBox(width: 8 * w),
                         Expanded(
                           child: Text(
                             'Analysis failed',
                             style: GoogleFonts.inter(
-                              color: Colors.redAccent,
+                              color: colorScheme.error,
                               fontSize: 14 * scale,
                               fontWeight: FontWeight.w600,
                             ),
@@ -506,7 +510,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                       maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
-                        color: Colors.redAccent.withValues(alpha: 0.8),
+                        color: colorScheme.error.withValues(alpha: 0.8),
                         fontSize: 11 * scale,
                       ),
                     ),
@@ -522,9 +526,9 @@ class _ScanMealTabState extends State<ScanMealTab>
               child: ElevatedButton(
                 onPressed: _isAnalyzing ? null : _analyzeImage,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  disabledBackgroundColor: Colors.white38,
+                  backgroundColor: colorScheme.onSurface,
+                  foregroundColor: colorScheme.surface,
+                  disabledBackgroundColor: colorScheme.onSurface.withValues(alpha: 0.3),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14 * scale),
                   ),
@@ -534,9 +538,9 @@ class _ScanMealTabState extends State<ScanMealTab>
                     ? SizedBox(
                         width: 20 * scale,
                         height: 20 * scale,
-                        child: const CircularProgressIndicator(
+                        child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.black54,
+                          color: colorScheme.surface.withValues(alpha: 0.6),
                         ),
                       )
                     : Text(
@@ -556,8 +560,10 @@ class _ScanMealTabState extends State<ScanMealTab>
 
   // ── 3. Results view ──────────────────────────────────────────────────────
 
-  Widget _buildResults(double w, double h, double scale) {
+  Widget _buildResults(BuildContext context, double w, double h, double scale) {
     final food = _result!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return SafeArea(
       bottom: false,
@@ -581,13 +587,14 @@ class _ScanMealTabState extends State<ScanMealTab>
                       Text(
                         'Scan Result',
                         style: GoogleFonts.inter(
-                          color: Colors.white,
+                          color: colorScheme.onSurface,
                           fontSize: 28 * scale,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const Spacer(),
                       _chipButton(
+                        context,
                         icon: Icons.camera_alt_rounded,
                         label: 'Scan Another',
                         onTap: _reset,
@@ -617,7 +624,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                   Text(
                     food.name ?? 'Unknown Meal',
                     style: GoogleFonts.inter(
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       fontSize: 24 * scale,
                       fontWeight: FontWeight.bold,
                     ),
@@ -628,7 +635,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                     Text(
                       food.description!,
                       style: GoogleFonts.inter(
-                        color: Colors.grey[400],
+                        color: colorScheme.onSurfaceVariant,
                         fontSize: 14 * scale,
                         height: 1.4,
                       ),
@@ -636,30 +643,29 @@ class _ScanMealTabState extends State<ScanMealTab>
                   ],
                   SizedBox(height: 20 * h),
 
-                  // AI badge
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 12 * w,
                       vertical: 6 * h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primarayColor.withValues(alpha: 0.12),
+                      color: colorScheme.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20 * scale),
                       border: Border.all(
-                        color: AppColors.primarayColor.withValues(alpha: 0.3),
+                        color: colorScheme.primary.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.auto_awesome,
-                            color: AppColors.primarayColor,
+                            color: colorScheme.primary,
                             size: 16 * scale),
                         SizedBox(width: 6 * w),
                         Text(
                           'Estimated by AI · per ${_amount.toStringAsFixed(0)}$_selectedUnit',
                           style: GoogleFonts.inter(
-                            color: AppColors.primarayColor,
+                            color: colorScheme.primary,
                             fontSize: 12 * scale,
                             fontWeight: FontWeight.w600,
                           ),
@@ -673,34 +679,38 @@ class _ScanMealTabState extends State<ScanMealTab>
                   Row(
                     children: [
                       _buildNutrientCard(
+                        context,
                         'Calories',
                         '$_adjustedCalories',
                         'kcal',
-                        Colors.orangeAccent,
+                        const Color(0xFFFFB36D),
                         Icons.local_fire_department_rounded,
                         scale,
                       ),
                       _buildNutrientCard(
+                        context,
                         'Protein',
                         _adjustedProtein.toStringAsFixed(1),
                         'g',
-                        Colors.redAccent,
+                        const Color(0xFFFF6D6D),
                         Icons.fitness_center_rounded,
                         scale,
                       ),
                       _buildNutrientCard(
+                        context,
                         'Carbs',
                         _adjustedCarbs.toStringAsFixed(1),
                         'g',
-                        Colors.amberAccent,
+                        const Color(0xFFFFB36D),
                         Icons.pie_chart_rounded,
                         scale,
                       ),
                       _buildNutrientCard(
+                        context,
                         'Fats',
                         _adjustedFats.toStringAsFixed(1),
                         'g',
-                        Colors.blueAccent,
+                        const Color(0xFF6DA4FF),
                         Icons.water_drop_rounded,
                         scale,
                       ),
@@ -716,9 +726,9 @@ class _ScanMealTabState extends State<ScanMealTab>
                       vertical: 8 * scale,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: colorScheme.onSurface.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(16 * scale),
-                      border: Border.all(color: Colors.white12),
+                      border: Border.all(color: colorScheme.outlineVariant),
                     ),
                     child: Row(
                       children: [
@@ -729,7 +739,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                               Text(
                                 'Amount',
                                 style: TextStyle(
-                                  color: Colors.white54,
+                                  color: colorScheme.onSurfaceVariant,
                                   fontSize: 12 * scale,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -740,7 +750,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                                     const TextInputType.numberWithOptions(
                                         decimal: true),
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: colorScheme.onSurface,
                                   fontSize: 24 * scale,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -761,16 +771,16 @@ class _ScanMealTabState extends State<ScanMealTab>
                         Container(
                           height: 40 * scale,
                           width: 1,
-                          color: Colors.white12,
+                          color: colorScheme.outlineVariant,
                           margin:
                               EdgeInsets.symmetric(horizontal: 16 * scale),
                         ),
                         DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _selectedUnit,
-                            dropdownColor: AppColors.ContainerColor,
-                            icon: const Icon(Icons.keyboard_arrow_down,
-                                color: Colors.white70),
+                            dropdownColor: theme.scaffoldBackgroundColor,
+                            icon: Icon(Icons.keyboard_arrow_down,
+                                color: colorScheme.onSurfaceVariant),
                             onChanged: (u) {
                               if (u != null) {
                                 setState(() => _selectedUnit = u);
@@ -782,7 +792,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                                 child: Text(
                                   u,
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: colorScheme.onSurface,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 18 * scale,
                                   ),
@@ -802,22 +812,22 @@ class _ScanMealTabState extends State<ScanMealTab>
                     child: ElevatedButton(
                       onPressed: _isLogging ? null : _logMeal,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primarayColor,
-                        foregroundColor: Colors.white,
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
                         elevation: 4,
                         shadowColor:
-                            AppColors.primarayColor.withValues(alpha: 0.5),
+                            colorScheme.primary.withValues(alpha: 0.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16 * scale),
                         ),
                         minimumSize: Size(double.infinity, 56 * scale),
                       ),
                       child: _isLogging
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
+                          ? SizedBox(
+                              width: 22 * scale,
+                              height: 22 * scale,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: colorScheme.onPrimary,
                                 strokeWidth: 2.5,
                               ),
                             )
@@ -842,7 +852,8 @@ class _ScanMealTabState extends State<ScanMealTab>
 
   // ── Shared UI helpers ────────────────────────────────────────────────────
 
-  Widget _chipButton({
+  Widget _chipButton(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -850,22 +861,24 @@ class _ScanMealTabState extends State<ScanMealTab>
     required double w,
     required double h,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12 * w, vertical: 6 * h),
         decoration: BoxDecoration(
-          color: AppColors.ContainerColor,
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(20 * scale),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: Colors.grey[300], size: 16 * scale),
+            Icon(icon, color: colorScheme.onSurfaceVariant, size: 16 * scale),
             SizedBox(width: 4 * w),
             Text(
               label,
               style: GoogleFonts.inter(
-                color: Colors.grey[300],
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 13 * scale,
               ),
             ),
@@ -876,6 +889,7 @@ class _ScanMealTabState extends State<ScanMealTab>
   }
 
   Widget _buildNutrientCard(
+    BuildContext context,
     String label,
     String value,
     String unit,
@@ -883,6 +897,7 @@ class _ScanMealTabState extends State<ScanMealTab>
     IconData icon,
     double scale,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Expanded(
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 4 * scale),
@@ -902,7 +917,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: colorScheme.onSurface,
                     fontSize: 15 * scale,
                     fontWeight: FontWeight.bold,
                   ),
@@ -910,7 +925,7 @@ class _ScanMealTabState extends State<ScanMealTab>
                 TextSpan(
                   text: ' $unit',
                   style: TextStyle(
-                    color: Colors.white70,
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 10 * scale,
                     fontWeight: FontWeight.w500,
                   ),

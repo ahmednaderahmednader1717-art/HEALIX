@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:test_splash/core/app_colors.dart';
 
 // Widget خاص بحقل إدخال مع دعم القيمة الابتدائية - تعمل فقط عند الإنشاء
 class HealixTextField extends StatefulWidget {
@@ -42,6 +41,8 @@ class _HealixTextFieldState extends State<HealixTextField> {
   @override
   Widget build(BuildContext context) {
     final hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,13 +51,13 @@ class _HealixTextFieldState extends State<HealixTextField> {
           controller: widget.controller,
           obscureText: _obscureText,
           keyboardType: widget.keyboardType,
-          style: const TextStyle(color: Colors.white),
-          cursorColor: Colors.white,
+          style: TextStyle(color: colorScheme.onSurface),
+          cursorColor: colorScheme.onSurface,
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: const TextStyle(color: Colors.white54),
+            hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
             filled: true,
-            fillColor: Colors.grey.withOpacity(0.15),
+            fillColor: theme.brightness == Brightness.dark ? const Color(0xFF16313B).withValues(alpha: 0.69) : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             contentPadding: const EdgeInsets.symmetric(
               vertical: 18,
               horizontal: 20,
@@ -64,14 +65,14 @@ class _HealixTextFieldState extends State<HealixTextField> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
               borderSide: BorderSide(
-                color: hasError ? Colors.red : Colors.white.withOpacity(0.3),
+                color: hasError ? colorScheme.error : (theme.brightness == Brightness.dark ? Colors.white12 : colorScheme.outlineVariant),
                 width: hasError ? 1.5 : 1,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
               borderSide: BorderSide(
-                color: hasError ? Colors.red : AppColors.primarayColor,
+                color: hasError ? colorScheme.error : colorScheme.primary,
                 width: 1.5,
               ),
             ),
@@ -81,7 +82,7 @@ class _HealixTextFieldState extends State<HealixTextField> {
                     child: IconButton(
                       icon: Icon(
                         _obscureText ? Icons.visibility_off : Icons.visibility,
-                        color: AppColors.secondaryColor,
+                        color: colorScheme.primary,
                         size: 20,
                       ),
                       onPressed: () {
@@ -104,7 +105,7 @@ class _HealixTextFieldState extends State<HealixTextField> {
             padding: const EdgeInsets.only(top: 6, left: 6),
             child: Text(
               widget.errorText!,
-              style: const TextStyle(color: Colors.red, fontSize: 12),
+              style: TextStyle(color: colorScheme.error, fontSize: 12),
             ),
           ),
       ],

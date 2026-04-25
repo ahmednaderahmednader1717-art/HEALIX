@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/views/home/views/home_tab.dart';
 import 'package:test_splash/views/home/views/profile_tab.dart';
@@ -56,44 +55,47 @@ class _HomeScreenState extends State<HomeScreen> {
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
 
+    final theme = Theme.of(context);
+
     return SafeArea(
       top: false,
       bottom: false,
       child: Scaffold(
         extendBody: true,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: Stack(
           children: [
-            // Gradient Background
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF000D11), Color(0xFF022836)],
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
+            if (theme.brightness == Brightness.dark)
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF000D11), Color(0xFF022836)],
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                  ),
                 ),
               ),
-            ),
-            // محتوى التابات مع padding أسفل BottomNavigationBar
             IndexedStack(index: _currentIndex, children: _pages),
           ],
         ),
         bottomNavigationBar: !kIsWeb && Platform.isIOS
-            ? _buildIOSTabBar()
+            ? _buildIOSTabBar(theme)
             : _buildDefaultTabBar(scale, h),
       ),
     );
   }
 
   // iOS Tab Bar with cupertino_native package
-  Widget _buildIOSTabBar() {
+  Widget _buildIOSTabBar(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: ClipRRect(
         child: CupertinoTheme(
-          data: const CupertinoThemeData(brightness: Brightness.dark),
+          data: CupertinoThemeData(brightness: theme.brightness),
           child: CNTabBar(
             height: 90,
-            tint: const Color.fromARGB(255, 141, 215, 225),
+            tint: isDark ? const Color.fromARGB(255, 141, 215, 225) : theme.colorScheme.primary,
             items: [
               CNTabBarItem(label: 'Home', icon: CNSymbol('house.fill')),
               CNTabBarItem(label: 'Search', icon: CNSymbol('magnifyingglass')),
@@ -114,11 +116,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Default Tab Bar for Android/Web
   Widget _buildDefaultTabBar(double scale, double h) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return MediaQuery.removePadding(
       context: context,
       removeBottom: true,
       child: Theme(
-        data: Theme.of(context).copyWith(
+        data: theme.copyWith(
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
         ),
@@ -127,7 +133,9 @@ class _HomeScreenState extends State<HomeScreen> {
             filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.ContainerColor.withValues(alpha: 0.4),
+                color: isDark 
+                    ? const Color(0xFF16313B).withValues(alpha: 0.4)
+                    : colorScheme.surface.withValues(alpha: 0.8),
               ),
               child: Padding(
                 padding: const EdgeInsets.only(
@@ -141,8 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundColor: Colors.transparent,
                   elevation: 0,
                   type: BottomNavigationBarType.fixed,
-                  selectedItemColor: Colors.white,
-                  unselectedItemColor: Colors.white54,
+                  selectedItemColor: isDark ? Colors.white : colorScheme.primary,
+                  unselectedItemColor: isDark ? Colors.white54 : colorScheme.onSurface.withValues(alpha: 0.5),
                   selectedFontSize: 12,
                   unselectedFontSize: 10,
                   showSelectedLabels: true,

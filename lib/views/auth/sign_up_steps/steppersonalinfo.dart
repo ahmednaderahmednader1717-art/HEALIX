@@ -45,15 +45,24 @@ class StepPersonalInfo extends StatelessWidget {
               style: GoogleFonts.inriaSans(
                 fontSize: 20 * scale,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Gap(10 * h),
-            Text(
-              "HEALIX would like to get to know you.",
-              style: GoogleFonts.inriaSans(
-                fontSize: 16 * scale,
-                color: const Color.fromARGB(255, 255, 255, 255),
+            RichText(
+              text: TextSpan(
+                style: GoogleFonts.inriaSans(
+                  fontSize: 16 * scale,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                children: [
+                  const TextSpan(text: "HEALI"),
+                  TextSpan(
+                    text: "X",
+                    style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
+                  ),
+                  const TextSpan(text: " would like to get to know you."),
+                ],
               ),
             ),
             Gap(16 * h),

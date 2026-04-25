@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:test_splash/services/auth_service.dart';
 import 'package:test_splash/views/home/home_screen.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/widgets/common/healix_logo.dart';
 import 'package:test_splash/views/splash/welcome_screen.dart';
 
@@ -62,16 +61,18 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               "HEALI",
               style: TextStyle(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 55,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
@@ -79,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
             HealixLogo(
               size: 55,
-              color: AppColors.primarayColor,
+              color: colorScheme.primary,
               duration: const Duration(seconds: 3),
               strokeWidth: 6,
             ),

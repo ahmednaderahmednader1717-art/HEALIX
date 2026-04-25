@@ -10,7 +10,6 @@ import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/food_service.dart';
 import 'package:test_splash/services/auth_service.dart';
 import 'package:test_splash/services/nutrition_service.dart';
-import 'package:test_splash/core/app_colors.dart';
 
 class SearchMealTab extends StatefulWidget {
   const SearchMealTab({super.key});
@@ -148,10 +147,12 @@ class _SearchMealTabState extends State<SearchMealTab> {
   void _showFilterBottomSheet(double scale, double h, double w) {
     // Work on a local copy so Apply is needed to confirm.
     final localSelected = Set<String>.from(_selectedCategories);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.secondaryColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24 * scale)),
       ),
@@ -173,14 +174,14 @@ class _SearchMealTabState extends State<SearchMealTab> {
                       Text(
                         'Filter by Category',
                         style: GoogleFonts.inter(
-                          color: Colors.white,
+                          color: colorScheme.onSurface,
                           fontSize: 20 * scale,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: Colors.white70),
+                        icon: Icon(Icons.close, color: colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -207,19 +208,19 @@ class _SearchMealTabState extends State<SearchMealTab> {
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.primarayColor
-                                : AppColors.secondaryColor,
+                                ? colorScheme.primary
+                                : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(12 * scale),
                             border: Border.all(
                               color: isSelected
-                                  ? AppColors.primarayColor
-                                  : Colors.white24,
+                                  ? colorScheme.primary
+                                  : colorScheme.outlineVariant,
                             ),
                           ),
                           child: Text(
                             category,
                             style: GoogleFonts.inter(
-                              color: isSelected ? Colors.black : Colors.white70,
+                              color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
                               fontSize: 14 * scale,
                               fontWeight: isSelected
                                   ? FontWeight.bold
@@ -239,7 +240,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
                             setModalState(() => localSelected.clear());
                           },
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.white24),
+                            side: BorderSide(color: colorScheme.outlineVariant),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12 * scale),
                             ),
@@ -248,7 +249,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
                           child: Text(
                             'Clear All',
                             style: GoogleFonts.inter(
-                              color: Colors.white70,
+                              color: colorScheme.onSurfaceVariant,
                               fontSize: 14 * scale,
                               fontWeight: FontWeight.w600,
                             ),
@@ -268,7 +269,8 @@ class _SearchMealTabState extends State<SearchMealTab> {
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primarayColor,
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12 * scale),
                             ),
@@ -277,7 +279,6 @@ class _SearchMealTabState extends State<SearchMealTab> {
                           child: Text(
                             'Apply',
                             style: GoogleFonts.inter(
-                              color: Colors.black,
                               fontSize: 14 * scale,
                               fontWeight: FontWeight.bold,
                             ),
@@ -310,6 +311,8 @@ class _SearchMealTabState extends State<SearchMealTab> {
     final w = screenWidth / baseWidth;
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,7 +323,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
           child: Text(
             'Search Meals',
             style: GoogleFonts.inter(
-              color: Colors.white,
+              color: colorScheme.onSurface,
               fontSize: 32 * scale,
               fontWeight: FontWeight.bold,
             ),
@@ -351,7 +354,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
                   label: Text(
                     diet,
                     style: GoogleFonts.inter(
-                      color: isSelected ? Colors.black : Colors.white70,
+                      color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
                       fontSize: 14 * scale,
                       fontWeight: isSelected
                           ? FontWeight.bold
@@ -360,14 +363,14 @@ class _SearchMealTabState extends State<SearchMealTab> {
                   ),
                   selected: isSelected,
                   onSelected: (_) => _onFilterChanged(diet),
-                  selectedColor: AppColors.primarayColor,
-                  backgroundColor: AppColors.secondaryColor,
+                  selectedColor: colorScheme.primary,
+                  backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24 * scale),
                     side: BorderSide(
                       color: isSelected
-                          ? AppColors.primarayColor
-                          : AppColors.secondaryColor,
+                          ? colorScheme.primary
+                          : colorScheme.outlineVariant,
                     ),
                   ),
                   showCheckmark: false,
@@ -388,7 +391,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
                   Text(
                     'Category: ',
                     style: GoogleFonts.inter(
-                      color: Colors.white54,
+                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                       fontSize: 12 * scale,
                     ),
                   ),
@@ -403,10 +406,10 @@ class _SearchMealTabState extends State<SearchMealTab> {
                             vertical: 4 * h,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primarayColor.withOpacity(0.2),
+                            color: colorScheme.primary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8 * scale),
                             border: Border.all(
-                              color: AppColors.primarayColor.withOpacity(0.5),
+                              color: colorScheme.primary.withValues(alpha: 0.5),
                             ),
                           ),
                           child: Row(
@@ -415,7 +418,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
                               Text(
                                 cat,
                                 style: GoogleFonts.inter(
-                                  color: AppColors.primarayColor,
+                                  color: colorScheme.primary,
                                   fontSize: 12 * scale,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -424,7 +427,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
                               Icon(
                                 Icons.close,
                                 size: 14 * scale,
-                                color: AppColors.primarayColor,
+                                color: colorScheme.primary,
                               ),
                             ],
                           ),
@@ -438,7 +441,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
           ),
         ],
         Gap(12 * h),
-        
+
         if (_recentFoods.isNotEmpty &&
             _searchQuery.isEmpty &&
             _selectedCategories.isEmpty &&
@@ -448,7 +451,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
             child: Text(
               'Recently Logged',
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 18 * scale,
                 fontWeight: FontWeight.bold,
               ),
@@ -479,7 +482,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
             child: Text(
               'All Meals',
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 18 * scale,
                 fontWeight: FontWeight.bold,
               ),
@@ -496,10 +499,10 @@ class _SearchMealTabState extends State<SearchMealTab> {
             slivers: [
               CupertinoSliverRefreshControl(onRefresh: _onRefresh),
               if (_isLoading)
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   child: Center(
                     child: CupertinoActivityIndicator(
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       radius: 14,
                     ),
                   ),
@@ -507,7 +510,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
               else if (_filteredFoods.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: _buildEmptyState(scale, h),
+                  child: _buildEmptyState(context, scale, h),
                 )
               else
                 SliverPadding(
@@ -536,7 +539,8 @@ class _SearchMealTabState extends State<SearchMealTab> {
     );
   }
 
-  Widget _buildEmptyState(double scale, double h) {
+  Widget _buildEmptyState(BuildContext context, double scale, double h) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -545,13 +549,13 @@ class _SearchMealTabState extends State<SearchMealTab> {
           Icon(
             Icons.search_off_rounded,
             size: 80 * scale,
-            color: Colors.white24,
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
           ),
           SizedBox(height: 24 * h),
           Text(
             'No Meals Found',
             style: GoogleFonts.inriaSans(
-              color: Colors.white,
+              color: colorScheme.onSurface,
               fontSize: 24 * scale,
               fontWeight: FontWeight.bold,
             ),
@@ -561,7 +565,7 @@ class _SearchMealTabState extends State<SearchMealTab> {
             "We couldn't find anything matching your criteria.\nTry adjusting your search or filters.",
             textAlign: TextAlign.center,
             style: GoogleFonts.inriaSans(
-              color: Colors.white54,
+              color: colorScheme.onSurfaceVariant,
               fontSize: 16 * scale,
               height: 1.5,
             ),
@@ -571,26 +575,26 @@ class _SearchMealTabState extends State<SearchMealTab> {
             onPressed: () {
               setState(() {
                 _searchQuery = '';
-                _selectedDiet = 'All';
+                _selectedDiet = 'Standard';
                 _selectedCategories.clear();
               });
               _fetchFoods();
             },
             icon: Icon(
               Icons.refresh,
-              color: AppColors.primarayColor,
+              color: colorScheme.primary,
               size: 20 * scale,
             ),
             label: Text(
               'Reset Filters',
               style: TextStyle(
-                color: AppColors.primarayColor,
+                color: colorScheme.primary,
                 fontSize: 16 * scale,
                 fontWeight: FontWeight.w600,
               ),
             ),
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.primarayColor),
+              side: BorderSide(color: colorScheme.primary),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12 * scale),
               ),

@@ -9,7 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/widgets/common/healix_text_field.dart';
@@ -52,6 +51,8 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> _selectDateOfBirth() async {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDateOfBirth ?? DateTime(2000, 1, 1),
@@ -59,16 +60,15 @@ class _EditProfileState extends State<EditProfile> {
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: Colors.white,
-              onPrimary: Colors.black,
-              surface: AppColors.ContainerColor,
-              onSurface: Colors.white,
-            ),
-            dialogTheme: DialogThemeData(
-              backgroundColor: AppColors.ContainerColor,
-            ),
+          data: theme.copyWith(
+            colorScheme: theme.brightness == Brightness.dark 
+                ? ColorScheme.dark(
+                    primary: Colors.white,
+                    onPrimary: Colors.black,
+                    surface: colorScheme.surfaceContainerHighest,
+                    onSurface: Colors.white,
+                  )
+                : theme.colorScheme,
           ),
           child: child!,
         );
@@ -255,31 +255,47 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final userProfileImage = widget.user.profilePictureUrl ?? '';
     final screenWidth = MediaQuery.of(context).size.width;
     final w = screenWidth / 430;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF16313B),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        automaticallyImplyLeading: false,
         title: Text(
           "Edit Profile",
           style: GoogleFonts.outfit(
-            color: Colors.white,
+            color: colorScheme.onSurface,
             fontSize: 22 * w,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.white,
-            size: 20 * w,
+        leading: Padding(
+          padding: EdgeInsets.only(left: 16 * w),
+          child: Center(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 40 * w,
+                height: 40 * w,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurface.withOpacity(0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: colorScheme.onSurface,
+                  size: 20 * w,
+                ),
+              ),
+            ),
           ),
-          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
@@ -299,8 +315,8 @@ class _EditProfileState extends State<EditProfile> {
                     height: 140 * w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.05),
-                      border: Border.all(color: Colors.white10, width: 2),
+                      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      border: Border.all(color: colorScheme.outlineVariant, width: 2),
                     ),
                     child: GestureDetector(
                       onTap: () {
@@ -341,7 +357,7 @@ class _EditProfileState extends State<EditProfile> {
                                                     context,
                                                     error,
                                                     stackTrace,
-                                                  ) => _buildPlaceholder(),
+                                                  ) => _buildPlaceholder(context),
                                             )
                                           : CachedNetworkImage(
                                               imageUrl: userProfileImage,
@@ -353,9 +369,9 @@ class _EditProfileState extends State<EditProfile> {
                                                   ),
                                               errorWidget:
                                                   (context, url, error) =>
-                                                      _buildPlaceholder(),
+                                                      _buildPlaceholder(context),
                                             ))
-                                    : _buildPlaceholder()),
+                                    : _buildPlaceholder(context)),
                         ),
                       ),
                     ),
@@ -365,13 +381,13 @@ class _EditProfileState extends State<EditProfile> {
                     child: Container(
                       height: 36 * w,
                       width: 36 * w,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primarayColor,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.camera_alt,
-                        color: Colors.white,
+                        color: colorScheme.onPrimary,
                         size: 18 * w,
                       ),
                     ),
@@ -385,51 +401,66 @@ class _EditProfileState extends State<EditProfile> {
               child: Text(
                 "Change Profile Photo",
                 style: GoogleFonts.outfit(
-                  color: Colors.white38,
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 14 * w,
                 ),
               ),
             ),
-            Gap(40 * w),
-            // Fields
-            _buildTextField(
-              label: "First Name",
-              controller: firstNameController,
-              hint: "Enter first name",
-              scale: w,
-            ),
-            Gap(16 * w),
-            _buildTextField(
-              label: "Last Name",
-              controller: lastNameController,
-              hint: "Enter last name",
-              scale: w,
-            ),
-            Gap(16 * w),
-            _buildTextField(
-              label: "Username",
-              controller: usernameController,
-              hint: "Enter username",
-              scale: w,
-            ),
-            Gap(16 * w),
-            GestureDetector(
-              onTap: _selectDateOfBirth,
-              child: AbsorbPointer(
-                child: _buildTextField(
-                  label: "Date of Birth",
-                  controller: TextEditingController(
-                    text: selectedDateOfBirth != null
-                        ? DateFormat('MMM d, yyyy').format(selectedDateOfBirth!)
-                        : "Not set",
+            // Fields Group
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(20 * w),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(20 * w),
+              ),
+              child: Column(
+                children: [
+                  _buildTextField(
+                    label: "First Name",
+                    controller: firstNameController,
+                    hint: "Enter first name",
+                    scale: w,
+                    context: context,
                   ),
-                  hint: "Select birth date",
-                  scale: w,
-                ),
+                  Gap(16 * w),
+                  _buildTextField(
+                    label: "Last Name",
+                    controller: lastNameController,
+                    hint: "Enter last name",
+                    scale: w,
+                    context: context,
+                  ),
+                  Gap(16 * w),
+                  _buildTextField(
+                    label: "Username",
+                    controller: usernameController,
+                    hint: "Enter username",
+                    scale: w,
+                    context: context,
+                  ),
+                  Gap(16 * w),
+                  GestureDetector(
+                    onTap: _selectDateOfBirth,
+                    child: AbsorbPointer(
+                      child: _buildTextField(
+                        label: "Date of Birth",
+                        controller: TextEditingController(
+                          text: selectedDateOfBirth != null
+                              ? DateFormat('MMM d, yyyy').format(selectedDateOfBirth!)
+                              : "Not set",
+                        ),
+                        hint: "Select birth date",
+                        scale: w,
+                        context: context,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             Gap(40 * w),
-            _buildSaveButton(w),
+            _buildSaveButton(w, context),
             Gap(20 * w),
           ],
         ),
@@ -437,14 +468,14 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
     return Center(
       child: Text(
         widget.user.fullName.isNotEmpty
             ? widget.user.fullName[0].toUpperCase()
             : '',
         style: GoogleFonts.outfit(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.onSurface,
           fontSize: 40,
           fontWeight: FontWeight.w600,
         ),
@@ -456,6 +487,7 @@ class _EditProfileState extends State<EditProfile> {
     required String label,
     required TextEditingController controller,
     required double scale,
+    required BuildContext context,
     String? hint,
   }) {
     return Column(
@@ -464,7 +496,7 @@ class _EditProfileState extends State<EditProfile> {
         Text(
           label,
           style: GoogleFonts.outfit(
-            color: Colors.white38,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontSize: 14 * scale,
           ),
         ),
@@ -474,13 +506,14 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
-  Widget _buildSaveButton(double w) {
+  Widget _buildSaveButton(double w, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       height: 55 * w,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16 * w),
-        color: AppColors.primarayColor,
+        color: colorScheme.primary,
       ),
       child: Material(
         color: Colors.transparent,
@@ -491,7 +524,7 @@ class _EditProfileState extends State<EditProfile> {
             child: Text(
               "Save Changes",
               style: GoogleFonts.outfit(
-                color: Colors.white,
+                color: colorScheme.onPrimary,
                 fontSize: 18 * w,
                 fontWeight: FontWeight.bold,
               ),

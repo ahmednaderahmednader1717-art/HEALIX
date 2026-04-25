@@ -1,8 +1,7 @@
 import 'dart:math';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/nutrition_models.dart';
-import 'package:test_splash/widgets/home/charts_widget.dart';
 
 class DaySelector extends StatefulWidget {
   final DateTime selectedDay;
@@ -63,6 +62,9 @@ class _DaySelectorState extends State<DaySelector> {
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return SizedBox(
       height: 105 * h,
       child: PageView.builder(
@@ -93,30 +95,14 @@ class _DaySelectorState extends State<DaySelector> {
               // Background colors
               Color bgColor;
               if (isSelected) {
-                bgColor = const Color.fromARGB(
-                  111,
-                  0,
-                  154,
-                  205,
-                ).withOpacity(0.80);
+                bgColor = colorScheme.primary.withValues(alpha: 0.8);
               } else if (isToday) {
-                bgColor = const Color.fromARGB(
-                  255,
-                  168,
-                  168,
-                  168,
-                ).withOpacity(.15);
+                bgColor = colorScheme.onSurface.withValues(alpha: 0.15);
               } else {
-                bgColor = Colors.white.withOpacity(0);
+                bgColor = Colors.transparent;
               }
 
               final summary = widget.caloriesProgress[dateKey];
-
-              // Calculate macro segments relative to goal
-              double proteinPct = 0;
-              double carbsPct = 0;
-              double fatsPct = 0;
-              double? genericProgress; // NEW: fallback for total calories
 
               // Fallback goal: if current day summary has 0 goal, try to find any valid goal in the map
               double effectiveGoal = summary?.calorieGoal ?? 0;
@@ -129,33 +115,58 @@ class _DaySelectorState extends State<DaySelector> {
                 }
               }
 
-              // Even if summary is null, we might want to show the circle.
-              // But summary contains the actual eaten macros.
-              if (summary != null && effectiveGoal > 0) {
-                if (summary.protein == 0 &&
-                    summary.carbs == 0 &&
-                    summary.fats == 0 &&
-                    summary.totalCalories > 0) {
-                  // Fallback: Month API doesn't return macros, but we have calories
-                  genericProgress = (summary.totalCalories / effectiveGoal).clamp(0.0, 1.0);
+              Widget ringWidget;
+              bool hasMeals = summary != null && summary.totalCalories > 0;
+              if (!hasMeals) {
+                ringWidget = DottedBorder(
+                  borderType: BorderType.Circle,
+                  color: isSelected
+                      ? colorScheme.onPrimary.withValues(alpha: 0.5)
+                      : colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  strokeWidth: 2.0,
+                  dashPattern: const [4, 4],
+                  padding: EdgeInsets.zero,
+                  child: const SizedBox.expand(),
+                );
+              } else {
+                double caloriesEaten = summary.totalCalories;
+                double caloriesLeft = effectiveGoal - caloriesEaten;
+                Color ringColor;
+                if (caloriesLeft > 200) {
+                  ringColor = colorScheme.error; // Red
+                } else if (caloriesLeft > 100) {
+                  ringColor = Colors.amber; // Yellow
                 } else {
-                  proteinPct = (summary.protein * 4) / effectiveGoal;
-                  carbsPct = (summary.carbs * 4) / effectiveGoal;
-                  fatsPct = (summary.fats * 9) / effectiveGoal;
+                  ringColor = const Color(0xFF4CD964); // Professional Green
                 }
+
+                double progress = effectiveGoal > 0
+                    ? (caloriesEaten / effectiveGoal).clamp(0.0, 1.0)
+                    : 0.0;
+                ringWidget = SizedBox.expand(
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    strokeWidth: 2.5,
+                    color: ringColor,
+                    backgroundColor: isSelected
+                        ? colorScheme.onPrimary.withValues(alpha: 0.3)
+                        : colorScheme.onSurfaceVariant.withValues(alpha: 0.15),
+                    strokeCap: StrokeCap.round,
+                  ),
+                );
               }
 
               Color dateColor = isSelected
-                  ? Colors.white
+                  ? colorScheme.onPrimary
                   : isFuture
-                  ? Colors.white.withOpacity(0.4)
-                  : Colors.white;
+                  ? colorScheme.onSurface.withValues(alpha: 0.4)
+                  : colorScheme.onSurface;
 
               Color labelColor = isSelected
-                  ? Colors.white
+                  ? colorScheme.onPrimary
                   : isFuture
-                  ? Colors.grey.withOpacity(0.5)
-                  : Colors.grey[350]!;
+                  ? colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
+                  : colorScheme.onSurfaceVariant;
 
               return GestureDetector(
                 onTap: () => widget.onDaySelected(day),
@@ -169,10 +180,10 @@ class _DaySelectorState extends State<DaySelector> {
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.25),
+                              color: Colors.black.withValues(alpha: 0.15),
                               blurRadius: 14,
                               spreadRadius: 1,
-                              offset: const Offset(0, 7), // ظل للأسفل قليلا
+                              offset: const Offset(0, 7),
                             ),
                           ]
                         : [],
@@ -195,31 +206,7 @@ class _DaySelectorState extends State<DaySelector> {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Background ring
-                            CustomPaint(
-                              size: Size.infinite,
-                              painter: SegmentedRingPainter(
-                                protein: 0,
-                                carbs: 0,
-                                fats: 0,
-                                strokeWidth: 3,
-                                backgroundColor: isSelected
-                                    ? Colors.white.withOpacity(0.3)
-                                    : Colors.grey.withOpacity(0.15),
-                              ),
-                            ),
-                            // Macro segments
-                            CustomPaint(
-                              size: Size.infinite,
-                              painter: SegmentedRingPainter(
-                                protein: proteinPct.clamp(0.0, 1.0),
-                                carbs: carbsPct.clamp(0.0, 1.0),
-                                fats: fatsPct.clamp(0.0, 1.0),
-                                genericProgress: genericProgress,
-                                genericColor: AppColors.primarayColor,
-                                strokeWidth: 3,
-                              ),
-                            ),
+                            ringWidget,
                             Text(
                               day.day.toString(),
                               style: TextStyle(

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/views/home/views/edit_nutration_goals.dart';
 import 'package:test_splash/views/home/views/edit_profile.dart';
@@ -154,6 +153,8 @@ class _ProfileTabState extends State<ProfileTab> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     const baseWidth = 430.0;
     const baseHeight = 932.0;
@@ -165,7 +166,7 @@ class _ProfileTabState extends State<ProfileTab> {
     return Stack(
       children: [
         SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 16 * w, vertical: 16 * h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +175,7 @@ class _ProfileTabState extends State<ProfileTab> {
               Text(
                 "Profile",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                   fontSize: 32 * w,
                   fontWeight: FontWeight.bold,
                 ),
@@ -194,7 +195,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 child: Container(
                   padding: EdgeInsets.all(18 * w),
                   decoration: BoxDecoration(
-                    color: AppColors.ContainerColor,
+                    color: colorScheme.surfaceContainerHighest.withValues(alpha: theme.brightness == Brightness.dark ? 0.69 : 0.8),
                     borderRadius: BorderRadius.circular(22),
                   ),
                   child: Row(
@@ -205,7 +206,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         height: 60 * scale,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.grey[800],
+                          color: colorScheme.surface,
                         ),
                         child: ClipOval(
                           child: (widget.user.profilePictureUrl != null &&
@@ -261,25 +262,25 @@ class _ProfileTabState extends State<ProfileTab> {
                           Text(
                             widget.user.fullName,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: colorScheme.onSurface,
                               fontSize: 20 * w,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             " @${widget.user.username}",
                             style: TextStyle(
-                              color: Colors.grey,
+                              color: colorScheme.onSurfaceVariant,
                               fontSize: 14 * w,
                             ),
                           ),
                         ],
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: Colors.grey,
+                        color: colorScheme.onSurfaceVariant,
                         size: 18 * w,
                       ),
                     ],
@@ -293,7 +294,7 @@ class _ProfileTabState extends State<ProfileTab> {
               Text(
                 "Account",
                 style: TextStyle(
-                  color: Colors.grey[300],
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * w,
                   fontWeight: FontWeight.w500,
                 ),
@@ -344,7 +345,7 @@ class _ProfileTabState extends State<ProfileTab> {
               Text(
                 "Goals & Tracking",
                 style: TextStyle(
-                  color: Colors.grey[300],
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * w,
                   fontWeight: FontWeight.w500,
                 ),
@@ -384,7 +385,7 @@ class _ProfileTabState extends State<ProfileTab> {
               Text(
                 "Support & Legal",
                 style: TextStyle(
-                  color: Colors.grey[300],
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * w,
                   fontWeight: FontWeight.w500,
                 ),
@@ -430,7 +431,7 @@ class _ProfileTabState extends State<ProfileTab> {
               Text(
                 "Follow Us",
                 style: TextStyle(
-                  color: Colors.grey[300],
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * w,
                   fontWeight: FontWeight.w500,
                 ),
@@ -464,7 +465,7 @@ class _ProfileTabState extends State<ProfileTab> {
               Text(
                 "Account Actions",
                 style: TextStyle(
-                  color: Colors.grey[300],
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * w,
                   fontWeight: FontWeight.w500,
                 ),
@@ -487,7 +488,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 w: w,
                 h: h,
               ),
-              SizedBox(
+              const SizedBox(
                 height: kBottomNavigationBarHeight + 40,
               ), // 24 لتعطي مسافة زيادة
             ],
@@ -495,8 +496,8 @@ class _ProfileTabState extends State<ProfileTab> {
         ),
         if (_isLoading)
           Container(
-            color: Colors.black.withValues(alpha: 0.5),
-            child: const Center(child: CupertinoActivityIndicator(radius: 15)),
+            color: colorScheme.surface.withValues(alpha: 0.5),
+            child: Center(child: CupertinoActivityIndicator(radius: 15, color: colorScheme.primary)),
           ),
       ],
     );

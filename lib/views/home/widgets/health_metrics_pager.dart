@@ -34,12 +34,13 @@ class _HealthMetricsPagerState extends State<HealthMetricsPager> {
   Widget build(BuildContext context) {
     final scale = widget.scale;
     final summary = widget.snapshot.data;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 270 * scale, // Matched height exactly to MacroChart
+          height: 270 * scale,
           child: PageView(
             controller: _pageController,
             physics: const BouncingScrollPhysics(),
@@ -84,8 +85,8 @@ class _HealthMetricsPagerState extends State<HealthMetricsPager> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: _currentPage == index
-                    ? Colors.white
-                    : Colors.white.withOpacity(0.2),
+                    ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : colorScheme.primary)
+                    : colorScheme.onSurface.withValues(alpha: 0.2),
               ),
             ),
           ),

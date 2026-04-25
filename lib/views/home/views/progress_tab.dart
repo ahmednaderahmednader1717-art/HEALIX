@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/nutrition_service.dart';
 
@@ -110,8 +109,8 @@ class _ProgressTabState extends State<ProgressTab> {
 
     return RefreshIndicator(
       onRefresh: _loadNutrition,
-      color: AppColors.primarayColor,
-      backgroundColor: AppColors.ContainerColor,
+      color: Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
@@ -129,7 +128,7 @@ class _ProgressTabState extends State<ProgressTab> {
             Text(
               'Progress',
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 32 * scale,
                 fontWeight: FontWeight.bold,
               ),
@@ -224,8 +223,9 @@ class _NutritionCard extends StatelessWidget {
       final today = DateTime.now();
       if (dt.year == today.year &&
           dt.month == today.month &&
-          dt.day == today.day)
+          dt.day == today.day) {
         return "Today's Nutrition";
+      }
       const months = [
         'Jan',
         'Feb',
@@ -260,10 +260,12 @@ class _NutritionCard extends StatelessWidget {
     final carbsPct = s?.carbsPercent ?? 0;
     final fatsPct = s?.fatsPercent ?? 0;
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20 * scale),
       ),
       child: Column(
@@ -276,7 +278,7 @@ class _NutritionCard extends StatelessWidget {
               Text(
                 _friendlyDate(selectedDate),
                 style: GoogleFonts.inter(
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                   fontSize: 18 * scale,
                   fontWeight: FontWeight.bold,
                 ),
@@ -285,8 +287,8 @@ class _NutritionCard extends StatelessWidget {
                 SizedBox(
                   width: 16 * scale,
                   height: 16 * scale,
-                  child: const CircularProgressIndicator(
-                    color: AppColors.primarayColor,
+                  child: CircularProgressIndicator(
+                    color: colorScheme.primary,
                     strokeWidth: 2,
                   ),
                 ),
@@ -307,6 +309,7 @@ class _NutritionCard extends StatelessWidget {
                     CustomPaint(
                       size: Size(140 * scale, 140 * scale),
                       painter: _DonutPainter(
+                        context,
                         proteinPct: proteinPct,
                         carbsPct: carbsPct,
                         fatsPct: fatsPct,
@@ -319,7 +322,7 @@ class _NutritionCard extends StatelessWidget {
                         Text(
                           totalCals.toStringAsFixed(0),
                           style: GoogleFonts.inter(
-                            color: Colors.white,
+                            color: colorScheme.onSurface,
                             fontSize: 22 * scale,
                             fontWeight: FontWeight.bold,
                           ),
@@ -327,7 +330,7 @@ class _NutritionCard extends StatelessWidget {
                         Text(
                           'kcal',
                           style: GoogleFonts.inter(
-                            color: Colors.white54,
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 11 * scale,
                           ),
                         ),
@@ -347,7 +350,8 @@ class _NutritionCard extends StatelessWidget {
                       'Protein',
                       protein,
                       proteinPct,
-                      Colors.redAccent,
+                      const Color(0xFFFF6D6D),
+                      context,
                       scale,
                       h,
                     ),
@@ -356,7 +360,8 @@ class _NutritionCard extends StatelessWidget {
                       'Carbs',
                       carbs,
                       carbsPct,
-                      Colors.amberAccent,
+                      const Color(0xFFFFB36D),
+                      context,
                       scale,
                       h,
                     ),
@@ -365,12 +370,13 @@ class _NutritionCard extends StatelessWidget {
                       'Fats',
                       fats,
                       fatsPct,
-                      Colors.blueAccent,
+                      const Color(0xFF6DA4FF),
+                      context,
                       scale,
                       h,
                     ),
                     SizedBox(height: 14 * h),
-                    Divider(color: Colors.white12, height: 1),
+                    Divider(color: colorScheme.outlineVariant, height: 1),
                     SizedBox(height: 10 * h),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -378,14 +384,14 @@ class _NutritionCard extends StatelessWidget {
                         Text(
                           'Goal',
                           style: GoogleFonts.inter(
-                            color: Colors.white54,
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 12 * scale,
                           ),
                         ),
                         Text(
                           '${goalCals.toStringAsFixed(0)} kcal',
                           style: GoogleFonts.inter(
-                            color: Colors.white,
+                            color: colorScheme.onSurface,
                             fontSize: 12 * scale,
                             fontWeight: FontWeight.w600,
                           ),
@@ -399,7 +405,7 @@ class _NutritionCard extends StatelessWidget {
                         Text(
                           'Remaining',
                           style: GoogleFonts.inter(
-                            color: Colors.white54,
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 12 * scale,
                           ),
                         ),
@@ -407,7 +413,7 @@ class _NutritionCard extends StatelessWidget {
                           '${remaining.toStringAsFixed(0)} kcal',
                           style: GoogleFonts.inter(
                             color: remaining >= 0
-                                ? AppColors.primarayColor
+                                ? colorScheme.primary
                                 : Colors.redAccent,
                             fontSize: 12 * scale,
                             fontWeight: FontWeight.w600,
@@ -424,12 +430,12 @@ class _NutritionCard extends StatelessWidget {
           // Today's log list
           if (s != null && s.logs.isNotEmpty) ...[
             SizedBox(height: 16 * h),
-            Divider(color: Colors.white12, height: 1),
+            Divider(color: colorScheme.outlineVariant, height: 1),
             SizedBox(height: 12 * h),
             Text(
               'Logged Today',
               style: GoogleFonts.inter(
-                color: Colors.white70,
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 13 * scale,
                 fontWeight: FontWeight.w600,
               ),
@@ -446,23 +452,20 @@ class _NutritionCard extends StatelessWidget {
                         child: (log.imageUrl!.startsWith('http') || log.imageUrl!.startsWith('https'))
                             ? Image.network(
                                 log.imageUrl!,
-                                width: 24 * scale,
-                                height: 24 * scale,
-                                fit: BoxFit.cover,
-                                errorBuilder: (c, e, st) => Icon(Icons.restaurant_rounded, color: AppColors.primarayColor, size: 14 * scale),
+                                errorBuilder: (c, e, st) => Icon(Icons.restaurant_rounded, color: colorScheme.primary, size: 14 * scale),
                               )
                             : Image.file(
                                 File(log.imageUrl!),
                                 width: 24 * scale,
                                 height: 24 * scale,
                                 fit: BoxFit.cover,
-                                errorBuilder: (c, e, st) => Icon(Icons.restaurant_rounded, color: AppColors.primarayColor, size: 14 * scale),
+                                errorBuilder: (c, e, st) => Icon(Icons.restaurant_rounded, color: colorScheme.primary, size: 14 * scale),
                               ),
                       )
                     else
                       Icon(
                         Icons.restaurant_rounded,
-                        color: AppColors.primarayColor,
+                        color: colorScheme.primary,
                         size: 14 * scale,
                       ),
                     SizedBox(width: 8 * w),
@@ -470,7 +473,7 @@ class _NutritionCard extends StatelessWidget {
                       child: Text(
                         log.foodName,
                         style: GoogleFonts.inter(
-                          color: Colors.white,
+                          color: colorScheme.onSurface,
                           fontSize: 13 * scale,
                         ),
                         maxLines: 1,
@@ -480,7 +483,7 @@ class _NutritionCard extends StatelessWidget {
                     Text(
                       '${log.calories.toStringAsFixed(0)} kcal',
                       style: GoogleFonts.inter(
-                        color: Colors.white54,
+                        color: colorScheme.onSurfaceVariant,
                         fontSize: 12 * scale,
                       ),
                     ),
@@ -499,9 +502,11 @@ class _NutritionCard extends StatelessWidget {
     double grams,
     double pct,
     Color color,
+    BuildContext context,
     double scale,
     double h,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -522,7 +527,7 @@ class _NutritionCard extends StatelessWidget {
                 Text(
                   label,
                   style: GoogleFonts.inter(
-                    color: Colors.white70,
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 12 * scale,
                   ),
                 ),
@@ -531,7 +536,7 @@ class _NutritionCard extends StatelessWidget {
             Text(
               '${grams.toStringAsFixed(1)}g',
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 12 * scale,
                 fontWeight: FontWeight.w600,
               ),
@@ -543,7 +548,7 @@ class _NutritionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: pct.clamp(0.0, 1.0),
-            backgroundColor: Colors.white12,
+            backgroundColor: colorScheme.outlineVariant,
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 4 * scale,
           ),
@@ -557,12 +562,15 @@ class _NutritionCard extends StatelessWidget {
 // Donut Chart Painter
 // ─────────────────────────────────────────────────────────────────────────────
 class _DonutPainter extends CustomPainter {
-  _DonutPainter({
+  _DonutPainter(
+    this.context, {
     required this.proteinPct,
     required this.carbsPct,
     required this.fatsPct,
     required this.isEmpty,
   });
+
+  final BuildContext context;
 
   final double proteinPct, carbsPct, fatsPct;
   final bool isEmpty;
@@ -585,7 +593,7 @@ class _DonutPainter extends CustomPainter {
         2 * pi,
         false,
         Paint()
-          ..color = Colors.white12
+          ..color = Theme.of(context).colorScheme.outlineVariant
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeW,
       );
@@ -594,9 +602,9 @@ class _DonutPainter extends CustomPainter {
 
     const gap = 0.04; // radians gap between arcs
     final segments = [
-      (proteinPct, Colors.redAccent),
-      (carbsPct, Colors.amberAccent),
-      (fatsPct, Colors.blueAccent),
+      (proteinPct, const Color(0xFFFF6D6D)), // Professional Red
+      (carbsPct, const Color(0xFFFFB36D)),  // Professional Orange/Amber
+      (fatsPct, const Color(0xFF6DA4FF)),   // Professional Blue
     ];
 
     double startAngle = -pi / 2;
@@ -665,11 +673,13 @@ class _CalendarStripCard extends StatelessWidget {
       return today.subtract(Duration(days: 27 - i));
     });
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor,
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.69 : 0.8),
         borderRadius: BorderRadius.circular(20 * scale),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.5 : 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -677,7 +687,7 @@ class _CalendarStripCard extends StatelessWidget {
           Text(
             'Last 28 Days',
             style: GoogleFonts.inter(
-              color: Colors.white,
+              color: colorScheme.onSurface,
               fontSize: 18 * scale,
               fontWeight: FontWeight.bold,
             ),
@@ -687,11 +697,11 @@ class _CalendarStripCard extends StatelessWidget {
           // Legend
           Row(
             children: [
-              _legendDot(AppColors.primarayColor, 'Goal reached', scale),
+              _legendDot(colorScheme.primary, 'Goal reached', scale, context),
               SizedBox(width: 12 * w),
-              _legendDot(Colors.orange, 'Logged', scale),
+              _legendDot(Colors.orange, 'Logged', scale, context),
               SizedBox(width: 12 * w),
-              _legendDot(Colors.white12, 'No data', scale),
+              _legendDot(colorScheme.outlineVariant, 'No data', scale, context),
             ],
           ),
           SizedBox(height: 12 * h),
@@ -757,13 +767,14 @@ class _CalendarStripCard extends StatelessWidget {
         final isSelected = dateStr == selectedDate;
         final isToday = dateStr == _fmt(DateTime.now());
 
+        final colorScheme = Theme.of(context).colorScheme;
         Color dotColor;
         if (daySummary == null || !daySummary.hasData) {
-          dotColor = Colors.white12;
+          dotColor = colorScheme.outlineVariant;
         } else if (daySummary.goalAchieved) {
-          dotColor = AppColors.primarayColor;
+          dotColor = colorScheme.primary;
         } else {
-          dotColor = Colors.orange;
+          dotColor = const Color(0xFFFFB36D);
         }
 
         return GestureDetector(
@@ -780,8 +791,8 @@ class _CalendarStripCard extends StatelessWidget {
                   border: isSelected || isToday
                       ? Border.all(
                           color: isSelected
-                              ? Colors.white
-                              : AppColors.primarayColor,
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Theme.of(context).colorScheme.primary,
                           width: 2,
                         )
                       : null,
@@ -790,8 +801,8 @@ class _CalendarStripCard extends StatelessWidget {
                   child: Text(
                     '${date.day}',
                     style: GoogleFonts.inter(
-                      color: dotColor == Colors.white12
-                          ? Colors.white38
+                      color: dotColor == Theme.of(context).colorScheme.outlineVariant
+                          ? Theme.of(context).colorScheme.onSurfaceVariant
                           : Colors.white,
                       fontSize: 10 * scale,
                       fontWeight: isSelected || isToday
@@ -808,7 +819,7 @@ class _CalendarStripCard extends StatelessWidget {
     );
   }
 
-  Widget _legendDot(Color color, String label, double scale) {
+  Widget _legendDot(Color color, String label, double scale, BuildContext context) {
     return Row(
       children: [
         Container(
@@ -819,7 +830,10 @@ class _CalendarStripCard extends StatelessWidget {
         SizedBox(width: 4 * scale),
         Text(
           label,
-          style: GoogleFonts.inter(color: Colors.white38, fontSize: 10 * scale),
+          style: GoogleFonts.inter(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 10 * scale,
+          ),
         ),
       ],
     );
@@ -845,10 +859,11 @@ class _DayStreakCard extends StatelessWidget {
     final int prevDay = streak > 0 ? streak - 1 : 0;
     final int nextDay = streak + 1;
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20 * w, vertical: 16 * h),
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20 * scale),
       ),
       child: Column(
@@ -857,7 +872,7 @@ class _DayStreakCard extends StatelessWidget {
           Text(
             'Streak',
             style: GoogleFonts.inter(
-              color: Colors.white,
+              color: colorScheme.onSurface,
               fontSize: 16 * scale,
               fontWeight: FontWeight.bold,
             ),
@@ -898,7 +913,7 @@ class _DayStreakCard extends StatelessWidget {
                   child: Container(
                     height: 7 * h,
                     decoration: BoxDecoration(
-                      color: Colors.grey[700],
+                      color: colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -938,7 +953,7 @@ class _DayStreakCard extends StatelessWidget {
               Text(
                 'Day $prevDay',
                 style: GoogleFonts.inter(
-                  color: Colors.grey[500],
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 11 * scale,
                 ),
               ),
@@ -948,13 +963,13 @@ class _DayStreakCard extends StatelessWidget {
                   vertical: 3 * h,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.45),
+                  color: colorScheme.surface.withValues(alpha: 0.45),
                   borderRadius: BorderRadius.circular(12 * scale),
                 ),
                 child: Text(
                   'Day $streak',
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: colorScheme.onSurface,
                     fontSize: 13 * scale,
                     fontWeight: FontWeight.bold,
                   ),
@@ -963,7 +978,7 @@ class _DayStreakCard extends StatelessWidget {
               Text(
                 'Day $nextDay',
                 style: GoogleFonts.inter(
-                  color: Colors.grey[500],
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 11 * scale,
                 ),
               ),
@@ -1012,10 +1027,12 @@ class _WeightCard extends StatelessWidget {
     final dateStr =
         '${months[goalDate.month - 1]} ${goalDate.day}, ${goalDate.year}';
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20 * scale),
       ),
       child: Column(
@@ -1030,7 +1047,7 @@ class _WeightCard extends StatelessWidget {
                   Text(
                     'Current Weight',
                     style: GoogleFonts.inter(
-                      color: Colors.grey[400],
+                      color: colorScheme.onSurfaceVariant,
                       fontSize: 13 * scale,
                     ),
                   ),
@@ -1038,7 +1055,7 @@ class _WeightCard extends StatelessWidget {
                   Text(
                     '${currentWeight.toStringAsFixed(currentWeight == currentWeight.roundToDouble() ? 0 : 1)} kg',
                     style: GoogleFonts.inter(
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       fontSize: 28 * scale,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1049,8 +1066,8 @@ class _WeightCard extends StatelessWidget {
               TextButton(
                 onPressed: () {},
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
+                  backgroundColor: colorScheme.onSurface,
+                  foregroundColor: colorScheme.surface,
                   shape: const StadiumBorder(),
                   padding: EdgeInsets.symmetric(
                     horizontal: 14 * w,
@@ -1068,7 +1085,7 @@ class _WeightCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12 * h),
-          Container(height: 1, color: Colors.grey[800]),
+          Container(height: 1, color: colorScheme.outlineVariant),
           SizedBox(height: 12 * h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1076,15 +1093,15 @@ class _WeightCard extends StatelessWidget {
               RichText(
                 text: TextSpan(
                   style: GoogleFonts.inter(
-                    color: Colors.grey[400],
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 13 * scale,
                   ),
                   children: [
                     const TextSpan(text: 'Start: '),
                     TextSpan(
                       text: '${startWeight.toStringAsFixed(0)} kg',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1094,15 +1111,15 @@ class _WeightCard extends StatelessWidget {
               RichText(
                 text: TextSpan(
                   style: GoogleFonts.inter(
-                    color: Colors.grey[400],
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 13 * scale,
                   ),
                   children: [
                     const TextSpan(text: 'Goal: '),
                     TextSpan(
                       text: '${goalWeight.toStringAsFixed(0)} kg',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1115,15 +1132,15 @@ class _WeightCard extends StatelessWidget {
           RichText(
             text: TextSpan(
               style: GoogleFonts.inter(
-                color: Colors.grey[400],
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 13 * scale,
               ),
               children: [
                 const TextSpan(text: 'At your goal by '),
                 TextSpan(
                   text: '$dateStr.',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -1156,10 +1173,12 @@ class _WeightProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor,
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: theme.brightness == Brightness.dark ? 0.69 : 0.8),
         borderRadius: BorderRadius.circular(20 * scale),
       ),
       child: Column(
@@ -1171,7 +1190,7 @@ class _WeightProgressCard extends StatelessWidget {
               Text(
                 'Weight Progress',
                 style: GoogleFonts.inter(
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                   fontSize: 18 * scale,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1180,14 +1199,14 @@ class _WeightProgressCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.flag_outlined,
-                    color: Colors.grey[400],
+                    color: colorScheme.onSurfaceVariant,
                     size: 16 * scale,
                   ),
                   SizedBox(width: 4 * w),
                   Text(
                     '$progressPct% of goal',
                     style: GoogleFonts.inter(
-                      color: Colors.grey[400],
+                      color: colorScheme.onSurfaceVariant,
                       fontSize: 13 * scale,
                     ),
                   ),
@@ -1233,6 +1252,7 @@ class _WeightLineChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: _LineChartPainter(
+        context,
         currentWeight: currentWeight,
         startWeight: startWeight,
         goalWeight: goalWeight,
@@ -1242,12 +1262,14 @@ class _WeightLineChart extends StatelessWidget {
 }
 
 class _LineChartPainter extends CustomPainter {
-  _LineChartPainter({
+  _LineChartPainter(
+    this.context, {
     required this.currentWeight,
     required this.startWeight,
     required this.goalWeight,
   });
 
+  final BuildContext context;
   final double currentWeight, startWeight, goalWeight;
 
   @override
@@ -1265,11 +1287,13 @@ class _LineChartPainter extends CustomPainter {
     double toY(double val) =>
         chartBottom - ((val - minY) / yRange) * chartBottom;
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     final gridPaint = Paint()
-      ..color = const Color(0xFF2C2C2E)
+      ..color = colorScheme.outlineVariant.withValues(alpha: 0.5)
       ..strokeWidth = 1;
 
-    const labelStyle = TextStyle(color: Color(0xFF8E8E93), fontSize: 11);
+    final labelStyle = TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 11);
 
     for (double val = minY; val <= maxY; val += 2) {
       final y = toY(val);
@@ -1285,16 +1309,20 @@ class _LineChartPainter extends CustomPainter {
       ..color = Colors.white
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
+      // ..strokeCap = StrokeCap.round; // Removed for exact match
 
     final y = toY(currentWeight);
     canvas.drawLine(Offset(chartLeft, y), Offset(chartRight, y), linePaint);
 
     final dotPaint = Paint()..color = Colors.white;
     canvas.drawCircle(Offset(chartLeft, y), 4, dotPaint);
+    
+    // Glow removed for exact match to original look
   }
 
   @override
-  bool shouldRepaint(_LineChartPainter old) => false;
+  bool shouldRepaint(_LineChartPainter old) => 
+      old.currentWeight != currentWeight;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

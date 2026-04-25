@@ -14,13 +14,14 @@ class RowHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           title,
           style: TextStyle(
-            color: Colors.white,
+            color: colorScheme.onSurface,
             fontSize: 18 * scale,
             fontWeight: FontWeight.w700,
           ),
@@ -31,7 +32,7 @@ class RowHeader extends StatelessWidget {
           child: Text(
             actionText,
             style: TextStyle(
-              color: const Color.fromARGB(255, 255, 255, 255),
+              color: colorScheme.onSurface,
               fontSize: 14 * scale,
               fontWeight: FontWeight.w600,
             ),

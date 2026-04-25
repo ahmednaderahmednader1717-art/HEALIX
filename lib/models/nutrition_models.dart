@@ -214,7 +214,7 @@ class DailySummary {
     final logsCalories = logs.fold(0.0, (s, l) => s + l.calories);
 
     // Prefer API top-level totals (including *Consumed variants); fall back to log-computed values.
-    double _pick(List<String> keys, double fallback) {
+    double pick(List<String> keys, double fallback) {
       for (final k in keys) {
         final val = get(k);
         if (val != null) {
@@ -227,7 +227,7 @@ class DailySummary {
       return fallback;
     }
 
-    final totalProtein = _pick([
+    final totalProtein = pick([
       'totalProteinG',
       'totalProteinConsumed',
       'proteinConsumed',
@@ -238,7 +238,7 @@ class DailySummary {
       'protein_consumed',
     ], logsProtein);
 
-    final totalCarbs = _pick([
+    final totalCarbs = pick([
       'totalCarbsG',
       'totalCarbohydratesConsumed',
       'carbohydratesConsumed',
@@ -251,7 +251,7 @@ class DailySummary {
       'carbs_consumed',
     ], logsCarbs);
 
-    final totalFats = _pick([
+    final totalFats = pick([
       'totalFatsG',
       'totalFatsConsumed',
       'totalFatConsumed',
@@ -265,7 +265,7 @@ class DailySummary {
       'fats_consumed',
     ], logsFats);
 
-    final totalCalories = _pick([
+    final totalCalories = pick([
       'totalCaloriesConsumed',
       'caloriesConsumed',
       'totalCalories',
@@ -274,7 +274,7 @@ class DailySummary {
       'calories_consumed',
     ], logsCalories);
 
-    final calorieGoal = _pick([
+    final calorieGoal = pick([
       'calorieGoal',
       'dailyCalorieGoal',
       'goalCalories',
@@ -284,19 +284,19 @@ class DailySummary {
 
     // Dynamic fallbacks if macros aren't explicitly provided by backend
     // Common split: 25% Protein, 45% Carbs, 30% Fat
-    final proteinGoal = _pick([
+    final proteinGoal = pick([
       'proteinGoal',
       'dailyProteinGoal',
       'protein_goal',
     ], (calorieGoal * 0.25) / 4);
 
-    final carbsGoal = _pick([
+    final carbsGoal = pick([
       'carbsGoal',
       'dailyCarbsGoal',
       'carbs_goal',
     ], (calorieGoal * 0.45) / 4);
 
-    final fatsGoal = _pick([
+    final fatsGoal = pick([
       'fatsGoal',
       'dailyFatsGoal',
       'fats_goal',

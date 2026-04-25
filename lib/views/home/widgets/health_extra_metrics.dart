@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/widgets/home/charts_widget.dart';
 import 'package:test_splash/services/health_service.dart';
 
@@ -46,36 +45,37 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
     final scale = widget.scale;
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 0),
+      padding: const EdgeInsets.symmetric(vertical: 0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Top Row: Steps & Calories Burned
           Row(
             children: [
-              Expanded(flex: 5, child: _buildStepsCard(scale)),
+              Expanded(flex: 5, child: _buildStepsCard(context, scale)),
               Gap(12 * scale),
-              Expanded(flex: 5, child: _buildCaloriesBurnedCard(scale)),
+              Expanded(flex: 5, child: _buildCaloriesBurnedCard(context, scale)),
             ],
           ),
           Gap(12 * scale),
           // Bottom Row: Water Log
-          _buildWaterCard(scale),
+          _buildWaterCard(context, scale),
         ],
       ),
     );
   }
 
-  Widget _buildStepsCard(double scale) {
+  Widget _buildStepsCard(BuildContext context, double scale) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       height: 160 * scale,
       padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor,
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(24 * scale),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -87,7 +87,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
           Text(
             "Steps",
             style: GoogleFonts.inter(
-              color: Colors.white70,
+              color: colorScheme.onSurfaceVariant,
               fontSize: 16 * scale,
               fontWeight: FontWeight.w600,
             ),
@@ -100,7 +100,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
               Text(
                 _loadingSteps ? '--' : '$_steps',
                 style: GoogleFonts.inter(
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                   fontSize: 28 * scale,
                   fontWeight: FontWeight.bold,
                 ),
@@ -108,7 +108,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
               Text(
                 ' /$_stepsGoal',
                 style: GoogleFonts.inter(
-                  color: Colors.white54,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                   fontSize: 12 * scale,
                   fontWeight: FontWeight.w600,
                 ),
@@ -129,17 +129,19 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
                       CustomPaint(
                         size: Size.infinite,
                         painter: SegmentedRingPainter(
+                          context: context,
                           protein: 0,
                           carbs: 0,
                           fats: 0,
                           strokeWidth: 8 * scale,
-                          backgroundColor: Colors.white.withOpacity(0.15),
+                          backgroundColor: colorScheme.onSurface.withValues(alpha: 0.15),
                         ),
                       ),
                       // Progress arc
                       CustomPaint(
                         size: Size.infinite,
                         painter: SegmentedRingPainter(
+                          context: context,
                           protein: 0,
                           carbs: 0,
                           fats: 0,
@@ -150,7 +152,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
                       ),
                       Icon(
                         Icons.directions_walk_rounded,
-                        color: Colors.white,
+                        color: colorScheme.onSurface,
                         size: 32 * scale,
                       ),
                     ],
@@ -164,16 +166,17 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
     );
   }
 
-  Widget _buildCaloriesBurnedCard(double scale) {
+  Widget _buildCaloriesBurnedCard(BuildContext context, double scale) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       height: 160 * scale,
       padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor,
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(24 * scale),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -185,7 +188,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
           Text(
             "Calories burned",
             style: GoogleFonts.inter(
-              color: Colors.white70,
+              color: colorScheme.onSurfaceVariant,
               fontSize: 16 * scale,
               fontWeight: FontWeight.w600,
             ),
@@ -196,9 +199,9 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                _loadingSteps ? '--' : '${_caloriesBurned.toStringAsFixed(0)}',
+                _loadingSteps ? '--' : _caloriesBurned.toStringAsFixed(0),
                 style: GoogleFonts.inter(
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                   fontSize: 28 * scale,
                   fontWeight: FontWeight.bold,
                 ),
@@ -207,7 +210,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
               Text(
                 "cal",
                 style: GoogleFonts.inter(
-                  color: Colors.white54,
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 14 * scale,
                   fontWeight: FontWeight.w600,
                 ),
@@ -219,7 +222,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
             children: [
               Icon(
                 Icons.directions_walk_rounded,
-                color: Colors.white70,
+                color: colorScheme.onSurfaceVariant,
                 size: 24 * scale,
               ),
               Gap(8 * scale),
@@ -229,7 +232,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
                   Text(
                     "Steps",
                     style: GoogleFonts.inter(
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       fontSize: 16 * scale,
                       fontWeight: FontWeight.w600,
                     ),
@@ -237,7 +240,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
                   Text(
                     "${_caloriesBurned.toStringAsFixed(0)} cal",
                     style: GoogleFonts.inter(
-                      color: Colors.white54,
+                      color: colorScheme.onSurfaceVariant,
                       fontSize: 12 * scale,
                       fontWeight: FontWeight.w600,
                     ),
@@ -251,15 +254,17 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
     );
   }
 
-  Widget _buildWaterCard(double scale) {
+  Widget _buildWaterCard(BuildContext context, double scale) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20 * scale, vertical: 16 * scale),
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor,
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(24 * scale),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -279,7 +284,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
               Text(
                 "Water",
                 style: GoogleFonts.inter(
-                  color: Colors.white70,
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * scale,
                   fontWeight: FontWeight.w600,
                 ),
@@ -287,7 +292,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
               Text(
                 "$waterMl ml",
                 style: GoogleFonts.inter(
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                   fontSize: 20 * scale,
                   fontWeight: FontWeight.bold,
                 ),
@@ -302,13 +307,13 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
               });
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent, // Outline button style base
-              foregroundColor: Colors.white,
+              backgroundColor: Colors.transparent,
+              foregroundColor: colorScheme.onSurface,
               elevation: 0,
               padding: EdgeInsets.symmetric(horizontal: 16 * scale, vertical: 12 * scale),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20 * scale),
-                side: const BorderSide(color: Colors.white24, width: 1.5),
+                side: BorderSide(color: colorScheme.outlineVariant, width: 1.5),
               ),
             ),
             child: Text(

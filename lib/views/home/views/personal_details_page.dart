@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,12 +31,13 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   }
 
   void _showTopMessage(BuildContext context, String message) {
+    final colorScheme = Theme.of(context).colorScheme;
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: '',
       barrierColor: Colors.transparent,
-      transitionDuration: Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, animation, secondaryAnimation) {
         return Align(
           alignment: Alignment.topCenter,
@@ -54,12 +54,12 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Color(0xFF1C1C1E).withOpacity(0.88),
+                      color: colorScheme.surface.withValues(alpha: 0.88),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.1),
+                        color: colorScheme.onSurface.withValues(alpha: 0.1),
                         width: 0.5,
                       ),
                     ),
@@ -67,7 +67,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       message,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.95),
+                        color: colorScheme.onSurface.withValues(alpha: 0.95),
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 0.1,
@@ -83,7 +83,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return SlideTransition(
           position: Tween<Offset>(
-            begin: Offset(0, -1),
+            begin: const Offset(0, -1),
             end: Offset.zero,
           ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
           child: FadeTransition(opacity: animation, child: child),
@@ -91,7 +91,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
       },
     );
 
-    Future.delayed(Duration(milliseconds: 2000), () {
+    Future.delayed(const Duration(milliseconds: 2000), () {
       if (Navigator.canPop(context)) {
         Navigator.of(context).pop();
       }
@@ -103,7 +103,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
       final token = await getToken();
       if (token == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("غير مسجل الدخول. الرجاء إعادة التسجيل")),
+          const SnackBar(content: Text("غير مسجل الدخول. الرجاء إعادة التسجيل")),
         );
         return;
       }
@@ -148,7 +148,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
       print("❌ Token is null or empty, showing error");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("غير مسجل الدخول. الرجاء إعادة تسجيل الدخول"),
+          content: const Text("غير مسجل الدخول. الرجاء إعادة تسجيل الدخول"),
           action: SnackBarAction(
             label: "تسجيل الدخول",
             onPressed: () {
@@ -205,7 +205,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
       } else if (response.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("انتهت صلاحية التوكن. الرجاء إعادة تسجيل الدخول"),
+            content: const Text("انتهت صلاحية التوكن. الرجاء إعادة تسجيل الدخول"),
             action: SnackBarAction(
               label: "تسجيل الدخول",
               onPressed: () {
@@ -227,8 +227,8 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
       if (e.response?.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("انتهت صلاحية الجلسة. يرجى إعادة تسجيل الدخول"),
-            duration: Duration(seconds: 4),
+            content: const Text("انتهت صلاحية الجلسة. يرجى إعادة تسجيل الدخول"),
+            duration: const Duration(seconds: 4),
             action: SnackBarAction(
               label: "تسجيل الدخول",
               onPressed: () {
@@ -258,30 +258,32 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   }) async {
     int tempValue = currentValue?.toInt() ?? min;
     int? selectedValue;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     await showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
         height: 320,
-        color: Colors.black,
+        color: theme.scaffoldBackgroundColor,
         child: Column(
           children: [
             Container(
-              color: Colors.grey[900],
+              color: colorScheme.surfaceContainerHighest,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CupertinoButton(
-                    child: const Text(
+                    child: Text(
                       "Cancel",
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
                   CupertinoButton(
                     child: Text(
                       "Done",
-                      style: TextStyle(color: AppColors.primarayColor),
+                      style: TextStyle(color: colorScheme.primary),
                     ),
                     onPressed: () {
                       selectedValue = tempValue;
@@ -294,7 +296,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
             Expanded(
               child: CupertinoPicker(
                 itemExtent: 40,
-                backgroundColor: Colors.black,
+                backgroundColor: theme.scaffoldBackgroundColor,
                 scrollController: FixedExtentScrollController(
                   initialItem: (currentValue?.toInt() ?? min) - min,
                 ),
@@ -304,7 +306,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                   (i) => Center(
                     child: Text(
                       "${min + i}",
-                      style: const TextStyle(color: Colors.white, fontSize: 20),
+                      style: TextStyle(color: colorScheme.onSurface, fontSize: 20),
                     ),
                   ),
                 ),
@@ -321,30 +323,32 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   Future<DateTime?> showDateOfBirthDialog(DateTime? currentValue) async {
     DateTime tempDate = currentValue ?? DateTime(2000, 1, 1);
     DateTime? selectedDate;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     await showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
         height: 320,
-        color: Colors.black,
+        color: theme.scaffoldBackgroundColor,
         child: Column(
           children: [
             Container(
-              color: Colors.grey[900],
+              color: colorScheme.surfaceContainerHighest,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CupertinoButton(
-                    child: const Text(
+                    child: Text(
                       "Cancel",
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
                   CupertinoButton(
                     child: Text(
                       "Done",
-                      style: TextStyle(color: AppColors.primarayColor),
+                      style: TextStyle(color: colorScheme.primary),
                     ),
                     onPressed: () {
                       selectedDate = tempDate;
@@ -359,7 +363,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                 data: CupertinoThemeData(
                   textTheme: CupertinoTextThemeData(
                     dateTimePickerTextStyle: TextStyle(
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       fontSize: 20,
                     ),
                   ),
@@ -373,7 +377,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                   onDateTimeChanged: (DateTime newDate) {
                     tempDate = newDate;
                   },
-                  backgroundColor: Colors.black,
+                  backgroundColor: theme.scaffoldBackgroundColor,
                 ),
               ),
             ),
@@ -389,7 +393,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     final token = await getToken();
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("غير مسجل الدخول. الرجاء إعادة تسجيل الدخول")),
+        const SnackBar(content: Text("غير مسجل الدخول. الرجاء إعادة تسجيل الدخول")),
       );
       return;
     }
@@ -441,6 +445,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   }
 
   Future<String?> showTextEditDialog(String title, String? currentValue) async {
+    final colorScheme = Theme.of(context).colorScheme;
     // للـ Gender
     if (title.toLowerCase().contains('gender')) {
       return await showGenderDialog(currentValue);
@@ -461,26 +466,26 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     return await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.ContainerColor,
-        title: Text('Edit $title', style: TextStyle(color: Colors.white)),
+        backgroundColor: colorScheme.surface,
+        title: Text('Edit $title', style: TextStyle(color: colorScheme.onSurface)),
         content: TextField(
           controller: controller,
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: colorScheme.onSurface),
           decoration: InputDecoration(
             hintText: "Enter new $title",
-            hintStyle: TextStyle(color: Colors.grey),
+            hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: Text('Cancel', style: TextStyle(color: colorScheme.onSurfaceVariant)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text),
             child: Text(
               'Save',
-              style: TextStyle(color: AppColors.primarayColor),
+              style: TextStyle(color: colorScheme.primary),
             ),
           ),
         ],
@@ -491,6 +496,8 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   Future<String?> showGenderDialog(String? currentValue) async {
     final genders = ['Male', 'Female'];
     String? selected;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     await showCupertinoModalPopup(
       context: context,
@@ -498,11 +505,11 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
         color: Colors.transparent,
         child: Container(
           height: 280,
-          color: Colors.black,
+          color: theme.scaffoldBackgroundColor,
           child: Column(
             children: [
               Container(
-                color: Colors.grey[900],
+                color: colorScheme.surfaceContainerHighest,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 10,
@@ -514,7 +521,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         "Cancel",
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
                       ),
                     ),
                     TextButton(
@@ -523,7 +530,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       },
                       child: Text(
                         "Done",
-                        style: TextStyle(color: AppColors.primarayColor),
+                        style: TextStyle(color: colorScheme.primary),
                       ),
                     ),
                   ],
@@ -538,15 +545,15 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         gender,
                         style: TextStyle(
                           color: isSelected
-                              ? AppColors.primarayColor
-                              : Colors.white,
+                              ? colorScheme.primary
+                              : colorScheme.onSurface,
                           fontWeight: isSelected
                               ? FontWeight.bold
                               : FontWeight.normal,
                         ),
                       ),
                       trailing: isSelected
-                          ? Icon(Icons.check, color: AppColors.primarayColor)
+                          ? Icon(Icons.check, color: colorScheme.primary)
                           : null,
                       onTap: () {
                         selected = gender;
@@ -568,6 +575,8 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   Future<String?> showBodyTypeDialog(String? currentValue) async {
     final bodyTypes = ['Ectomorph', 'Mesomorph', 'Endomorph'];
     String? selected;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     await showCupertinoModalPopup(
       context: context,
@@ -575,11 +584,11 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
         color: Colors.transparent,
         child: Container(
           height: 300,
-          color: Colors.black,
+          color: theme.scaffoldBackgroundColor,
           child: Column(
             children: [
               Container(
-                color: Colors.grey[900],
+                color: colorScheme.surfaceContainerHighest,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 10,
@@ -591,7 +600,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         "Cancel",
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
                       ),
                     ),
                     TextButton(
@@ -600,7 +609,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       },
                       child: Text(
                         "Done",
-                        style: TextStyle(color: AppColors.primarayColor),
+                        style: TextStyle(color: colorScheme.primary),
                       ),
                     ),
                   ],
@@ -615,15 +624,15 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         type,
                         style: TextStyle(
                           color: isSelected
-                              ? AppColors.primarayColor
-                              : Colors.white,
+                              ? colorScheme.primary
+                              : colorScheme.onSurface,
                           fontWeight: isSelected
                               ? FontWeight.bold
                               : FontWeight.normal,
                         ),
                       ),
                       trailing: isSelected
-                          ? Icon(Icons.check, color: AppColors.primarayColor)
+                          ? Icon(Icons.check, color: colorScheme.primary)
                           : null,
                       onTap: () {
                         selected = type;
@@ -645,6 +654,8 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   Future<String?> showDietTypeDialog(String? currentValue) async {
     final dietTypes = ['Standard', 'Vegetarian', 'Vegan', 'Pescatarian'];
     String? selected;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     await showCupertinoModalPopup(
       context: context,
@@ -652,11 +663,11 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
         color: Colors.transparent,
         child: Container(
           height: 400,
-          color: Colors.black,
+          color: theme.scaffoldBackgroundColor,
           child: Column(
             children: [
               Container(
-                color: Colors.grey[900],
+                color: colorScheme.surfaceContainerHighest,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 10,
@@ -668,7 +679,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         "Cancel",
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
                       ),
                     ),
                     TextButton(
@@ -677,7 +688,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       },
                       child: Text(
                         "Done",
-                        style: TextStyle(color: AppColors.primarayColor),
+                        style: TextStyle(color: colorScheme.primary),
                       ),
                     ),
                   ],
@@ -692,15 +703,15 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         diet,
                         style: TextStyle(
                           color: isSelected
-                              ? AppColors.primarayColor
-                              : Colors.white,
+                              ? colorScheme.primary
+                              : colorScheme.onSurface,
                           fontWeight: isSelected
                               ? FontWeight.bold
                               : FontWeight.normal,
                         ),
                       ),
                       trailing: isSelected
-                          ? Icon(Icons.check, color: AppColors.primarayColor)
+                          ? Icon(Icons.check, color: colorScheme.primary)
                           : null,
                       onTap: () {
                         selected = diet;
@@ -721,6 +732,10 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final w = screenWidth / 430.0;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final goalWeight = '${user.userGoalWeight ?? "--"}KG';
     final currentWeight = '${user.userWeight ?? "--"}KG';
     final height = '${user.userHeight ?? "--"}CM';
@@ -732,38 +747,55 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     final dietType = user.dietType ?? "--";
 
     return Scaffold(
-      backgroundColor: const Color(0xFF16313B), // Solid background fix
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.ContainerColor,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        automaticallyImplyLeading: false,
         title: Text(
           "Personal Details",
           style: GoogleFonts.outfit(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+            fontSize: 22 * w,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+        leading: Padding(
+          padding: EdgeInsets.only(left: 16 * w),
+          child: Center(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 40 * w,
+                height: 40 * w,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurface.withOpacity(0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: colorScheme.onSurface,
+                  size: 20 * w,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 24 * w, vertical: 10 * w),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 35),
             Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(20 * w),
               decoration: BoxDecoration(
-                color: AppColors.ContainerColor,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppColors.secondaryColor, width: 1),
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(20 * w),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-              margin: const EdgeInsets.only(bottom: 24),
+              margin: EdgeInsets.only(bottom: 16 * w),
               child: Row(
                 children: [
                   Expanded(
@@ -772,17 +804,17 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                       children: [
                         Text(
                           'Goal Weight',
-                          style: GoogleFonts.inriaSans(
-                            color: Colors.white.withOpacity(0.73),
-                            fontSize: 15,
+                          style: GoogleFonts.outfit(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 14 * w,
                           ),
                         ),
-                        const SizedBox(height: 5),
+                        SizedBox(height: 5 * w),
                         Text(
                           goalWeight,
-                          style: GoogleFonts.inriaSans(
-                            color: Colors.white,
-                            fontSize: 22,
+                          style: GoogleFonts.outfit(
+                            color: colorScheme.onSurface,
+                            fontSize: 22 * w,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -791,8 +823,8 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.white,
+                      foregroundColor: colorScheme.surface,
+                      backgroundColor: colorScheme.onSurface,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -815,9 +847,9 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                     },
                     child: Text(
                       'Change Goal',
-                      style: GoogleFonts.inriaSans(
-                        color: const Color(0xFF232237),
-                        fontSize: 15.5,
+                      style: GoogleFonts.outfit(
+                        color: colorScheme.surface,
+                        fontSize: 15 * w,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -826,12 +858,12 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
               ),
             ),
             Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(20 * w),
               decoration: BoxDecoration(
-                color: AppColors.ContainerColor,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppColors.secondaryColor, width: 1),
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(20 * w),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
               child: Column(
                 children: [
                   _infoRow(
@@ -848,9 +880,10 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         await updateHealthProfile(weight: newWeight);
                       }
                     },
+                    context: context,
                   ),
                   Divider(
-                    color: Colors.grey.withOpacity(0.35),
+                    color: colorScheme.outlineVariant,
                     height: 1,
                     thickness: 1,
                     endIndent: 10,
@@ -870,9 +903,10 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         await updateHealthProfile(height: newHeight);
                       }
                     },
+                    context: context,
                   ),
                   Divider(
-                    color: Colors.grey.withOpacity(0.35),
+                    color: colorScheme.outlineVariant,
                     height: 1,
                     thickness: 1,
                     endIndent: 10,
@@ -889,9 +923,10 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         await updateProfile(dateOfBirth: newDate);
                       }
                     },
+                    context: context,
                   ),
                   Divider(
-                    color: Colors.grey.withOpacity(0.35),
+                    color: colorScheme.outlineVariant,
                     height: 1,
                     thickness: 1,
                     endIndent: 10,
@@ -909,9 +944,10 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         await updateProfile(gender: newGender);
                       }
                     },
+                    context: context,
                   ),
                   Divider(
-                    color: Colors.grey.withOpacity(0.35),
+                    color: colorScheme.outlineVariant,
                     height: 1,
                     thickness: 1,
                     endIndent: 10,
@@ -929,9 +965,10 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         await updateHealthProfile(bodyType: newBodyType);
                       }
                     },
+                    context: context,
                   ),
                   Divider(
-                    color: Colors.grey.withOpacity(0.35),
+                    color: colorScheme.outlineVariant,
                     height: 1,
                     thickness: 1,
                     endIndent: 10,
@@ -949,6 +986,7 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
                         await updateHealthProfile(dietType: newDietType);
                       }
                     },
+                    context: context,
                   ),
                 ],
               ),
@@ -959,37 +997,48 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
     );
   }
 
-  Widget _infoRow(String title, String value, {required VoidCallback onEdit}) {
+  Widget _infoRow(String title, String value, {required VoidCallback onEdit, required BuildContext context}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final w = screenWidth / 430.0;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 13.5),
+      padding: EdgeInsets.symmetric(vertical: 14 * w),
       child: Row(
         children: [
           Expanded(
             child: Text(
               title,
-              style: GoogleFonts.inriaSans(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 15,
+              style: GoogleFonts.outfit(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 15 * w,
                 fontWeight: FontWeight.w400,
               ),
             ),
           ),
           Text(
             value,
-            style: GoogleFonts.inriaSans(
-              color: Colors.white,
-              fontSize: title == 'Daily step goal' ? 17 : 15.5,
+            style: GoogleFonts.outfit(
+              color: colorScheme.onSurface,
+              fontSize: 16 * w,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(width: 13),
+          SizedBox(width: 12 * w),
           InkWell(
             borderRadius: BorderRadius.circular(17),
             onTap: onEdit,
-            child: Icon(
-              Icons.edit,
-              color: Colors.white.withOpacity(0.57),
-              size: 19,
+            child: Container(
+              padding: EdgeInsets.all(4 * w),
+              decoration: BoxDecoration(
+                color: colorScheme.onSurface.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.chevron_right,
+                color: colorScheme.onSurfaceVariant,
+                size: 20 * w,
+              ),
             ),
           ),
         ],

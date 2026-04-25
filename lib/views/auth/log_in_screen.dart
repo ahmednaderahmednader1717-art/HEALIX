@@ -2,13 +2,11 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/views/home/home_screen.dart';
 import 'package:test_splash/widgets/common/healix_text_field.dart';
 import 'package:test_splash/widgets/auth/social_button.dart';
@@ -286,22 +284,37 @@ class _LogInScreenState extends State<LogInScreen> {
     final w = screenWidth / baseWidth;
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: Colors.black,
-            title: SvgPicture.asset(
-              "assets/logo/HEALIX.svg",
-              width: 60 * w,
-              height: 40 * h,
+            backgroundColor: theme.scaffoldBackgroundColor,
+            elevation: 0,
+            title: RichText(
+              text: TextSpan(
+                style: GoogleFonts.inriaSans(
+                  fontSize: 24 * scale,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                  letterSpacing: 1.2,
+                ),
+                children: [
+                  const TextSpan(text: "HEALI"),
+                  TextSpan(
+                    text: "X",
+                    style: TextStyle(color: colorScheme.primary),
+                  ),
+                ],
+              ),
             ),
             centerTitle: true,
-            iconTheme: const IconThemeData(color: Colors.white),
+            iconTheme: IconThemeData(color: colorScheme.onSurface),
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+              icon: Icon(Icons.arrow_back_ios_new, color: colorScheme.onSurface),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -316,7 +329,7 @@ class _LogInScreenState extends State<LogInScreen> {
                   Text(
                     "Log In",
                     style: GoogleFonts.inriaSans(
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       fontSize: 40 * scale,
                       fontWeight: FontWeight.bold,
                     ),
@@ -326,7 +339,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     "Enter Your Username",
                     style: GoogleFonts.inriaSans(
                       fontSize: 17 * scale,
-                      color: const Color.fromARGB(255, 169, 169, 169),
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   Gap(10 * h),
@@ -340,7 +353,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     "Enter Your Password",
                     style: GoogleFonts.inriaSans(
                       fontSize: 17 * scale,
-                      color: const Color.fromARGB(255, 169, 169, 169),
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   Gap(10 * h),
@@ -359,7 +372,7 @@ class _LogInScreenState extends State<LogInScreen> {
                         "Forgot Password?",
                         style: GoogleFonts.inriaSans(
                           fontSize: 17 * scale,
-                          color: const Color.fromARGB(255, 169, 169, 169),
+                          color: colorScheme.primary,
                         ),
                       ),
                     ),
@@ -376,21 +389,21 @@ class _LogInScreenState extends State<LogInScreen> {
                   Gap(25 * h),
                   Row(
                     children: [
-                      const Expanded(
-                        child: Divider(color: Colors.white24, thickness: 1),
+                      Expanded(
+                        child: Divider(color: theme.brightness == Brightness.dark ? Colors.white24 : colorScheme.outlineVariant, thickness: 1),
                       ),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10 * w),
                         child: Text(
                           "Or continue with",
                           style: GoogleFonts.inriaSans(
-                            color: Colors.white54,
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 14 * scale,
                           ),
                         ),
                       ),
-                      const Expanded(
-                        child: Divider(color: Colors.white24, thickness: 1),
+                      Expanded(
+                        child: Divider(color: theme.brightness == Brightness.dark ? Colors.white24 : colorScheme.outlineVariant, thickness: 1),
                       ),
                     ],
                   ),
@@ -399,7 +412,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     text: "Sign in with Google",
                     imagePath: "assets/icons/google.png",
                     size: scale,
-                    backgroundColor: Colors.white.withValues(alpha: 0.08),
+                    backgroundColor: theme.brightness == Brightness.dark ? const Color(0xFF16313B).withValues(alpha: 0.69) : Colors.white,
                     onPressed: _signInWithGoogle,
                   ),
                   Gap(15 * h),
@@ -407,8 +420,10 @@ class _LogInScreenState extends State<LogInScreen> {
                     text: "Sign in with Apple",
                     imagePath: "assets/icons/apple.png",
                     size: scale,
-                    backgroundColor: Colors.white.withValues(alpha: 0.08),
-                    onPressed: () {},
+                    backgroundColor: theme.brightness == Brightness.dark ? const Color(0xFF16313B).withValues(alpha: 0.69) : Colors.black,
+                    onPressed: () {
+                      // TODO SIGN IN WITH APPLE LOGIC HERE
+                    },
                   ),
                   Gap(30 * h),
                   Row(
@@ -418,7 +433,7 @@ class _LogInScreenState extends State<LogInScreen> {
                         "Don’t have an account?",
                         style: GoogleFonts.inriaSans(
                           fontSize: 16 * scale,
-                          color: Colors.white70,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       TextButton(
@@ -434,7 +449,7 @@ class _LogInScreenState extends State<LogInScreen> {
                           "Sign Up",
                           style: GoogleFonts.inriaSans(
                             fontSize: 16 * scale,
-                            color: AppColors.primarayColor,
+                            color: colorScheme.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -451,10 +466,10 @@ class _LogInScreenState extends State<LogInScreen> {
         // Loading overlay
         if (_loading)
           Container(
-            color: Colors.black.withValues(alpha: 0.7),
-            child: const Center(
+            color: colorScheme.surface.withValues(alpha: 0.7),
+            child: Center(
               child: CupertinoActivityIndicator(
-                color: Colors.white,
+                color: colorScheme.primary,
                 radius: 15,
               ),
             ),

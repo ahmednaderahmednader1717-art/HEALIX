@@ -1,0 +1,206 @@
+Analyzing HEALIX...                                             
+
+   info • The constant name 'ContainerColor' isn't a lowerCamelCase identifier • lib/core/app_colors.dart:6:16 • constant_identifier_names
+warning • The value of the local variable 'prefs' isn't used • lib/core/theme/theme_provider.dart:24:11 • unused_local_variable
+warning • Unused import: 'package:test_splash/core/theme/theme_provider.dart' • lib/features/search/presentation/pages/food_search_page.dart:4:8 • unused_import
+   info • The local variable '_pick' starts with an underscore • lib/models/nutrition_models.dart:217:12 • no_leading_underscores_for_local_identifiers
+   info • Don't invoke 'print' in production code • lib/models/user_info_model.dart:87:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/models/user_info_model.dart:112:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/models/user_info_model.dart:126:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/models/user_info_model.dart:128:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/models/user_info_model.dart:133:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/models/user_info_model.dart:136:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/models/user_info_model.dart:142:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/models/user_info_model.dart:159:7 • avoid_print
+warning • Unused import: 'dart:developer' • lib/services/live_activity_service.dart:2:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:13:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:15:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:36:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:40:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:46:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:48:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:50:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:53:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:60:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:66:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_activity_service.dart:69:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/src/web_wrapper.dart:19:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/src/web_wrapper.dart:22:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/src/web_wrapper.dart:37:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/src/web_wrapper.dart:39:11 • avoid_print
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/auth/log_in_screen.dart:11:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:80:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:81:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:90:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:91:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:94:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:95:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:113:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:116:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:125:11 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/auth/log_in_screen.dart:130:13 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:141:7 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/auth/log_in_screen.dart:201:11 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:218:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:223:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:227:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:229:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:232:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:238:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:242:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:244:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:250:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:253:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/log_in_screen.dart:257:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:206:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:207:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:208:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:210:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:221:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:222:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:226:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:240:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:242:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:247:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:258:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:274:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:276:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:280:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:285:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:297:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:313:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:315:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:321:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:347:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:361:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:362:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:363:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:370:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:384:19 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:386:19 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:393:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:396:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:397:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:401:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:402:13 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/auth/multi_step_signup_page.dart:424:11 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:430:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:459:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:463:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:464:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:465:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:466:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:467:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:483:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:484:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:493:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:508:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:513:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:528:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:536:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:542:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/auth/multi_step_signup_page.dart:544:7 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/multi_step_signup_page.dart:601:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/multi_step_signup_page.dart:727:52 • deprecated_member_use
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/auth/sign_up_screen.dart:11:8 • unused_import
+   info • Don't use 'BuildContext's across async gaps • lib/views/auth/sign_up_screen.dart:75:11 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/auth/sign_up_screen.dart:83:7 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/auth/sign_up_screen.dart:115:13 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_body_type.dart:85:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_body_type.dart:89:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_body_type.dart:99:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_body_type.dart:106:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_body_type.dart:119:52 • deprecated_member_use
+   info • 'color' is deprecated and shouldn't be used. Use colorFilter instead • lib/views/auth/sign_up_steps/step_body_type.dart:124:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_diet_type.dart:89:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_diet_type.dart:93:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_diet_type.dart:103:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_diet_type.dart:110:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_diet_type.dart:123:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/step_profile_photo.dart:246:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/auth/sign_up_steps/stepextradetails.dart:188:39 • deprecated_member_use
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/home_screen.dart:9:8 • unused_import
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/views/edit_nutration_goals.dart:7:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/views/home/views/edit_nutration_goals.dart:75:7 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/edit_nutration_goals.dart:107:30 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/edit_nutration_goals.dart:110:23 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/home/views/edit_nutration_goals.dart:113:7 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/edit_nutration_goals.dart:114:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/edit_profile.dart:107:9 • use_build_context_synchronously
+   info • Statements in an if should be enclosed in a block • lib/views/home/views/edit_profile.dart:149:13 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/views/home/views/edit_profile.dart:151:13 • curly_braces_in_flow_control_structures
+   info • Don't invoke 'print' in production code • lib/views/home/views/edit_profile.dart:168:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/edit_profile.dart:185:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/edit_profile.dart:247:7 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/home/views/edit_profile.dart:561:39 • deprecated_member_use
+   info • The private field _monthlyProgress could be 'final' • lib/views/home/views/home_tab.dart:36:29 • prefer_final_fields
+   info • Don't invoke 'print' in production code • lib/views/home/views/home_tab.dart:151:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/home_tab.dart:156:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/home_tab.dart:161:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/home_tab.dart:172:15 • avoid_print
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/views/personal_details_page.dart:5:8 • unused_import
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:96:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:97:22 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:106:30 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/home/views/personal_details_page.dart:128:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/personal_details_page.dart:140:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/personal_details_page.dart:142:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/personal_details_page.dart:145:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/personal_details_page.dart:149:7 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:150:28 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/home/views/personal_details_page.dart:181:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/personal_details_page.dart:182:5 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:205:25 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:207:30 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:219:30 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/home/views/personal_details_page.dart:226:7 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:229:30 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:242:30 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/home/views/personal_details_page.dart:247:7 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:249:9 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:396:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:432:25 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:434:30 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/home/views/personal_details_page.dart:441:7 • avoid_print
+   info • Don't use 'BuildContext's across async gaps • lib/views/home/views/personal_details_page.dart:443:9 • use_build_context_synchronously
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/views/preferences_page.dart:6:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/home/views/preferences_page.dart:102:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/home/views/preferences_page.dart:250:58 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/home/views/preferences_page.dart:276:41 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre • lib/views/home/views/preferences_page.dart:356:13 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/home/views/preferences_page.dart:368:59 • deprecated_member_use
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/views/profile_tab.dart:11:8 • unused_import
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/views/home/views/profile_tab.dart:124:30 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/views/home/views/profile_tab.dart:227:47 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/profile_tab.dart:331:34 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/profile_tab.dart:336:34 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/profile_tab.dart:372:34 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/profile_tab.dart:401:34 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/profile_tab.dart:406:34 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/profile_tab.dart:447:34 • avoid_print
+   info • Don't invoke 'print' in production code • lib/views/home/views/profile_tab.dart:452:34 • avoid_print
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/views/progress_tab.dart:5:8 • unused_import
+   info • Statements in an if should be enclosed in a block • lib/views/home/views/progress_tab.dart:228:9 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/views/home/views/progress_tab.dart:888:40 • deprecated_member_use
+  error • The named parameter 'context' isn't defined • lib/views/home/views/progress_tab.dart:1226:15 • undefined_named_parameter
+  error • All final variables must be initialized, but 'context' isn't • lib/views/home/views/progress_tab.dart:1239:9 • final_not_initialized_constructor
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/views/scan_meal_tab.dart:7:8 • unused_import
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/views/search_meal_tab.dart:13:8 • unused_import
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/widgets/health_extra_metrics.dart:4:8 • unused_import
+warning • The value of the local variable 'colorScheme' isn't used • lib/views/home/widgets/health_extra_metrics.dart:48:11 • unused_local_variable
+   info • Unnecessary use of string interpolation • lib/views/home/widgets/health_extra_metrics.dart:205:40 • unnecessary_string_interpolations
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/widgets/meal_tile.dart:3:8 • unused_import
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/home/widgets/profile_card_group.dart:3:8 • unused_import
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/splash/splash_screen.dart:5:8 • unused_import
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/views/splash/welcome_screen.dart:8:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/common/healix_logo.dart:123:25 • deprecated_member_use
+warning • Unused import: 'package:test_splash/core/app_colors.dart' • lib/widgets/common/healix_text_field.dart:2:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/widgets/home/home_page_appbar.dart:34:5 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/home/home_page_appbar.dart:151:41 • deprecated_member_use
+   info • The imported package 'shelf' isn't a dependency of the importing package • proxy_server.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'shelf' isn't a dependency of the importing package • proxy_server.dart:3:8 • depend_on_referenced_packages
+   info • Don't invoke 'print' in production code • proxy_server.dart:20:3 • avoid_print
+   info • Don't invoke 'print' in production code • proxy_server.dart:21:3 • avoid_print
+   info • Don't invoke 'print' in production code • proxy_server.dart:22:3 • avoid_print
+
+202 issues found. (ran in 2.3s)

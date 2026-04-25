@@ -12,6 +12,8 @@ class NutritionService {
   /// Widgets can listen to this to auto-refresh nutrition data.
   static final ValueNotifier<int> foodLogged = ValueNotifier(0);
 
+  static final Set<int> _syncingLogs = {};
+
   // ─── Auth header helper ───────────────────────────────────────────────────
 
   Future<Options> _authOptions() async {
@@ -126,6 +128,8 @@ class NutritionService {
   }
 
   Future<void> syncLocalLogToServer(NutritionLog logItem, String date) async {
+    if (_syncingLogs.contains(logItem.id)) return;
+    _syncingLogs.add(logItem.id);
     try {
       final serverLog = await logFood(
         foodId: logItem.foodId,
@@ -137,6 +141,8 @@ class NutritionService {
       }
     } catch (e) {
       log('Background sync failed: $e');
+    } finally {
+      _syncingLogs.remove(logItem.id);
     }
   }
 

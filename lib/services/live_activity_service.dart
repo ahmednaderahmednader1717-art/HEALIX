@@ -1,5 +1,4 @@
 import 'package:live_activities/live_activities.dart';
-import 'dart:developer' as developer;
 
 class LiveActivityService {
   static final LiveActivities _liveActivitiesPlugin = LiveActivities();

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/food_model.dart';
 import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/nutrition_service.dart';
@@ -13,20 +12,23 @@ class MealTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return GestureDetector(
       onTap: () {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          backgroundColor: AppColors.ContainerColor,
+          backgroundColor: Colors.transparent,
           builder: (context) => _MealDetailsSheet(food: food, scale: scale),
         );
       },
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.ContainerColor,
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: theme.brightness == Brightness.dark ? 0.69 : 0.8),
           borderRadius: BorderRadius.circular(16 * scale),
-          border: Border.all(color: Colors.white12),
+          border: Border.all(color: theme.brightness == Brightness.dark ? Colors.white12 : colorScheme.outlineVariant.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -43,7 +45,7 @@ class MealTile extends StatelessWidget {
                           height: 90 * scale,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              _buildPlaceholder(scale, width: 110, height: 90),
+                              _buildPlaceholder(context, scale, width: 110, height: 90),
                         )
                       : Image.file(
                           File(food.imageUrl!),
@@ -51,9 +53,9 @@ class MealTile extends StatelessWidget {
                           height: 90 * scale,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              _buildPlaceholder(scale, width: 110, height: 90),
+                              _buildPlaceholder(context, scale, width: 110, height: 90),
                         ))
-                  : _buildPlaceholder(scale, width: 110, height: 90),
+                  : _buildPlaceholder(context, scale, width: 110, height: 90),
             ),
             Expanded(
               child: Padding(
@@ -67,7 +69,7 @@ class MealTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: theme.brightness == Brightness.dark ? Colors.white : colorScheme.onSurface,
                         fontSize: 14 * scale,
                         fontWeight: FontWeight.w600,
                       ),
@@ -84,7 +86,7 @@ class MealTile extends StatelessWidget {
                         Text(
                           "${food.calories} kcal",
                           style: TextStyle(
-                            color: Colors.white70,
+                            color: theme.brightness == Brightness.dark ? Colors.white70 : colorScheme.onSurfaceVariant,
                             fontSize: 12 * scale,
                           ),
                         ),
@@ -101,7 +103,7 @@ class MealTile extends StatelessWidget {
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
-                    backgroundColor: AppColors.ContainerColor,
+                    backgroundColor: theme.brightness == Brightness.dark ? const Color(0xFF16313B).withValues(alpha: 0.69) : colorScheme.surface,
                     builder: (context) =>
                         _MealDetailsSheet(food: food, scale: scale),
                   );
@@ -112,13 +114,13 @@ class MealTile extends StatelessWidget {
                     vertical: 8 * scale,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primarayColor.withValues(alpha: 0.15),
+                    color: colorScheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12 * scale),
                   ),
                   child: Text(
                     'Add',
                     style: TextStyle(
-                      color: AppColors.primarayColor,
+                      color: colorScheme.primary,
                       fontWeight: FontWeight.w900,
                       fontSize: 12 * scale,
                     ),
@@ -132,11 +134,11 @@ class MealTile extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder(double scale, {double? width, double? height}) {
+  Widget _buildPlaceholder(BuildContext context, double scale, {double? width, double? height}) {
     return Container(
       width: width != null ? width * scale : double.infinity,
       height: height != null ? height * scale : double.infinity,
-      color: Colors.white12,
+      color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey.shade200,
       child: Image.asset('assets/covers/IMG_1049.JPG', fit: BoxFit.cover),
     );
   }
@@ -243,6 +245,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
   Future<void> _logFood() async {
     if (widget.food.id == null || _amount <= 0) return;
     setState(() => _isLogging = true);
+    final colorScheme = Theme.of(context).colorScheme;
     try {
       final now = DateTime.now();
       final dateStr =
@@ -266,7 +269,6 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
 
       await _nutritionService.saveLocalLog(localLog, dateStr);
 
-      // 💥 Fire and forget sync to the backend to ensure cross-device compatibility 
       _nutritionService.syncLocalLogToServer(localLog, dateStr);
 
       if (!mounted) return;
@@ -275,7 +277,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('✓ Saved ${widget.food.name} to your diary locally'),
-          backgroundColor: AppColors.primarayColor,
+          backgroundColor: colorScheme.primary,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -287,7 +289,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Failed to log meal locally. Please try again.'),
-          backgroundColor: Colors.red,
+          backgroundColor: colorScheme.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -302,6 +304,9 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
   @override
   Widget build(BuildContext context) {
     final scale = widget.scale;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return DraggableScrollableSheet(
       initialChildSize: 0.65,
       minChildSize: 0.4,
@@ -310,7 +315,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
       builder: (_, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.ContainerColor,
+            color: theme.brightness == Brightness.dark ? const Color(0xFF16313B) : theme.scaffoldBackgroundColor,
             borderRadius: BorderRadius.vertical(
               top: Radius.circular(20 * scale),
             ),
@@ -332,7 +337,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                       height: 5 * scale,
                       width: 40 * scale,
                       decoration: BoxDecoration(
-                        color: Colors.white30,
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -352,16 +357,16 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                                   width: double.infinity,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
-                                      _buildPlaceholder(scale),
+                                      _buildPlaceholder(context, scale),
                                 )
                               : Image.file(
                                   File(widget.food.imageUrl!),
                                   width: double.infinity,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
-                                      _buildPlaceholder(scale),
+                                      _buildPlaceholder(context, scale),
                                 ))
-                          : _buildPlaceholder(scale),
+                          : _buildPlaceholder(context, scale),
                     ),
                   ),
                   SizedBox(height: 16 * scale),
@@ -369,7 +374,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                     widget.food.name ?? 'Unknown Meal',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       fontSize: 22 * scale,
                       fontWeight: FontWeight.bold,
                     ),
@@ -384,9 +389,9 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                       vertical: 8 * scale,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: theme.brightness == Brightness.dark ? Colors.black.withValues(alpha: 0.2) : colorScheme.onSurface.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(16 * scale),
-                      border: Border.all(color: Colors.white12),
+                      border: Border.all(color: theme.brightness == Brightness.dark ? Colors.white24 : colorScheme.outlineVariant),
                     ),
                     child: Row(
                       children: [
@@ -397,7 +402,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                               Text(
                                 'Amount',
                                 style: TextStyle(
-                                  color: Colors.white54,
+                                  color: theme.brightness == Brightness.dark ? Colors.white70 : colorScheme.onSurfaceVariant,
                                   fontSize: 12 * scale,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -409,7 +414,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                                       decimal: true,
                                     ),
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: theme.brightness == Brightness.dark ? Colors.white : colorScheme.onSurface,
                                   fontSize: 24 * scale,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -426,16 +431,16 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                         Container(
                           height: 40 * scale,
                           width: 1 * scale,
-                          color: Colors.white12,
+                          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
                           margin: EdgeInsets.symmetric(horizontal: 16 * scale),
                         ),
                         DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _selectedUnit,
-                            dropdownColor: AppColors.ContainerColor,
+                            dropdownColor: theme.scaffoldBackgroundColor,
                             icon: Icon(
                               Icons.keyboard_arrow_down,
-                              color: Colors.white70,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                             onChanged: _onUnitChanged,
                             items: _units.map((u) {
@@ -444,7 +449,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                                 child: Text(
                                   u,
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: theme.brightness == Brightness.dark ? Colors.white : colorScheme.onSurface,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 18 * scale,
                                   ),
@@ -461,6 +466,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                   Row(
                     children: [
                       _buildNutrientInfo(
+                        context,
                         'Calories',
                         '$_adjustedCalories',
                         'kcal',
@@ -469,6 +475,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                         scale,
                       ),
                       _buildNutrientInfo(
+                        context,
                         'Protein',
                         _adjustedProtein.toStringAsFixed(1),
                         'g',
@@ -477,6 +484,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                         scale,
                       ),
                       _buildNutrientInfo(
+                        context,
                         'Carbs',
                         _adjustedCarbs.toStringAsFixed(1),
                         'g',
@@ -485,6 +493,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                         scale,
                       ),
                       _buildNutrientInfo(
+                        context,
                         'Fats',
                         _adjustedFats.toStringAsFixed(1),
                         'g',
@@ -499,9 +508,9 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                     width: double.infinity,
                     padding: EdgeInsets.all(16 * scale),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.03),
+                      color: theme.brightness == Brightness.dark ? Colors.black.withValues(alpha: 0.1) : colorScheme.onSurface.withValues(alpha: 0.03),
                       borderRadius: BorderRadius.circular(16 * scale),
-                      border: Border.all(color: Colors.white12),
+                      border: Border.all(color: theme.brightness == Brightness.dark ? Colors.white12 : colorScheme.outlineVariant.withValues(alpha: 0.5)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -510,14 +519,14 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                           children: [
                             Icon(
                               Icons.info_outline,
-                              color: Colors.white54,
+                              color: colorScheme.onSurfaceVariant,
                               size: 18 * scale,
                             ),
                             SizedBox(width: 8 * scale),
                             Text(
                               'Description',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: colorScheme.onSurface,
                                 fontSize: 16 * scale,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -530,7 +539,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                               ? widget.food.description!
                               : 'No description available for this meal.',
                           style: TextStyle(
-                            color: Colors.white70,
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 14 * scale,
                             height: 1.5,
                           ),
@@ -541,10 +550,10 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                   SizedBox(height: 30 * scale),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primarayColor,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       elevation: 4,
-                      shadowColor: AppColors.primarayColor.withValues(
+                      shadowColor: colorScheme.primary.withValues(
                         alpha: 0.5,
                       ),
                       shape: RoundedRectangleBorder(
@@ -582,6 +591,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
   }
 
   Widget _buildNutrientInfo(
+    BuildContext context,
     String label,
     String value,
     String unit,
@@ -589,6 +599,8 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
     IconData icon,
     double scale,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Expanded(
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 4 * scale),
@@ -609,7 +621,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                   TextSpan(
                     text: value,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: theme.brightness == Brightness.dark ? Colors.white : colorScheme.onSurface,
                       fontSize: 15 * scale,
                       fontWeight: FontWeight.bold,
                     ),
@@ -617,7 +629,7 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                   TextSpan(
                     text: ' $unit',
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: theme.brightness == Brightness.dark ? Colors.white70 : colorScheme.onSurfaceVariant,
                       fontSize: 10 * scale,
                       fontWeight: FontWeight.w500,
                     ),
@@ -640,11 +652,11 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
     );
   }
 
-  Widget _buildPlaceholder(double scale, {double? width, double? height}) {
+  Widget _buildPlaceholder(BuildContext context, double scale, {double? width, double? height}) {
     return Container(
       width: width != null ? width * scale : double.infinity,
       height: height != null ? height * scale : double.infinity,
-      color: Colors.white12,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Image.asset('assets/covers/IMG_1049.JPG', fit: BoxFit.cover),
     );
   }

@@ -2,10 +2,8 @@ import 'dart:math';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/cover_model.dart';
 import 'package:test_splash/views/auth/log_in_screen.dart';
 import 'package:test_splash/views/auth/sign_up_screen.dart';
@@ -24,6 +22,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     // مقاسات التصميم الأصلية (iPhone 14 Pro Max)
     const baseWidth = 430.0;
@@ -35,7 +35,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final scale = min(w, h); // 👈 المفتاح لتصميم متناسق على كل الشاشات
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: Align(
@@ -53,17 +53,29 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   style: GoogleFonts.inriaSans(
                     fontSize: 20 * scale,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.secondaryColor,
+                    color: colorScheme.onSurface,
                   ),
                 ),
 
                 Gap(10 * h),
 
                 // 🟣 Logo
-                SvgPicture.asset(
-                  "assets/logo/HEALIX.svg",
-                  width: 70 * scale,
-                  height: 27 * scale,
+                RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.inriaSans(
+                      fontSize: 24 * scale,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                      letterSpacing: 1.5,
+                    ),
+                    children: [
+                      const TextSpan(text: "HEALI"),
+                      TextSpan(
+                        text: "X",
+                        style: TextStyle(color: colorScheme.primary),
+                      ),
+                    ],
+                  ),
                 ),
 
                 Gap(60 * h),
@@ -92,14 +104,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           cover.coverName,
                           style: GoogleFonts.inriaSans(
                             fontSize: 20 * scale,
-                            color: AppColors.secondaryColor,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ],
                     );
                   },
                   options: CarouselOptions(
-                    scrollPhysics: BouncingScrollPhysics(),
+                    scrollPhysics: const BouncingScrollPhysics(),
                     height: 430 * h,
                     viewportFraction: 0.8,
                     enableInfiniteScroll: false,
@@ -126,14 +138,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         height: 8 * scale,
                         decoration: BoxDecoration(
                           color: isActive
-                              ? AppColors.primarayColor
-                              : Colors.white.withOpacity(0.3),
+                              ? colorScheme.primary
+                              : colorScheme.onSurface.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(10 * scale),
                           boxShadow: isActive
                               ? [
                                   BoxShadow(
-                                    color: AppColors.primarayColor.withOpacity(
-                                      0.6,
+                                    color: colorScheme.primary.withValues(
+                                      alpha: 0.6,
                                     ),
                                     blurRadius: 8,
                                     spreadRadius: 1,
@@ -154,7 +166,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   height: 60 * h,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primarayColor,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(80 * scale),
                       ),
@@ -171,7 +184,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       "Sign Up",
                       style: GoogleFonts.inriaSans(
                         fontSize: 20 * scale,
-                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -187,7 +200,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       "Already Have An Account?",
                       style: GoogleFonts.inriaSans(
                         fontSize: 18 * scale,
-                        color: AppColors.secondaryColor,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     TextButton(
@@ -203,7 +216,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         "Log In",
                         style: GoogleFonts.inriaSans(
                           fontSize: 18 * scale,
-                          color: AppColors.primarayColor,
+                          color: colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

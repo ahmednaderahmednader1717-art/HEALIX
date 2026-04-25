@@ -33,7 +33,7 @@ class _HomeTabState extends State<HomeTab> {
   late Future<List<Food>> _foodsFuture;
   Future<DailySummary?>? _dailySummaryFuture;
   final NutritionService _nutritionService = NutritionService();
-  Map<DateTime, DaySummary> _monthlyProgress = {};
+  final Map<DateTime, DaySummary> _monthlyProgress = {};
   int _streakCount = 0;
   int _pagerPage = 0;
 
@@ -277,6 +277,9 @@ class _HomeTabState extends State<HomeTab> {
     final h = screenHeight / baseHeight;
     final scale = math.min(w, h);
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return CustomScrollView(
       physics: const BouncingScrollPhysics(
         parent: AlwaysScrollableScrollPhysics(),
@@ -297,8 +300,8 @@ class _HomeTabState extends State<HomeTab> {
                       return Center(
                         child: Padding(
                           padding: EdgeInsets.only(bottom: 20 * h),
-                          child: const CupertinoActivityIndicator(
-                            color: Colors.white,
+                          child: CupertinoActivityIndicator(
+                            color: colorScheme.onSurface,
                             radius: 12,
                           ),
                         ),
@@ -317,12 +320,12 @@ class _HomeTabState extends State<HomeTab> {
                             fontSize: 32 * w,
                             fontWeight: FontWeight.bold,
                           ),
-                          children: const [
+                          children: [
                             TextSpan(
                               text: "HEALI",
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: colorScheme.onSurface),
                             ),
-                            TextSpan(
+                            const TextSpan(
                               text: "X",
                               style: TextStyle(color: AppColors.primarayColor),
                             ),
@@ -334,11 +337,11 @@ class _HomeTabState extends State<HomeTab> {
                         width: 60 * w,
                         height: 40 * h,
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 42, 38, 38),
+                          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.35),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 12,
                               spreadRadius: 2,
                               offset: const Offset(0, 6),
@@ -362,7 +365,7 @@ class _HomeTabState extends State<HomeTab> {
                               "$_streakCount",
                               style: GoogleFonts.inriaSans(
                                 fontSize: 20 * scale,
-                                color: Colors.white,
+                                color: colorScheme.onSurface,
                               ),
                             ),
                           ],
@@ -407,7 +410,7 @@ class _HomeTabState extends State<HomeTab> {
                   child: Text(
                     "Recommended Meals",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       fontSize: 18 * scale,
                       fontWeight: FontWeight.w700,
                     ),
@@ -429,7 +432,7 @@ class _HomeTabState extends State<HomeTab> {
                           ),
                         );
                       } else if (snapshot.hasError) {
-                        return Center(
+                        return const Center(
                           child: Text(
                             'Error loading meals',
                             style: TextStyle(color: Colors.redAccent),
@@ -439,7 +442,7 @@ class _HomeTabState extends State<HomeTab> {
                         return Center(
                           child: Text(
                             'No meals available',
-                            style: TextStyle(color: Colors.white54),
+                            style: TextStyle(color: colorScheme.onSurfaceVariant),
                           ),
                         );
                       }

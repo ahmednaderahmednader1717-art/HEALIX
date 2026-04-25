@@ -8,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:dio/dio.dart';
 import 'package:test_splash/services/auth_service.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/views/auth/multi_step_signup_page.dart';
 import 'package:test_splash/views/home/home_screen.dart';
 import 'package:test_splash/models/user_info_model.dart';
@@ -188,24 +187,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final w = screenWidth / baseWidth;
     final h = screenHeight / baseHeight;
     final scale = min(w, h);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: Colors.black,
+            backgroundColor: theme.scaffoldBackgroundColor,
+            elevation: 0,
             title: Text(
               "Sign Up",
               style: GoogleFonts.inriaSans(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 22 * scale,
               ),
             ),
             centerTitle: true,
-            iconTheme: const IconThemeData(color: Colors.white),
+            iconTheme: IconThemeData(color: colorScheme.onSurface),
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+              icon: Icon(Icons.arrow_back_ios_new, color: colorScheme.onSurface),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -216,12 +218,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Gap(180 * h),
-                  Text(
-                    "Welcome! Let's customize\n HEALIX for your goals.",
+                  RichText(
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inriaSans(
-                      color: Colors.white,
-                      fontSize: 24,
+                    text: TextSpan(
+                      style: GoogleFonts.inriaSans(
+                        color: colorScheme.onSurface,
+                        fontSize: 24 * scale,
+                      ),
+                      children: [
+                        const TextSpan(text: "Welcome! Let's customize\n HEALI"),
+                        TextSpan(
+                          text: "X",
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const TextSpan(text: " for your goals."),
+                      ],
                     ),
                   ),
                   Gap(30 * h),
@@ -241,7 +255,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Text(
                     "OR",
                     style: GoogleFonts.inriaSans(
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       fontSize: 24,
                     ),
                   ),
@@ -250,7 +264,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     text: "Sign Up with Google",
                     imagePath: "assets/icons/google.png",
                     size: scale,
-                    backgroundColor: Colors.white.withOpacity(0.08),
+                    backgroundColor: theme.brightness == Brightness.dark ? const Color(0xFF16313B).withValues(alpha: 0.69) : Colors.white,
                     onPressed: _signUpWithGoogle,
                   ),
                   Gap(15 * h),
@@ -258,7 +272,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     text: "Sign in with Apple",
                     imagePath: "assets/icons/apple.png",
                     size: scale,
-                    backgroundColor: Colors.white.withOpacity(0.08),
+                    backgroundColor: theme.brightness == Brightness.dark ? const Color(0xFF16313B).withValues(alpha: 0.69) : Colors.black,
                     onPressed: () {
                       // TODO SIGN IN WITH APPLE LOGIC HERE
                     },
@@ -268,18 +282,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: GoogleFonts.inriaSans(
-                        color: Colors.white,
+                        color: colorScheme.onSurfaceVariant,
                         fontSize: 15 * scale,
                       ),
                       children: [
                         const TextSpan(
                           text:
-                              "We will collect personal information from and about\nyou and use it for various purposes, including to\ncustomize your HEALIX experience. Read more\nabout the purposes, our practices, your choices, and\nyour rights in our  ",
+                              "We will collect personal information from and about\nyou and use it for various purposes, including to\ncustomize your HEALI",
+                        ),
+                        TextSpan(
+                          text: "X",
+                          style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+                        ),
+                        const TextSpan(
+                          text: " experience. Read more\nabout the purposes, our practices, your choices, and\nyour rights in our  ",
                         ),
                         TextSpan(
                           text: "Privacy Policy",
                           style: GoogleFonts.inriaSans(
-                            color: AppColors.primarayColor,
+                            color: colorScheme.primary,
                             fontSize: 15 * scale,
                           ),
                           recognizer: TapGestureRecognizer()
@@ -298,8 +319,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
         if (_loading)
           Container(
-            color: Colors.black.withOpacity(0.7),
-            child: const Center(child: CupertinoActivityIndicator(radius: 15)),
+            color: colorScheme.surface.withValues(alpha: 0.7),
+            child: Center(
+              child: CupertinoActivityIndicator(
+                color: colorScheme.primary,
+                radius: 15,
+              ),
+            ),
           ),
       ],
     );

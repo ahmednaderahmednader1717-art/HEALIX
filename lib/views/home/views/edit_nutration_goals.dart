@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/models/user_info_model.dart';
 
 class EditNutrationGoals extends StatefulWidget {
@@ -131,30 +130,46 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final w = screenWidth / 430;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF16313B),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        automaticallyImplyLeading: false,
         title: Text(
           "Edit nutrition goals",
           style: GoogleFonts.outfit(
-            color: Colors.white,
+            color: colorScheme.onSurface,
             fontSize: 22 * w,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.white,
-            size: 20 * w,
+        leading: Padding(
+          padding: EdgeInsets.only(left: 16 * w),
+          child: Center(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 40 * w,
+                height: 40 * w,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurface.withOpacity(0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: colorScheme.onSurface,
+                  size: 20 * w,
+                ),
+              ),
+            ),
           ),
-          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
@@ -174,6 +189,7 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
                     color: Colors.orangeAccent,
                     scale: w,
                     progress: 0.8,
+                    context: context,
                   ),
                   SizedBox(height: 16 * w),
                   _buildGoalCard(
@@ -184,6 +200,7 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
                     color: const Color(0xFFFF6D6D),
                     scale: w,
                     progress: 0.6,
+                    context: context,
                   ),
                   SizedBox(height: 16 * w),
                   _buildGoalCard(
@@ -194,6 +211,7 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
                     color: const Color(0xFFFFB36D),
                     scale: w,
                     progress: 0.7,
+                    context: context,
                   ),
                   SizedBox(height: 16 * w),
                   _buildGoalCard(
@@ -204,17 +222,18 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
                     color: const Color(0xFF6DA4FF),
                     scale: w,
                     progress: 0.5,
+                    context: context,
                   ),
                   SizedBox(height: 40 * w),
-                  _buildSaveButton(w),
+                  _buildSaveButton(w, context),
                   SizedBox(height: 30 * w),
                 ],
               ),
             ),
             if (_isLoading)
               Container(
-                color: Colors.black.withOpacity(0.3),
-                child: const Center(child: CupertinoActivityIndicator()),
+                color: colorScheme.surface.withValues(alpha: 0.3),
+                child: Center(child: CupertinoActivityIndicator(color: colorScheme.primary)),
               ),
           ],
         ),
@@ -230,13 +249,14 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
     required Color color,
     required double scale,
     required double progress,
+    required BuildContext context,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor.withOpacity(0.4),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(20 * scale),
-        border: Border.all(color: Colors.white.withOpacity(0.30), width: 1),
       ),
       child: Row(
         children: [
@@ -252,6 +272,7 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
                     color: color,
                     progress: progress * _animation.value,
                     scale: scale,
+                    trackColor: colorScheme.onSurface.withValues(alpha: 0.05),
                   ),
                   child: Center(
                     child: Icon(icon, color: color, size: 22 * scale),
@@ -269,7 +290,7 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
                 Text(
                   label,
                   style: GoogleFonts.outfit(
-                    color: Colors.white60,
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 14 * scale,
                   ),
                 ),
@@ -282,7 +303,7 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
                         controller: controller,
                         keyboardType: TextInputType.number,
                         style: GoogleFonts.outfit(
-                          color: Colors.white,
+                          color: colorScheme.onSurface,
                           fontSize: 26 * scale,
                           fontWeight: FontWeight.bold,
                         ),
@@ -297,7 +318,7 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
                     Text(
                       unit,
                       style: GoogleFonts.outfit(
-                        color: Colors.white30,
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                         fontSize: 15 * scale,
                       ),
                     ),
@@ -311,13 +332,14 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
     );
   }
 
-  Widget _buildSaveButton(double w) {
+  Widget _buildSaveButton(double w, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       height: 55 * w,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16 * w),
-        color: AppColors.primarayColor,
+        color: colorScheme.primary,
       ),
       child: Material(
         color: Colors.transparent,
@@ -327,7 +349,11 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
           child: Center(
             child: Text(
               "Save Changes",
-              style: GoogleFonts.outfit(color: Colors.white, fontSize: 18 * w),
+              style: GoogleFonts.outfit(
+                color: colorScheme.onPrimary,
+                fontSize: 18 * w,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -340,18 +366,20 @@ class _RingPainter extends CustomPainter {
   final Color color;
   final double progress;
   final double scale;
+  final Color trackColor;
 
   _RingPainter({
     required this.color,
     required this.progress,
     required this.scale,
+    required this.trackColor,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final strokeWidth = 4.0 * scale;
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = trackColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;

@@ -19,6 +19,8 @@ class SocialElevatedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SizedBox(
       width: double.infinity,
       height: 55 * size,
@@ -27,7 +29,7 @@ class SocialElevatedButton extends StatelessWidget {
           backgroundColor: backgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15 * size),
-            side: const BorderSide(color: Colors.white24),
+            side: BorderSide(color: theme.brightness == Brightness.dark ? Colors.white24 : colorScheme.outlineVariant),
           ),
           elevation: 2,
         ),
@@ -39,6 +41,7 @@ class SocialElevatedButton extends StatelessWidget {
               imagePath,
               width: 26 * size,
               height: 26 * size,
+              color: (backgroundColor == Colors.black || theme.brightness == Brightness.dark) ? Colors.white : null,
               errorBuilder: (context, error, stackTrace) =>
                   const Icon(Icons.error, color: Colors.red),
             ),
@@ -46,7 +49,7 @@ class SocialElevatedButton extends StatelessWidget {
             Text(
               text,
               style: GoogleFonts.inriaSans(
-                color: Colors.white,
+                color: (backgroundColor == Colors.black || theme.brightness == Brightness.dark) ? Colors.white : colorScheme.onSurface,
                 fontSize: 17 * size,
                 fontWeight: FontWeight.w500,
               ),

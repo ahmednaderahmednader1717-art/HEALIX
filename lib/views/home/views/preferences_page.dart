@@ -3,18 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_splash/core/app_colors.dart';
 import 'package:test_splash/services/notification_service.dart';
 import 'package:test_splash/services/live_activity_service.dart';
 
-class PreferencesPage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:test_splash/core/theme/theme_provider.dart';
+
+class PreferencesPage extends ConsumerStatefulWidget {
   const PreferencesPage({super.key});
 
   @override
-  State<PreferencesPage> createState() => _PreferencesPageState();
+  ConsumerState<PreferencesPage> createState() => _PreferencesPageState();
 }
 
-class _PreferencesPageState extends State<PreferencesPage> {
+class _PreferencesPageState extends ConsumerState<PreferencesPage> {
   bool _waterRemindersEnabled = false;
   bool _streakRemindersEnabled = true;
   bool _liveActivitiesEnabled = false;
@@ -68,9 +70,12 @@ class _PreferencesPageState extends State<PreferencesPage> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final w = screenWidth / 430.0;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final currentThemeMode = ref.watch(themeNotifierProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF16313B),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -79,7 +84,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
         title: Text(
           "Preferences",
           style: GoogleFonts.outfit(
-            color: Colors.white,
+            color: colorScheme.onSurface,
             fontSize: 22 * w,
             fontWeight: FontWeight.w700,
           ),
@@ -93,12 +98,12 @@ class _PreferencesPageState extends State<PreferencesPage> {
                 width: 40 * w,
                 height: 40 * w,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
+                  color: colorScheme.onSurface.withOpacity(0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.arrow_back,
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                   size: 20 * w,
                 ),
               ),
@@ -118,13 +123,15 @@ class _PreferencesPageState extends State<PreferencesPage> {
                 children: [
                   // Appearance Section
                   _buildSectionContainer(
+                    w: w,
+                    context: context,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           "Appearance",
                           style: GoogleFonts.outfit(
-                            color: Colors.white,
+                            color: colorScheme.onSurface,
                             fontSize: 20 * w,
                             fontWeight: FontWeight.w700,
                           ),
@@ -132,7 +139,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
                         Text(
                           "Choose light, dark, or system appearance",
                           style: GoogleFonts.outfit(
-                            color: Colors.white54,
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 14 * w,
                           ),
                         ),
@@ -144,28 +151,34 @@ class _PreferencesPageState extends State<PreferencesPage> {
                               "System",
                               Ionicons.contrast_outline,
                               w,
+                              isSelected: currentThemeMode == ThemeMode.system,
+                              onTap: () => ref.read(themeNotifierProvider.notifier).setTheme(ThemeMode.system),
                             ),
                             _buildAppearanceOption(
                               "Light",
                               Ionicons.sunny_outline,
                               w,
+                              isSelected: currentThemeMode == ThemeMode.light,
+                              onTap: () => ref.read(themeNotifierProvider.notifier).setTheme(ThemeMode.light),
                             ),
                             _buildAppearanceOption(
                               "Dark",
                               Ionicons.moon_outline,
                               w,
-                              isSelected: true,
+                              isSelected: currentThemeMode == ThemeMode.dark,
+                              onTap: () => ref.read(themeNotifierProvider.notifier).setTheme(ThemeMode.dark),
                             ),
                           ],
                         ),
                       ],
                     ),
-                    w: w,
                   ),
                   SizedBox(height: 16 * w),
 
                   // Notifications Section
                   _buildSectionContainer(
+                    w: w,
+                    context: context,
                     child: Column(
                       children: [
                         _buildPreferenceItem(
@@ -204,13 +217,14 @@ class _PreferencesPageState extends State<PreferencesPage> {
                         ),
                       ],
                     ),
-                    w: w,
                   ),
 
                   SizedBox(height: 16 * w),
 
                   // Units Section
                   _buildSectionContainer(
+                    w: w,
+                    context: context,
                     child: _buildPreferenceItem(
                       title: "Auto adjust macros",
                       subtitle:
@@ -219,7 +233,6 @@ class _PreferencesPageState extends State<PreferencesPage> {
                       onChanged: (v) {},
                       w: w,
                     ),
-                    w: w,
                   ),
                 ],
               ),
@@ -227,12 +240,13 @@ class _PreferencesPageState extends State<PreferencesPage> {
     );
   }
 
-  Widget _buildSectionContainer({required Widget child, required double w}) {
+  Widget _buildSectionContainer({required Widget child, required double w, required BuildContext context}) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20 * w),
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
         borderRadius: BorderRadius.circular(28 * w),
       ),
       child: child,
@@ -244,50 +258,57 @@ class _PreferencesPageState extends State<PreferencesPage> {
     IconData icon,
     double w, {
     bool isSelected = false,
+    VoidCallback? onTap,
   }) {
-    return Column(
-      children: [
-        Container(
-          width: 100 * w,
-          height: 80 * w,
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Colors.white.withOpacity(0.05)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(16 * w),
-            border: Border.all(
-              color: isSelected ? Colors.white : Colors.white12,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Center(
-            child: Icon(
-              icon,
-              color: isSelected ? Colors.white : Colors.white38,
-              size: 32 * w,
-            ),
-          ),
-        ),
-        SizedBox(height: 8 * w),
-        Row(
-          children: [
-            Icon(
-              isSelected ? Ionicons.radio_button_on : Ionicons.radio_button_off,
-              color: isSelected ? Colors.white : Colors.white38,
-              size: 16 * w,
-            ),
-            SizedBox(width: 4 * w),
-            Text(
-              label,
-              style: GoogleFonts.outfit(
-                color: isSelected ? Colors.white : Colors.white38,
-                fontSize: 16 * w,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 100 * w,
+            height: 80 * w,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? colorScheme.primary.withOpacity(0.1)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(16 * w),
+              border: Border.all(
+                color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
+                width: isSelected ? 2 : 1,
               ),
             ),
-          ],
-        ),
-      ],
+            child: Center(
+              child: Icon(
+                icon,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                size: 32 * w,
+              ),
+            ),
+          ),
+          SizedBox(height: 8 * w),
+          Row(
+            children: [
+              Icon(
+                isSelected ? Ionicons.radio_button_on : Ionicons.radio_button_off,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                size: 16 * w,
+              ),
+              SizedBox(width: 4 * w),
+              Text(
+                label,
+                style: GoogleFonts.outfit(
+                  color: isSelected ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+                  fontSize: 16 * w,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -298,6 +319,9 @@ class _PreferencesPageState extends State<PreferencesPage> {
     required ValueChanged<bool> onChanged,
     required double w,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 12 * w),
       child: Row(
@@ -309,7 +333,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
                 Text(
                   title,
                   style: GoogleFonts.outfit(
-                    color: Colors.white,
+                    color: colorScheme.onSurface,
                     fontSize: 19 * w,
                     fontWeight: FontWeight.w600,
                   ),
@@ -318,7 +342,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
                 Text(
                   subtitle,
                   style: GoogleFonts.outfit(
-                    color: Colors.white38,
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 13 * w,
                   ),
                 ),
@@ -328,7 +352,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
           SizedBox(width: 10 * w),
           CupertinoSwitch(
             value: value,
-            activeColor: const Color(0xFF4CD964), // Green as per image
+            activeTrackColor: colorScheme.primary,
             onChanged: onChanged,
           ),
         ],
@@ -340,7 +364,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
     return Container(
       height: 1,
       width: double.infinity,
-      color: Colors.white.withOpacity(0.05),
+      color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.1),
     );
   }
 }

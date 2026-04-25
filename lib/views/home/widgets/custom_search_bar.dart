@@ -35,12 +35,14 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final scale = widget.scale;
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.ContainerColor,
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: theme.brightness == Brightness.dark ? 0.69 : 0.8),
         borderRadius: BorderRadius.circular(16 * scale),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       padding: EdgeInsets.symmetric(
         horizontal: 12 * scale,
@@ -48,20 +50,20 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       ),
       child: Row(
         children: [
-          Icon(Icons.search, color: Colors.white70, size: 24 * scale),
+          Icon(Icons.search, color: colorScheme.onSurfaceVariant, size: 24 * scale),
           SizedBox(width: 8 * scale),
           Expanded(
             child: TextField(
               controller: _controller,
               onChanged: widget.onChanged,
               style: GoogleFonts.inriaSans(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 16 * scale,
               ),
-              cursorColor: Colors.white,
+              cursorColor: colorScheme.primary,
               decoration: InputDecoration(
                 hintText: 'Search meals...',
-                hintStyle: const TextStyle(color: Colors.white54),
+                hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                 border: InputBorder.none,
                 isDense: true,
                 contentPadding: EdgeInsets.symmetric(vertical: 12 * scale),
@@ -70,7 +72,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           ),
           if (_controller.text.isNotEmpty)
             IconButton(
-              icon: Icon(Icons.clear, color: Colors.white54, size: 20 * scale),
+              icon: Icon(Icons.clear, color: colorScheme.onSurfaceVariant, size: 20 * scale),
               onPressed: () {
                 _controller.clear();
                 if (widget.onChanged != null) {

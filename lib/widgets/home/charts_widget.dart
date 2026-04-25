@@ -64,24 +64,24 @@ class _AppleRingCardState extends State<AppleRingCard>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardWidth = constraints.maxWidth;
         final cardHeight = constraints.maxHeight;
         final internalScale = (cardWidth / 180).clamp(0.75, 1.1);
 
-        // اجعل السمك دائمًا ثابت (20) أو نسبة من العرض
         final ringDiameter = cardWidth * (0.80 * internalScale);
-        final ringStroke =
-            20.0; // ثابت مهما تغير الحجم (يمكنك تغييره لنسبة: max(8.0, ringDiameter * 0.10);)
+        final ringStroke = 20.0;
 
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.ContainerColor,
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(22 * widget.scale),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -100,6 +100,7 @@ class _AppleRingCardState extends State<AppleRingCard>
                       cardHeight * (0.40 * internalScale),
                     ),
                     painter: AppleBottomLabelRingPainter(
+                      context: context,
                       progress: _animation.value,
                       color: widget.color,
                       strokeWidth: ringStroke,
@@ -113,7 +114,7 @@ class _AppleRingCardState extends State<AppleRingCard>
                   Text(
                     widget.title,
                     style: GoogleFonts.inriaSans(
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       fontSize: cardHeight * 0.080 * internalScale,
                       fontWeight: FontWeight.w600,
                     ),
@@ -124,7 +125,7 @@ class _AppleRingCardState extends State<AppleRingCard>
                     builder: (context, _) => Text(
                       "${(_animation.value * 100).toInt()}%",
                       style: GoogleFonts.inriaSans(
-                        color: Colors.white.withOpacity(0.7),
+                        color: colorScheme.onSurfaceVariant,
                         fontSize: cardHeight * 0.085 * internalScale,
                       ),
                     ),
@@ -201,6 +202,8 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
   @override
   Widget build(BuildContext context) {
     final scale = widget.scale;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     // Compute ring proportions from grams eaten.
     // Calorie contribution: protein=4 kcal/g, carbs=4 kcal/g, fats=9 kcal/g
@@ -231,11 +234,11 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
       child: Container(
         padding: EdgeInsets.all(20 * scale),
         decoration: BoxDecoration(
-          color: AppColors.ContainerColor,
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: theme.brightness == Brightness.dark ? 0.69 : 0.8),
           borderRadius: BorderRadius.circular(24 * scale),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.3 : 0.1),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -248,7 +251,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
             Text(
               "Calories",
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 18 * scale,
                 fontWeight: FontWeight.bold,
               ),
@@ -271,6 +274,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
                             return CustomPaint(
                               size: Size.infinite,
                               painter: SegmentedRingPainter(
+                                context: context,
                                 protein:
                                     proteinPct *
                                     overallProgress *
@@ -300,7 +304,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
                                 return Text(
                                   '$shown',
                                   style: GoogleFonts.inter(
-                                    color: Colors.white,
+                                    color: colorScheme.onSurface,
                                     fontSize: 22 * scale,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -310,7 +314,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
                             Text(
                               '/ $goalStr kcal',
                               style: GoogleFonts.inter(
-                                color: Colors.white60,
+                                color: colorScheme.onSurfaceVariant,
                                 fontSize: 10 * scale,
                               ),
                             ),
@@ -329,6 +333,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildMacroLabel(
+                        context,
                         "Fats",
                         _showGrams
                             ? widget.fatsGrams
@@ -341,6 +346,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
                       ),
                       Gap(16 * scale),
                       _buildMacroLabel(
+                        context,
                         "Protein",
                         _showGrams
                             ? widget.proteinGrams
@@ -353,6 +359,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
                       ),
                       Gap(16 * scale),
                       _buildMacroLabel(
+                        context,
                         "Carbs",
                         _showGrams
                             ? widget.carbsGrams
@@ -375,12 +382,14 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
   }
 
   Widget _buildMacroLabel(
+    BuildContext context,
     String label,
     double value,
     String unit,
     Color color,
     double scale,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         Container(
@@ -391,7 +400,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.4),
+                color: color.withValues(alpha: 0.4),
                 blurRadius: 4,
                 spreadRadius: 1,
               ),
@@ -405,7 +414,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
             Text(
               label,
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 16 * scale,
                 fontWeight: FontWeight.w600,
               ),
@@ -429,6 +438,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
 }
 
 class SegmentedRingPainter extends CustomPainter {
+  final BuildContext context;
   final double protein;
   final double carbs;
   final double fats;
@@ -438,6 +448,7 @@ class SegmentedRingPainter extends CustomPainter {
   final Color? genericColor;
 
   SegmentedRingPainter({
+    required this.context,
     required this.protein,
     required this.carbs,
     required this.fats,
@@ -449,12 +460,13 @@ class SegmentedRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final colorScheme = Theme.of(context).colorScheme;
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
     final rect = Rect.fromCircle(center: center, radius: radius);
 
     final bgPaint = Paint()
-      ..color = backgroundColor ?? Colors.white.withOpacity(0.05)
+      ..color = backgroundColor ?? colorScheme.onSurface.withValues(alpha: 0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -501,7 +513,7 @@ class SegmentedRingPainter extends CustomPainter {
 
     // Add a subtle glow to the segment
     final glowPaint = Paint()
-      ..color = color.withOpacity(0.2)
+      ..color = color.withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth + 4
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
@@ -518,11 +530,13 @@ class SegmentedRingPainter extends CustomPainter {
 
 /// رسمة الحلقة السفلية مع اللـabel، متجاوبة مع كل الأحجام
 class AppleBottomLabelRingPainter extends CustomPainter {
+  final BuildContext context;
   final double progress;
   final Color color;
   final double strokeWidth;
 
   AppleBottomLabelRingPainter({
+    required this.context,
     required this.progress,
     required this.color,
     required this.strokeWidth,
@@ -530,13 +544,14 @@ class AppleBottomLabelRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final colorScheme = Theme.of(context).colorScheme;
     final center = Offset(size.width / 2, size.height);
     final radius = size.width / 2 - strokeWidth / 2;
 
     const totalAngle = 4 * pi / 3;
 
     final backgroundPaint = Paint()
-      ..color = Colors.grey.shade700
+      ..color = colorScheme.onSurface.withValues(alpha: 0.1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -552,7 +567,7 @@ class AppleBottomLabelRingPainter extends CustomPainter {
     final gradient = SweepGradient(
       startAngle: pi + (pi - totalAngle) / 2,
       endAngle: pi + (pi - totalAngle) / 2 + totalAngle,
-      colors: [color.withOpacity(0.7), color, color.withOpacity(0.9)],
+      colors: [color.withValues(alpha: 0.7), color, color.withValues(alpha: 0.9)],
       stops: const [0.0, 0.6, 1.0],
     );
 
@@ -565,7 +580,7 @@ class AppleBottomLabelRingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final glowPaint = Paint()
-      ..color = color.withOpacity(0.30)
+      ..color = color.withValues(alpha: 0.30)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth + 12
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
