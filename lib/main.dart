@@ -1,5 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:test_splash/l10n/app_localizations.dart';
 import 'package:test_splash/services/notification_service.dart';
 import 'package:test_splash/services/live_activity_service.dart';
 import 'package:test_splash/views/splash/splash_screen.dart';
@@ -8,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_splash/core/theme/app_theme.dart';
 import 'package:test_splash/core/theme/theme_provider.dart';
+import 'package:test_splash/core/theme/locale_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,13 +20,7 @@ void main() async {
   
   final prefs = await SharedPreferences.getInstance();
 
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.dark, // For iOS
-      statusBarIconBrightness: Brightness.light, // For Android
-      statusBarColor: Colors.transparent, // For Android
-    ),
-  );
+
 
   runApp(
     ProviderScope(
@@ -40,17 +38,40 @@ class HealixApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeNotifierProvider);
+    final locale = ref.watch(localeNotifierProvider);
+
+    final brightness = themeMode == ThemeMode.system
+        ? PlatformDispatcher.instance.platformBrightness
+        : (themeMode == ThemeMode.dark ? Brightness.dark : Brightness.light);
+    final isDark = brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.dark, // For iOS
-        statusBarIconBrightness: Brightness.light, // For Android
-        statusBarColor: Colors.transparent, // For Android
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light, // iOS
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark, // Android
       ),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        locale: const Locale('en'),
-        supportedLocales: const [Locale('en'), Locale('ar')],
+        locale: locale,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        localeResolutionCallback: (locale, supportedLocales) {
+          if (locale == null) return const Locale('en');
+          // Check if the current locale is supported
+          for (var supportedLocale in supportedLocales) {
+            if (supportedLocale.languageCode == locale.languageCode) {
+              return supportedLocale;
+            }
+          }
+          // If the locale is not supported, fallback to English
+          return const Locale('en');
+        },
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: themeMode,

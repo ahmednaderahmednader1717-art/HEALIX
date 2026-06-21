@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -12,6 +13,7 @@ import 'package:test_splash/widgets/common/healix_text_field.dart';
 import 'package:test_splash/widgets/auth/social_button.dart';
 import 'package:test_splash/widgets/common/healix_primary_button.dart';
 import 'package:test_splash/views/auth/sign_up_screen.dart';
+import 'package:test_splash/views/auth/multi_step_signup_page.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/src/web_wrapper.dart' as web;
 import 'package:test_splash/services/auth_service.dart';
@@ -143,63 +145,82 @@ class _LogInScreenState extends State<LogInScreen> {
     }
   }
 
-  Future<void> _handleGoogleSignIn(GoogleSignInAccount user) async {
+  Future<void> _handleGoogleSignIn(GoogleSignInAccount googleUser) async {
     setState(() => _loading = true);
     try {
       final payload = {
         "provider": "Google",
-        "externalId": user.id,
-        "email": user.email,
-        "fullName": user.displayName ?? "Unknown",
-        "profilePictureUrl": user.photoUrl ?? "",
+        "externalId": googleUser.id,
+        "email": googleUser.email,
+        "fullName": googleUser.displayName ?? "Unknown",
+        "profilePictureUrl": googleUser.photoUrl ?? "",
       };
 
       final response = await dio.post('/Auth/external-login', data: payload);
 
       if (response.statusCode == 200 && response.data['user'] != null) {
         final userJson = response.data['user'];
-        // ✅ الـ API بيرجع accessToken مش token
         final token =
             response.data['accessToken'] ?? response.data['token'] ?? "";
         final refreshToken = response.data['refreshToken'] ?? "";
-
-        await AuthService.saveTokens(token, refreshToken);
-
-        // حمّل المستخدم من الرد
+        
         UserInfo userObj = UserInfo.fromJson(userJson);
-        await AuthService.saveUserInfo(userObj);
-
-        // إذا كانت صورة Google متاحة وليست محلية، قم بتحميلها ورفعها للسيرفر
-        if (userObj.profilePictureUrl != null &&
-            userObj.profilePictureUrl!.startsWith(
-              'https://lh3.googleusercontent.com',
-            )) {
-          final file = await UserInfo.downloadProfileImage(
-            userObj.profilePictureUrl!,
-          );
-
-          if (file != null && file.existsSync()) {
-            // ارفعها للسيرفر الخاص بك وسيتم تعيين الرابط الجديد في كائن userObj
-            final newUrl = await userObj.uploadProfilePicture(
-              file,
-              token: token,
-            );
-
-            // خزنه محلي إذا أردت استخدامه لاحقاً
-            final prefs = await SharedPreferences.getInstance();
-            if (newUrl != null) {
-              await prefs.setString('profilePictureUrl', newUrl);
-              await AuthService.saveUserInfo(userObj); // Update cached info
-            }
-          }
+        
+        bool isNewUser = response.data['isNewUser'] == true;
+        // Fallback: If backend doesn't flag isNewUser, check if essential profile info is missing
+        if (!isNewUser && (userObj.userHeight == null || userObj.userHeight == 0 || userObj.userWeight == null || userObj.userWeight == 0)) {
+          isNewUser = true;
         }
 
-        // انتقل للواجهة الرئيسية
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => HomeScreen(user: userObj)),
-          (route) => false,
-        );
+        await AuthService.saveTokens(token, refreshToken);
+        await AuthService.saveUserInfo(userObj);
+
+        if (!mounted) return;
+
+        if (isNewUser) {
+          // New account — send to multi-step onboarding with pre-filled fields
+          Navigator.pushAndRemoveUntil(
+            context,
+            CupertinoPageRoute(
+              builder: (_) => MultiStepSignUpPage(
+                isSocialSignup: true,
+                prefillName: googleUser.displayName,
+                prefillEmail: googleUser.email,
+                prefillProfileUrl: googleUser.photoUrl,
+              ),
+            ),
+            (route) => false,
+          );
+        } else {
+          // Existing account — upload Google photo if needed, then go home
+          if (userObj.profilePictureUrl != null &&
+              userObj.profilePictureUrl!.startsWith(
+                'https://lh3.googleusercontent.com',
+              )) {
+            try {
+              final file = await UserInfo.downloadProfileImage(
+                userObj.profilePictureUrl!,
+              );
+              if (file != null && file.existsSync()) {
+                final newUrl = await userObj.uploadProfilePicture(
+                  file,
+                  token: token,
+                );
+                if (newUrl != null) {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('profilePictureUrl', newUrl);
+                  await AuthService.saveUserInfo(userObj);
+                }
+              }
+            } catch (_) {}
+          }
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => HomeScreen(user: userObj)),
+            (route) => false,
+          );
+        }
       } else {
         _showCupertinoDialog(
           "Google Sign-In failed. Status: ${response.statusCode}\nResponse: ${response.data}",
@@ -208,7 +229,7 @@ class _LogInScreenState extends State<LogInScreen> {
     } catch (e) {
       _showCupertinoDialog("Google Sign-In failed: $e");
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -256,6 +277,46 @@ class _LogInScreenState extends State<LogInScreen> {
       _showCupertinoDialog("فشل تسجيل الدخول مع جوجل: $e");
     } finally {
       setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    setState(() => _loading = true);
+    try {
+      final result = await AuthService.signInWithApple();
+
+      if (!mounted) return;
+
+      if (result.isNewUser) {
+        // New account — send to multi-step onboarding with pre-filled fields
+        Navigator.pushAndRemoveUntil(
+          context,
+          CupertinoPageRoute(
+            builder: (_) => MultiStepSignUpPage(
+              appleIdentityToken: result.identityToken,
+              prefillName: result.appleFullName,
+              prefillEmail: result.appleEmail,
+            ),
+          ),
+          (route) => false,
+        );
+      } else {
+        // Existing account — go straight home
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => HomeScreen(user: result.user)),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (e.toString().contains('AuthorizationErrorCode.canceled') ||
+          e.toString().contains('canceled')) {
+        // User dismissed the sheet — silently ignore
+        return;
+      }
+      _showCupertinoDialog('Apple Sign In failed: $e');
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -416,14 +477,13 @@ class _LogInScreenState extends State<LogInScreen> {
                     onPressed: _signInWithGoogle,
                   ),
                   Gap(15 * h),
+                  if (!kIsWeb && Platform.isIOS)
                   SocialElevatedButton(
                     text: "Sign in with Apple",
                     imagePath: "assets/icons/apple.png",
                     size: scale,
                     backgroundColor: theme.brightness == Brightness.dark ? const Color(0xFF16313B).withValues(alpha: 0.69) : Colors.black,
-                    onPressed: () {
-                      // TODO SIGN IN WITH APPLE LOGIC HERE
-                    },
+                    onPressed: _signInWithApple,
                   ),
                   Gap(30 * h),
                   Row(

@@ -161,9 +161,12 @@ class NutritionService {
         for (final raw in localRaw) {
           try {
             final logItem = NutritionLog.fromJson(jsonDecode(raw));
-            // Only DB foods (foodId > 0) can be synced to backend. AI custom foods remain local.
             if (logItem.foodId > 0) {
+              // Standard DB food — sync via existing flow
               await syncLocalLogToServer(logItem, dateStr);
+            } else {
+              // AI custom food (negative foodId) — create food on server first, then log
+              await _syncAIMealToServer(logItem, dateStr);
             }
           } catch (_) {}
         }
@@ -171,6 +174,135 @@ class NutritionService {
     } catch (e) {
       log('Error syncing pending logs: $e');
     }
+  }
+
+  /// Syncs an AI-scanned meal to the server by creating the food entry first,
+  /// then logging it. On success, removes from local storage.
+  Future<void> _syncAIMealToServer(NutritionLog logItem, String date) async {
+    if (_syncingLogs.contains(logItem.id)) return;
+    _syncingLogs.add(logItem.id);
+    try {
+      final serverLog = await logCustomMeal(
+        foodName: logItem.foodName,
+        description: logItem.description,
+        proteinPer100: logItem.originalProteinPer100 ?? logItem.protein,
+        carbsPer100: logItem.originalCarbsPer100 ?? logItem.carbs,
+        fatsPer100: logItem.originalFatsPer100 ?? logItem.fats,
+        quantity: logItem.quantity,
+        unitName: logItem.unitName ?? 'g',
+        category: logItem.category ?? 'Snacks',
+        weightPerUnit: logItem.weightPerUnit,
+        date: date,
+      );
+      if (serverLog != null) {
+        await removeLocalLog(logItem.id, date);
+      }
+    } catch (e) {
+      log('AI meal sync failed: $e');
+    } finally {
+      _syncingLogs.remove(logItem.id);
+    }
+  }
+
+  // ─── Create Custom Food (for AI meals) ──────────────────────────────────────
+
+  /// Creates a custom food on the server via POST /api/admin/foods.
+  /// Returns the server-assigned food ID on success, or null on failure.
+  Future<int?> createCustomFood({
+    required String name,
+    String? description,
+    required double protein,
+    required double carbs,
+    required double fats,
+    String category = 'Snacks',
+    String unitName = 'g',
+    String measurementType = 'Weight',
+    double? weightPerUnit,
+  }) async {
+    try {
+      final options = await _authOptions();
+      options.contentType = 'multipart/form-data';
+
+      final formData = FormData.fromMap({
+        'Name': name,
+        'Description': description ?? 'AI scanned meal',
+        'Categories': [category],
+        'DietType': 'Standard',
+        'MeasurementType': measurementType,
+        'UnitName': unitName,
+        'Protein': protein,
+        'Carbs': carbs,
+        'Fats': fats,
+        if (weightPerUnit != null) 'WeightPerUnit': weightPerUnit,
+      });
+
+      final response = await _dio.post(
+        '/admin/foods',
+        data: formData,
+        options: options,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        log('CreateCustomFood response: ${response.data}');
+        final data = response.data;
+        // Try to extract the food ID from the response
+        if (data is Map<String, dynamic>) {
+          return data['id'] ?? data['Id'] ?? data['foodId'];
+        }
+      }
+    } catch (e) {
+      log('Error creating custom food: $e');
+    }
+    return null;
+  }
+
+  // ─── Log Custom Meal (two-step: create food + log it) ───────────────────────
+
+  /// Creates a custom food on the server, then logs it.
+  /// Returns the server-created NutritionLog on success, or null on failure.
+  Future<NutritionLog?> logCustomMeal({
+    required String foodName,
+    String? description,
+    required double proteinPer100,
+    required double carbsPer100,
+    required double fatsPer100,
+    required double quantity,
+    String unitName = 'g',
+    String category = 'Snacks',
+    double? weightPerUnit,
+    String? date,
+  }) async {
+    // Step 1: Create the food on the server
+    String measurementType = 'Weight';
+    if (unitName == 'ml') {
+      measurementType = 'Liquid';
+    } else if (unitName == 'piece') {
+      measurementType = 'Unit';
+    }
+
+    final foodId = await createCustomFood(
+      name: foodName,
+      description: description,
+      protein: proteinPer100,
+      carbs: carbsPer100,
+      fats: fatsPer100,
+      category: category,
+      unitName: unitName,
+      measurementType: measurementType,
+      weightPerUnit: weightPerUnit,
+    );
+
+    if (foodId == null) {
+      log('Failed to create custom food on server');
+      return null;
+    }
+
+    // Step 2: Log it with the server-assigned foodId
+    return await logFood(
+      foodId: foodId,
+      quantity: quantity,
+      date: date,
+    );
   }
 
   /// Returns up to the past 14 days of local AI scan logs that have a valid image

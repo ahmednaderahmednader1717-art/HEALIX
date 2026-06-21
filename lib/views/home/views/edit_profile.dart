@@ -86,10 +86,27 @@ class _EditProfileState extends State<EditProfile> {
 
   Future<void> _changeProfilePicture() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
+    XFile? image;
+    try {
+      image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+    } catch (e) {
+      print("Error picking image: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().contains('invalid_image')
+                ? "Failed to load image. Try another photo or download a fresh image in the simulator."
+                : "Error picking image: $e"),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+      return;
+    }
 
     if (image == null) return;
 
@@ -257,7 +274,12 @@ class _EditProfileState extends State<EditProfile> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final userProfileImage = widget.user.profilePictureUrl ?? '';
+    final rawUrl = widget.user.profilePictureUrl ?? '';
+    final userProfileImage = rawUrl.isNotEmpty
+        ? (rawUrl.startsWith('http')
+            ? rawUrl
+            : 'http://healix26.somee.com${rawUrl.startsWith('/') ? '' : '/'}$rawUrl')
+        : '';
     final screenWidth = MediaQuery.of(context).size.width;
     final w = screenWidth / 430;
 
@@ -285,7 +307,7 @@ class _EditProfileState extends State<EditProfile> {
                 width: 40 * w,
                 height: 40 * w,
                 decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withOpacity(0.08),
+                  color: colorScheme.onSurface.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -411,7 +433,7 @@ class _EditProfileState extends State<EditProfile> {
               width: double.infinity,
               padding: EdgeInsets.all(20 * w),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(20 * w),
               ),
               child: Column(
@@ -583,7 +605,7 @@ class FullScreenImage extends StatelessWidget {
             child: SafeArea(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(

@@ -7,7 +7,7 @@ class LiveActivityService {
 
   static Future<void> init() async {
     try {
-      await _liveActivitiesPlugin.init(appGroupId: "group.com.healix.app");
+      await _liveActivitiesPlugin.init(appGroupId: "group.com.ahmednader.healix");
       _isInitialized = true;
       print('Live Activity Service Initialized successfully');
     } catch (e) {

@@ -1,0 +1,76 @@
+{
+  "@@locale": "en",
+
+  "home": "Home",
+  "search": "Search",
+  "scan": "Scan",
+  "progress": "Progress",
+  "profile": "Profile",
+
+  "todaysTotalNutrition": "Today's Total Nutrition",
+  "todaysActivity": "Today's Activity",
+  "nutritionForDate": "Nutrition for {date}",
+  "@nutritionForDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "recommendedMeals": "Recommended Meals",
+  "errorLoadingMeals": "Error loading meals",
+  "noMealsAvailable": "No meals available",
+
+  "calories": "Calories",
+  "fats": "Fats",
+  "protein": "Protein",
+  "carbs": "Carbs",
+
+  "steps": "Steps",
+  "caloriesBurned": "Calories burned",
+  "cal": "cal",
+  "water": "Water",
+  "logWater": "Log Water",
+
+  "account": "Account",
+  "personalDetails": "Personal Details",
+  "preferences": "Preferences",
+  "language": "Language",
+  "upgradeToFamilyPlan": "Upgrade to Family Plan",
+  "goalsAndTracking": "Goals & Tracking",
+  "editNutritionGoals": "Edit Nutrition Goals",
+  "trackDailyIntake": "Track Daily Intake",
+  "weightHistory": "Weight History",
+  "supportAndLegal": "Support & Legal",
+  "requestAFeature": "Request a Feature",
+  "supportEmail": "Support Email",
+  "syncData": "Sync Data",
+  "termsAndConditions": "Terms & Conditions",
+  "privacyPolicy": "Privacy Policy",
+  "followUs": "Follow Us",
+  "accountActions": "Account Actions",
+  "logout": "Logout",
+  "deleteAccount": "Delete Account",
+
+  "logoutTitle": "Logout",
+  "logoutConfirm": "Are you sure you want to logout?",
+  "deleteAccountTitle": "Delete Account",
+  "deleteAccountConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "error": "Error",
+  "ok": "OK",
+  "authTokenNotFound": "Authentication token not found. Please log in again.",
+  "anErrorOccurred": "An error occurred: {error}",
+  "@anErrorOccurred": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "failedToDeleteAccount": "Failed to delete account. Status: {status}",
+  "@failedToDeleteAccount": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+
+  "selectLanguage": "Select Language"
+}

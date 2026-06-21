@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:test_splash/core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,6 +20,11 @@ class AppTheme {
       ),
       textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
       appBarTheme: const AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark, // Dark icons for Android
+          statusBarBrightness: Brightness.light, // Dark text/icons for iOS
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black87),
@@ -56,6 +62,11 @@ class AppTheme {
       ),
       textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
       appBarTheme: const AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light, // Light icons for Android
+          statusBarBrightness: Brightness.dark, // Light text/icons for iOS
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.white),

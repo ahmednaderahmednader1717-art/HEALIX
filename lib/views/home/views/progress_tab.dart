@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/nutrition_service.dart';
 
@@ -449,17 +451,32 @@ class _NutritionCard extends StatelessWidget {
                     if (log.imageUrl != null && log.imageUrl!.isNotEmpty)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(6 * scale),
-                        child: (log.imageUrl!.startsWith('http') || log.imageUrl!.startsWith('https'))
-                            ? Image.network(
-                                log.imageUrl!,
-                                errorBuilder: (c, e, st) => Icon(Icons.restaurant_rounded, color: colorScheme.primary, size: 14 * scale),
+                        child:
+                            (log.imageUrl!.startsWith('http') ||
+                                log.imageUrl!.startsWith('https'))
+                            ? CachedNetworkImage(
+                                imageUrl: log.imageUrl!,
+                                width: 24 * scale,
+                                height: 24 * scale,
+                                fit: BoxFit.cover,
+                                placeholder: (c, url) =>
+                                    const CupertinoActivityIndicator(radius: 8),
+                                errorWidget: (c, url, error) => Icon(
+                                  Icons.restaurant_rounded,
+                                  color: colorScheme.primary,
+                                  size: 14 * scale,
+                                ),
                               )
                             : Image.file(
                                 File(log.imageUrl!),
                                 width: 24 * scale,
                                 height: 24 * scale,
                                 fit: BoxFit.cover,
-                                errorBuilder: (c, e, st) => Icon(Icons.restaurant_rounded, color: colorScheme.primary, size: 14 * scale),
+                                errorBuilder: (c, e, st) => Icon(
+                                  Icons.restaurant_rounded,
+                                  color: colorScheme.primary,
+                                  size: 14 * scale,
+                                ),
                               ),
                       )
                     else
@@ -603,8 +620,8 @@ class _DonutPainter extends CustomPainter {
     const gap = 0.04; // radians gap between arcs
     final segments = [
       (proteinPct, const Color(0xFFFF6D6D)), // Professional Red
-      (carbsPct, const Color(0xFFFFB36D)),  // Professional Orange/Amber
-      (fatsPct, const Color(0xFF6DA4FF)),   // Professional Blue
+      (carbsPct, const Color(0xFFFFB36D)), // Professional Orange/Amber
+      (fatsPct, const Color(0xFF6DA4FF)), // Professional Blue
     ];
 
     double startAngle = -pi / 2;
@@ -677,9 +694,15 @@ class _CalendarStripCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.69 : 0.8),
+        color: colorScheme.surfaceContainerHighest.withValues(
+          alpha: Theme.of(context).brightness == Brightness.dark ? 0.69 : 0.8,
+        ),
         borderRadius: BorderRadius.circular(20 * scale),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.5 : 0.2)),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(
+            alpha: Theme.of(context).brightness == Brightness.dark ? 0.5 : 0.2,
+          ),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -801,7 +824,9 @@ class _CalendarStripCard extends StatelessWidget {
                   child: Text(
                     '${date.day}',
                     style: GoogleFonts.inter(
-                      color: dotColor == Theme.of(context).colorScheme.outlineVariant
+                      color:
+                          dotColor ==
+                              Theme.of(context).colorScheme.outlineVariant
                           ? Theme.of(context).colorScheme.onSurfaceVariant
                           : Colors.white,
                       fontSize: 10 * scale,
@@ -819,7 +844,12 @@ class _CalendarStripCard extends StatelessWidget {
     );
   }
 
-  Widget _legendDot(Color color, String label, double scale, BuildContext context) {
+  Widget _legendDot(
+    Color color,
+    String label,
+    double scale,
+    BuildContext context,
+  ) {
     return Row(
       children: [
         Container(
@@ -1178,7 +1208,9 @@ class _WeightProgressCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: theme.brightness == Brightness.dark ? 0.69 : 0.8),
+        color: colorScheme.surfaceContainerHighest.withValues(
+          alpha: theme.brightness == Brightness.dark ? 0.69 : 0.8,
+        ),
         borderRadius: BorderRadius.circular(20 * scale),
       ),
       child: Column(
@@ -1293,7 +1325,10 @@ class _LineChartPainter extends CustomPainter {
       ..color = colorScheme.outlineVariant.withValues(alpha: 0.5)
       ..strokeWidth = 1;
 
-    final labelStyle = TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 11);
+    final labelStyle = TextStyle(
+      color: colorScheme.onSurfaceVariant,
+      fontSize: 11,
+    );
 
     for (double val = minY; val <= maxY; val += 2) {
       final y = toY(val);
@@ -1309,19 +1344,19 @@ class _LineChartPainter extends CustomPainter {
       ..color = Colors.white
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
-      // ..strokeCap = StrokeCap.round; // Removed for exact match
+    // ..strokeCap = StrokeCap.round; // Removed for exact match
 
     final y = toY(currentWeight);
     canvas.drawLine(Offset(chartLeft, y), Offset(chartRight, y), linePaint);
 
     final dotPaint = Paint()..color = Colors.white;
     canvas.drawCircle(Offset(chartLeft, y), 4, dotPaint);
-    
+
     // Glow removed for exact match to original look
   }
 
   @override
-  bool shouldRepaint(_LineChartPainter old) => 
+  bool shouldRepaint(_LineChartPainter old) =>
       old.currentWeight != currentWeight;
 }
 

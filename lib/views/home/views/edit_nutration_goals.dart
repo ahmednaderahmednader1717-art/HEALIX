@@ -5,6 +5,7 @@ import 'package:ionicons/ionicons.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_splash/models/user_info_model.dart';
+import 'package:test_splash/services/auth_service.dart';
 
 class EditNutrationGoals extends StatefulWidget {
   final UserInfo user;
@@ -42,12 +43,21 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
     _fetchGoals();
   }
 
-  Future<void> _fetchGoals() async {
-    setState(() => _isLoading = true);
+  Future<void> _fetchGoals({bool isRetry = false}) async {
+    if (!isRetry) setState(() => _isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("token");
-      if (token == null) return;
+      var token = prefs.getString("token");
+      if (token == null) {
+        if (mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Debug Error: Token is null in SharedPreferences")),
+            );
+          });
+        }
+        return;
+      }
 
       final response = await dio.get(
         "/nutrition/goals",
@@ -60,28 +70,84 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
       );
 
       if (response.statusCode == 200) {
-        final data = response.data;
+        final rawData = response.data;
+        // The API response might wrap the data inside a 'data' key
+        final Map<String, dynamic> data = (rawData is Map<String, dynamic> && rawData['data'] is Map<String, dynamic>)
+            ? rawData['data'] as Map<String, dynamic>
+            : (rawData is Map<String, dynamic> ? rawData : <String, dynamic>{});
+
+        String formatGoal(dynamic value) {
+          if (value == null) return "0";
+          if (value is num) {
+            // Format as integer if it has no decimal part, otherwise stringify
+            if (value % 1 == 0) {
+              return value.toInt().toString();
+            }
+            return value.toString();
+          }
+          return value.toString();
+        }
+
         setState(() {
-          _calorieController.text = (data['dailyCalorieGoal'] ?? "0")
-              .toString();
-          _proteinController.text = (data['dailyProteinGoal'] ?? "0")
-              .toString();
-          _carbController.text = (data['dailyCarbsGoal'] ?? "0").toString();
-          _fatController.text = (data['dailyFatsGoal'] ?? "0").toString();
+          _calorieController.text = formatGoal(data['dailyCalorieGoal'] ?? data['calorieGoal']);
+          _proteinController.text = formatGoal(data['dailyProteinGoal'] ?? data['proteinGoal']);
+          _carbController.text = formatGoal(data['dailyCarbsGoal'] ?? data['carbsGoal']);
+          _fatController.text = formatGoal(data['dailyFatsGoal'] ?? data['fatsGoal']);
         });
+      } else {
+        if (mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Debug Error: API returned status ${response.statusCode}")),
+            );
+          });
+        }
       }
     } catch (e) {
       print("Error fetching goals: $e");
+
+      if (e is DioException && e.response?.statusCode == 401) {
+        if (!isRetry) {
+          final refreshed = await AuthService().refreshToken();
+          if (refreshed) {
+            return _fetchGoals(isRetry: true);
+          }
+        }
+        if (mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Your session has expired. Please log out and log back in."),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          });
+        }
+        return;
+      }
+
+      if (mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Failed to load nutrition goals. Please check your connection."),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        });
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (!isRetry) setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _saveGoals() async {
-    setState(() => _isLoading = true);
+  Future<void> _saveGoals({bool isRetry = false}) async {
+    if (!isRetry) setState(() => _isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("token");
+      var token = prefs.getString("token");
       if (token == null) return;
 
       final payload = {
@@ -110,11 +176,20 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
       }
     } catch (e) {
       print("Error saving goals: $e");
+
+      // Auto-refresh token if unauthorized
+      if (e is DioException && e.response?.statusCode == 401 && !isRetry) {
+        final refreshed = await AuthService().refreshToken();
+        if (refreshed) {
+          return _saveGoals(isRetry: true);
+        }
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to update nutrition goals")),
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (!isRetry) setState(() => _isLoading = false);
     }
   }
 
@@ -159,7 +234,7 @@ class _EditNutrationGoalsState extends State<EditNutrationGoals>
                 width: 40 * w,
                 height: 40 * w,
                 decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withOpacity(0.08),
+                  color: colorScheme.onSurface.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

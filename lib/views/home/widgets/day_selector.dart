@@ -133,7 +133,7 @@ class _DaySelectorState extends State<DaySelector> {
                 double caloriesLeft = effectiveGoal - caloriesEaten;
                 Color ringColor;
                 if (caloriesLeft > 200) {
-                  ringColor = colorScheme.error; // Red
+                  ringColor = Colors.red; // Red
                 } else if (caloriesLeft > 100) {
                   ringColor = Colors.amber; // Yellow
                 } else {

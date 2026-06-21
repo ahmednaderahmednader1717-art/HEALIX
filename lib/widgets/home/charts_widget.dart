@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:test_splash/l10n/app_localizations.dart';
 import 'package:test_splash/core/app_colors.dart';
 
 // كرت حلقة أبـِل متجاوب مع جميع الأحجام
@@ -249,7 +250,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Calories",
+              AppLocalizations.of(context).calories,
               style: GoogleFonts.inter(
                 color: colorScheme.onSurface,
                 fontSize: 18 * scale,
@@ -334,7 +335,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
                     children: [
                       _buildMacroLabel(
                         context,
-                        "Fats",
+                        AppLocalizations.of(context).fats,
                         _showGrams
                             ? widget.fatsGrams
                             : (widget.calorieGoal > 0
@@ -347,7 +348,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
                       Gap(16 * scale),
                       _buildMacroLabel(
                         context,
-                        "Protein",
+                        AppLocalizations.of(context).protein,
                         _showGrams
                             ? widget.proteinGrams
                             : (widget.calorieGoal > 0
@@ -360,7 +361,7 @@ class _UnifiedMacroChartState extends State<UnifiedMacroChart>
                       Gap(16 * scale),
                       _buildMacroLabel(
                         context,
-                        "Carbs",
+                        AppLocalizations.of(context).carbs,
                         _showGrams
                             ? widget.carbsGrams
                             : (widget.calorieGoal > 0

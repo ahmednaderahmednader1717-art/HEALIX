@@ -18,11 +18,33 @@ import 'package:test_splash/views/auth/sign_up_steps/step_profile_photo.dart';
 import 'package:test_splash/services/auth_service.dart';
 import 'package:test_splash/views/home/home_screen.dart';
 import 'package:test_splash/widgets/common/healix_primary_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gap/gap.dart';
 
 class MultiStepSignUpPage extends StatefulWidget {
-  const MultiStepSignUpPage({super.key, this.user});
+  const MultiStepSignUpPage({
+    super.key,
+    this.user,
+    this.appleIdentityToken,
+    this.prefillName,
+    this.prefillEmail,
+    this.prefillProfileUrl,
+    this.isSocialSignup = false,
+  });
+
   final UserInfo? user;
+  /// When set, the form is in "Apple Sign Up" mode:
+  /// the password step is skipped and final submit calls /Auth/apple-login
+  final String? appleIdentityToken;
+  /// Set to true for any social sign-up (Google, Apple) to skip the password step
+  /// and use profile-update APIs on submit instead of re-registering.
+  final bool isSocialSignup;
+  /// Pre-fill the name field (from social credential)
+  final String? prefillName;
+  /// Pre-fill the email field (from social credential)
+  final String? prefillEmail;
+  /// Pre-fill the profile picture URL (from social credential)
+  final String? prefillProfileUrl;
 
   @override
   State<MultiStepSignUpPage> createState() => _MultiStepSignUpPageState();
@@ -31,7 +53,13 @@ class MultiStepSignUpPage extends StatefulWidget {
 class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
-  final int _totalSteps = 7;
+
+  /// Whether the user arrived via a social provider (Apple, Google, etc.)
+  /// Skips the password step and uses profile-update APIs on submit.
+  bool get _isSocialFlow => widget.appleIdentityToken != null || widget.isSocialSignup;
+
+  /// Step count: social flow skips the password step
+  int get _totalSteps => _isSocialFlow ? 6 : 7;
 
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -41,6 +69,21 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill from Apple credential if available
+    if (widget.prefillName != null && widget.prefillName!.isNotEmpty) {
+      _fullNameController.text = widget.prefillName!;
+    }
+    if (widget.prefillEmail != null && widget.prefillEmail!.isNotEmpty) {
+      _emailController.text = widget.prefillEmail!;
+    }
+    if (widget.prefillProfileUrl != null && widget.prefillProfileUrl!.isNotEmpty) {
+      _profileUrl = widget.prefillProfileUrl;
+    }
+  }
+
   String? _selectedGender;
   DateTime? _selectedDate;
   double? _selectedHeight; // was int? -- now double?
@@ -49,6 +92,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   String? _selectedBodyType;
   String? _selectedDietType;
   dynamic _profileImage; // File (mobile) أو Uint8List (web)
+  String? _profileUrl;
   String? _uploadedProfileUrl;
   bool _isLoading = false;
 
@@ -114,7 +158,8 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       if (!isValid) return;
     }
 
-    if (_currentStep == 2) {
+    // Step 2 = password — skipped for Apple flow
+    if (_currentStep == 2 && !_isSocialFlow) {
       bool isValid = true;
       if (_passwordController.text.isEmpty) {
         setState(() => _passwordError = "Please enter a password");
@@ -152,14 +197,18 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
       if (!isValid) return;
     }
 
-    if (_currentStep == 4) {
+    // Validate body-type step (visible step 4 for Apple, 4 for regular)
+    final bodyTypeVisibleStep = _isSocialFlow ? 3 : 4;
+    final dietTypeVisibleStep = _isSocialFlow ? 4 : 5;
+
+    if (_currentStep == bodyTypeVisibleStep) {
       if (_selectedBodyType == null) {
         setState(() => _bodyTypeError = "Please select your body type");
         return;
       }
     }
 
-    if (_currentStep == 5) {
+    if (_currentStep == dietTypeVisibleStep) {
       if (_selectedDietType == null) {
         setState(() => _dietTypeError = "Please select your diet type");
         return;
@@ -173,7 +222,12 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         curve: Curves.easeInOut,
       );
     } else {
-      await _signUpWithProfileImage();
+      // Final submit
+      if (_isSocialFlow) {
+        await _socialSignUpWithProfileImage();
+      } else {
+        await _signUpWithProfileImage();
+      }
     }
   }
 
@@ -187,6 +241,150 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
     }
   }
 
+  // ─── Apple final submit ────────────────────────────────────────────────────
+  Future<void> _socialSignUpWithProfileImage() async {
+    setState(() => _isLoading = true);
+    String? uploadedProfileUrl;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('token') ?? '';
+
+      // Optionally upload profile photo first
+      if (_profileImage != null && accessToken.isNotEmpty) {
+        try {
+          FormData fd;
+          if (_profileImage is File) {
+            fd = FormData.fromMap({
+              'file': await MultipartFile.fromFile((_profileImage as File).path),
+            });
+          } else if (_profileImage is Uint8List) {
+            fd = FormData.fromMap({
+              'file': MultipartFile.fromBytes(
+                _profileImage as Uint8List,
+                filename: 'profile.jpg',
+              ),
+            });
+          } else {
+            throw Exception('Unsupported image type');
+          }
+          final uploadResp = await _dio.post(
+            '/User/upload-profile-picture',
+            data: fd,
+            options: Options(
+              headers: {'Authorization': 'Bearer $accessToken'},
+              validateStatus: (s) => s != null && s < 600,
+            ),
+          );
+          if (uploadResp.statusCode == 200 || uploadResp.statusCode == 201) {
+            uploadedProfileUrl = _extractUrlFromResponse(uploadResp.data);
+            if (uploadedProfileUrl != null) {
+              setState(() => _uploadedProfileUrl = uploadedProfileUrl);
+              // Update profile picture link on server
+              await _dio.put(
+                '/User/update-profile-picture',
+                data: {'profilePictureUrl': uploadedProfileUrl},
+                options: Options(
+                  headers: {
+                    'Authorization': 'Bearer $accessToken',
+                    'Content-Type': 'application/json',
+                  },
+                ),
+              );
+            }
+          }
+        } catch (e) {
+          print('⚠️ Profile picture upload error (non-critical): $e');
+        }
+      }
+
+      // Update profile data (phone, gender, dob)
+      if (accessToken.isNotEmpty) {
+        try {
+          final profileData = {
+            if (_phoneController.text.trim().isNotEmpty)
+              'phoneNumber': _phoneController.text.trim(),
+            if (_selectedDate != null)
+              'dateOfBirth': _selectedDate!.toIso8601String(),
+            if (_selectedGender != null) 'gender': _selectedGender,
+            if (_userNameController.text.trim().isNotEmpty)
+              'username': _userNameController.text.trim(),
+          };
+          if (profileData.isNotEmpty) {
+            await _dio.put(
+              '/User/update-profile',
+              data: profileData,
+              options: Options(
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer $accessToken',
+                },
+                validateStatus: (s) => s != null && s < 600,
+              ),
+            );
+          }
+        } catch (e) {
+          print('⚠️ Profile update error (non-critical): $e');
+        }
+
+        // Update health profile (height, weight, bodyType, dietType, goalWeight)
+        try {
+          final healthData = {
+            if (_selectedHeight != null) 'height': _selectedHeight,
+            if (_selectedWeight != null) 'weight': _selectedWeight,
+            if (_selectedGoalWeight != null) 'goalWeight': _selectedGoalWeight,
+            if (_selectedBodyType != null) 'bodyType': _selectedBodyType,
+            if (_selectedDietType != null) 'dietType': _selectedDietType,
+          };
+          if (healthData.isNotEmpty) {
+            await _dio.put(
+              '/User/update-health-profile',
+              data: healthData,
+              options: Options(
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer $accessToken',
+                },
+                validateStatus: (s) => s != null && s < 600,
+              ),
+            );
+          }
+        } catch (e) {
+          print('⚠️ Health profile update error (non-critical): $e');
+        }
+      }
+
+      // Fetch updated user profile and navigate home
+      UserInfo userInfo = UserInfo(
+        username: _userNameController.text.trim(),
+        email: _emailController.text.trim(),
+        fullName: _fullNameController.text.trim(),
+        phoneNumber: _phoneController.text.trim(),
+        dateOfBirth: _selectedDate,
+        gender: _selectedGender,
+        bodyType: _selectedBodyType,
+        userHeight: _selectedHeight,
+        userWeight: _selectedWeight,
+        userGoalWeight: _selectedGoalWeight,
+        profilePictureUrl: uploadedProfileUrl,
+      );
+
+      await AuthService.saveUserInfo(userInfo);
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen(user: userInfo)),
+        (route) => false,
+      );
+    } catch (e) {
+      print('❌ Apple signup error: $e');
+      _showDialog('Something went wrong: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // ─── Regular signup ────────────────────────────────────────────────────────
   Future<void> _signUpWithProfileImage() async {
     setState(() => _isLoading = true);
     String? uploadedProfileUrl;
@@ -612,7 +810,11 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
   Widget _buildPages() => PageView(
     controller: _pageController,
     physics: const NeverScrollableScrollPhysics(),
-    children: [
+    children: _buildStepWidgets(),
+  );
+
+  List<Widget> _buildStepWidgets() {
+    final allSteps = [
       StepPersonalInfo(
         nameController: _fullNameController,
         phoneController: _phoneController,
@@ -625,6 +827,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         emailError: _emailError,
         usernameError: _usernameError,
       ),
+      // index 2 — password step (skipped for Apple)
       StepPassword(
         passwordController: _passwordController,
         confirmController: _confirmPasswordController,
@@ -636,7 +839,7 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         genderError: _genderError,
         selectedDate: _selectedDate,
         dobError: _dobError,
-        selectedHeight: _selectedHeight?.toInt(), // للـPicker يجب int
+        selectedHeight: _selectedHeight?.toInt(),
         heightError: _heightError,
         selectedWeight: _selectedWeight?.toInt(),
         weightError: _weightError,
@@ -680,12 +883,31 @@ class _MultiStepSignUpPageState extends State<MultiStepSignUpPage> {
         onSelect: (dt) => setState(() => _selectedDietType = dt),
       ),
       StepProfilePhoto(
-        selectedImage: _profileImage,
-        onImageSelected: (fileOrBytes) =>
-            setState(() => _profileImage = fileOrBytes),
+        selectedImage: _profileImage ?? _profileUrl,
+        onImageSelected: (fileOrBytes) {
+          setState(() {
+            _profileImage = fileOrBytes;
+            if (fileOrBytes == null) {
+              _profileUrl = null; // Clear prefilled URL if user removes image
+            }
+          });
+        },
       ),
-    ],
-  );
+    ];
+
+    // For Apple flow, remove the password step (index 2)
+    if (_isSocialFlow) {
+      return [
+        allSteps[0], // personal info
+        allSteps[1], // account info (email+username)
+        allSteps[3], // extra details (gender, dob, height…)
+        allSteps[4], // body type
+        allSteps[5], // diet type
+        allSteps[6], // profile photo
+      ];
+    }
+    return allSteps;
+  }
 
   Widget _buildProgressBar() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),

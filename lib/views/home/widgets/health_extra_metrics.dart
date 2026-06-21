@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:test_splash/l10n/app_localizations.dart';
 import 'package:test_splash/widgets/home/charts_widget.dart';
 import 'package:test_splash/services/health_service.dart';
 
@@ -85,7 +86,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Steps",
+            AppLocalizations.of(context).steps,
             style: GoogleFonts.inter(
               color: colorScheme.onSurfaceVariant,
               fontSize: 16 * scale,
@@ -186,7 +187,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Calories burned",
+            AppLocalizations.of(context).caloriesBurned,
             style: GoogleFonts.inter(
               color: colorScheme.onSurfaceVariant,
               fontSize: 16 * scale,
@@ -208,7 +209,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
               ),
               Gap(4 * scale),
               Text(
-                "cal",
+                AppLocalizations.of(context).cal,
                 style: GoogleFonts.inter(
                   color: colorScheme.onSurfaceVariant,
                   fontSize: 14 * scale,
@@ -230,7 +231,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Steps",
+                    AppLocalizations.of(context).steps,
                     style: GoogleFonts.inter(
                       color: colorScheme.onSurface,
                       fontSize: 16 * scale,
@@ -238,7 +239,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
                     ),
                   ),
                   Text(
-                    "${_caloriesBurned.toStringAsFixed(0)} cal",
+                    "${_caloriesBurned.toStringAsFixed(0)} ${AppLocalizations.of(context).cal}",
                     style: GoogleFonts.inter(
                       color: colorScheme.onSurfaceVariant,
                       fontSize: 12 * scale,
@@ -282,7 +283,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Water",
+                AppLocalizations.of(context).water,
                 style: GoogleFonts.inter(
                   color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * scale,
@@ -317,7 +318,7 @@ class _HealthExtraMetricsState extends State<HealthExtraMetrics> {
               ),
             ),
             child: Text(
-              "Log Water",
+              AppLocalizations.of(context).logWater,
               style: GoogleFonts.inter(
                 fontSize: 14 * scale,
                 fontWeight: FontWeight.bold,

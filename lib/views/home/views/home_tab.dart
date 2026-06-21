@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:test_splash/l10n/app_localizations.dart';
 import 'package:test_splash/views/home/widgets/day_selector.dart';
 import 'package:test_splash/views/home/widgets/meal_tile.dart';
 import 'package:test_splash/views/home/widgets/row_header.dart';
@@ -254,15 +255,16 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   String _getNutritionHeader() {
-    if (_pagerPage == 1) return "Today's Activity";
+    final loc = AppLocalizations.of(context);
+    if (_pagerPage == 1) return loc.todaysActivity;
     final now = DateTime.now();
     final isToday =
         selectedDay.year == now.year &&
         selectedDay.month == now.month &&
         selectedDay.day == now.day;
     return isToday
-        ? "Today's Total Nutrition"
-        : "Nutrition for ${DateFormat('EEE, MMM d').format(selectedDay)}";
+        ? loc.todaysTotalNutrition
+        : loc.nutritionForDate(DateFormat('EEE, MMM d').format(selectedDay));
   }
 
   @override
@@ -408,7 +410,7 @@ class _HomeTabState extends State<HomeTab> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12 * w),
                   child: Text(
-                    "Recommended Meals",
+                    AppLocalizations.of(context).recommendedMeals,
                     style: TextStyle(
                       color: colorScheme.onSurface,
                       fontSize: 18 * scale,
@@ -432,16 +434,16 @@ class _HomeTabState extends State<HomeTab> {
                           ),
                         );
                       } else if (snapshot.hasError) {
-                        return const Center(
+                        return Center(
                           child: Text(
-                            'Error loading meals',
-                            style: TextStyle(color: Colors.redAccent),
+                            AppLocalizations.of(context).errorLoadingMeals,
+                            style: const TextStyle(color: Colors.redAccent),
                           ),
                         );
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return Center(
                           child: Text(
-                            'No meals available',
+                            AppLocalizations.of(context).noMealsAvailable,
                             style: TextStyle(color: colorScheme.onSurfaceVariant),
                           ),
                         );

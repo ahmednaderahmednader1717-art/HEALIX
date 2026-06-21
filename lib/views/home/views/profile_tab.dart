@@ -6,8 +6,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_splash/l10n/app_localizations.dart';
+import 'package:test_splash/core/theme/locale_provider.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/views/home/views/edit_nutration_goals.dart';
 import 'package:test_splash/views/home/views/edit_profile.dart';
@@ -20,31 +23,28 @@ import 'package:test_splash/services/auth_service.dart';
 // مودل الكارت كما لديك
 
 // الصفحة الرئيسية
-class ProfileTab extends StatefulWidget {
+class ProfileTab extends ConsumerStatefulWidget {
   final UserInfo user;
   const ProfileTab({super.key, required this.user});
 
   @override
-  State<ProfileTab> createState() => _ProfileTabState();
+  ConsumerState<ProfileTab> createState() => _ProfileTabState();
 }
 
-class _ProfileTabState extends State<ProfileTab> {
+class _ProfileTabState extends ConsumerState<ProfileTab> {
   bool _isLoading = false;
 
-  Future<void> _deleteAccount() async {
-    // إظهار حوار التأكيد
+  void _showDeleteAccountDialog() {
+    final loc = AppLocalizations.of(context);
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text("Delete Account"),
-        content: const Text(
-          "Are you sure you want to delete your account? This action cannot be undone.",
-        ),
+        title: Text(loc.deleteAccountTitle),
+        content: Text(loc.deleteAccountConfirm),
         actions: [
           CupertinoDialogAction(
-            isDefaultAction: true,
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: Text(loc.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -52,7 +52,7 @@ class _ProfileTabState extends State<ProfileTab> {
               Navigator.pop(context); // إغلاق الحوار
               await _performDelete();
             },
-            child: const Text("Delete"),
+            child: Text(loc.delete),
           ),
         ],
       ),
@@ -103,6 +103,21 @@ class _ProfileTabState extends State<ProfileTab> {
     }
   }
 
+  void _showLanguageSheet() {
+    final currentLang = ref.read(localeNotifierProvider.notifier).currentLanguageName;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => LanguageSelectionSheet(
+        selectedLanguage: currentLang,
+        onLanguageSelected: (lang) {
+          ref.read(localeNotifierProvider.notifier).setLocale(lang);
+        },
+      ),
+    );
+  }
+
   void _showLogoutDialog() {
     showCupertinoDialog(
       context: context,
@@ -134,15 +149,16 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showErrorDialog(String message) {
+    final loc = AppLocalizations.of(context);
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text("Error"),
+        title: Text(loc.error),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
+            child: Text(loc.ok),
           ),
         ],
       ),
@@ -173,7 +189,7 @@ class _ProfileTabState extends State<ProfileTab> {
             children: [
               SizedBox(height: 70 * h),
               Text(
-                "Profile",
+                AppLocalizations.of(context).profile,
                 style: TextStyle(
                   color: colorScheme.onSurface,
                   fontSize: 32 * w,
@@ -195,7 +211,9 @@ class _ProfileTabState extends State<ProfileTab> {
                 child: Container(
                   padding: EdgeInsets.all(18 * w),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(alpha: theme.brightness == Brightness.dark ? 0.69 : 0.8),
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: theme.brightness == Brightness.dark ? 0.69 : 0.8,
+                    ),
                     borderRadius: BorderRadius.circular(22),
                   ),
                   child: Row(
@@ -209,11 +227,13 @@ class _ProfileTabState extends State<ProfileTab> {
                           color: colorScheme.surface,
                         ),
                         child: ClipOval(
-                          child: (widget.user.profilePictureUrl != null &&
+                          child:
+                              (widget.user.profilePictureUrl != null &&
                                   widget.user.profilePictureUrl!.isNotEmpty)
                               ? Builder(
                                   builder: (context) {
-                                    String rawUrl = widget.user.profilePictureUrl!;
+                                    String rawUrl =
+                                        widget.user.profilePictureUrl!;
                                     String finalUrl = rawUrl.startsWith('http')
                                         ? rawUrl
                                         : 'http://healix26.somee.com${rawUrl.startsWith('/') ? '' : '/'}$rawUrl';
@@ -222,17 +242,27 @@ class _ProfileTabState extends State<ProfileTab> {
                                         ? Image.network(
                                             'https://corsproxy.io/?${Uri.encodeComponent(finalUrl)}',
                                             fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              print("❌ Error loading image: $error");
-                                              return Image.asset(
-                                                "assets/logo/person_icon.png",
-                                                fit: BoxFit.cover,
-                                              );
-                                            },
-                                            loadingBuilder: (context, child, loadingProgress) {
-                                              if (loadingProgress == null) return child;
-                                              return const CupertinoActivityIndicator();
-                                            },
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  print(
+                                                    "❌ Error loading image: $error",
+                                                  );
+                                                  return Image.asset(
+                                                    "assets/logo/person_icon.png",
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                },
+                                            loadingBuilder:
+                                                (
+                                                  context,
+                                                  child,
+                                                  loadingProgress,
+                                                ) {
+                                                  if (loadingProgress == null) {
+                                                    return child;
+                                                  }
+                                                  return const CupertinoActivityIndicator();
+                                                },
                                           )
                                         : CachedNetworkImage(
                                             imageUrl: finalUrl,
@@ -292,7 +322,7 @@ class _ProfileTabState extends State<ProfileTab> {
 
               // Account Section
               Text(
-                "Account",
+                AppLocalizations.of(context).account,
                 style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * w,
@@ -304,7 +334,7 @@ class _ProfileTabState extends State<ProfileTab> {
               ProfileCardGroup(
                 items: [
                   ProfileCardItem(
-                    title: "Personal Details",
+                    title: AppLocalizations.of(context).personalDetails,
                     icon: Ionicons.person,
                     onTap: () => Navigator.push(
                       context,
@@ -315,7 +345,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     ),
                   ),
                   ProfileCardItem(
-                    title: "Preferences",
+                    title: AppLocalizations.of(context).preferences,
                     icon: FontAwesomeIcons.gears,
                     onTap: () => Navigator.push(
                       context,
@@ -325,12 +355,12 @@ class _ProfileTabState extends State<ProfileTab> {
                     ),
                   ),
                   ProfileCardItem(
-                    title: "Language",
+                    title: AppLocalizations.of(context).language,
                     icon: FontAwesomeIcons.language,
-                    onTap: () => print("Language clicked"),
+                    onTap: _showLanguageSheet,
                   ),
                   ProfileCardItem(
-                    title: "Upgrade to Family Plan",
+                    title: AppLocalizations.of(context).upgradeToFamilyPlan,
                     icon: Ionicons.people_outline,
                     onTap: () => print("Upgrade clicked"),
                   ),
@@ -343,7 +373,7 @@ class _ProfileTabState extends State<ProfileTab> {
 
               // Goals & Tracking
               Text(
-                "Goals & Tracking",
+                AppLocalizations.of(context).goalsAndTracking,
                 style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * w,
@@ -355,7 +385,7 @@ class _ProfileTabState extends State<ProfileTab> {
               ProfileCardGroup(
                 items: [
                   ProfileCardItem(
-                    title: "Edit Nutrition Goals",
+                    title: AppLocalizations.of(context).editNutritionGoals,
                     icon: Ionicons.nutrition_outline,
                     onTap: () => Navigator.push(
                       context,
@@ -366,12 +396,12 @@ class _ProfileTabState extends State<ProfileTab> {
                     ),
                   ),
                   ProfileCardItem(
-                    title: "Track Daily Intake",
+                    title: AppLocalizations.of(context).trackDailyIntake,
                     icon: Ionicons.trending_up_outline,
                     onTap: () => print("Track Daily Intake clicked"),
                   ),
                   ProfileCardItem(
-                    title: "Weight History",
+                    title: AppLocalizations.of(context).weightHistory,
                     icon: Ionicons.barbell_outline,
                     onTap: () {},
                   ),
@@ -383,7 +413,7 @@ class _ProfileTabState extends State<ProfileTab> {
 
               // Support & Legal
               Text(
-                "Support & Legal",
+                AppLocalizations.of(context).supportAndLegal,
                 style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * w,
@@ -395,28 +425,28 @@ class _ProfileTabState extends State<ProfileTab> {
               ProfileCardGroup(
                 items: [
                   ProfileCardItem(
-                    title: "Request a Feature",
+                    title: AppLocalizations.of(context).requestAFeature,
                     icon: Ionicons.bulb_outline,
                     onTap: () => print("Request Feature clicked"),
                   ),
                   ProfileCardItem(
-                    title: "Support Email",
+                    title: AppLocalizations.of(context).supportEmail,
                     icon: Ionicons.mail_outline,
                     onTap: () => print("Support Email clicked"),
                   ),
                   ProfileCardItem(
-                    title: "Sync Data",
+                    title: AppLocalizations.of(context).syncData,
                     icon: Ionicons.sync_outline,
                     arrow: false,
                     onTap: () {},
                   ),
                   ProfileCardItem(
-                    title: "Terms & Conditions",
+                    title: AppLocalizations.of(context).termsAndConditions,
                     icon: Ionicons.document_text_outline,
                     onTap: () {},
                   ),
                   ProfileCardItem(
-                    title: "Privacy Policy",
+                    title: AppLocalizations.of(context).privacyPolicy,
                     icon: Ionicons.lock_closed_outline,
                     onTap: () {},
                   ),
@@ -429,7 +459,7 @@ class _ProfileTabState extends State<ProfileTab> {
 
               // Follow Us
               Text(
-                "Follow Us",
+                AppLocalizations.of(context).followUs,
                 style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * w,
@@ -463,7 +493,7 @@ class _ProfileTabState extends State<ProfileTab> {
 
               // Account Actions
               Text(
-                "Account Actions",
+                AppLocalizations.of(context).accountActions,
                 style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
                   fontSize: 16 * w,
@@ -475,14 +505,14 @@ class _ProfileTabState extends State<ProfileTab> {
               ProfileCardGroup(
                 items: [
                   ProfileCardItem(
-                    title: "Logout",
+                    title: AppLocalizations.of(context).logout,
                     icon: Ionicons.log_out_outline,
                     onTap: _showLogoutDialog,
                   ),
                   ProfileCardItem(
-                    title: "Delete Account",
+                    title: AppLocalizations.of(context).deleteAccount,
                     icon: Ionicons.person_remove_outline,
-                    onTap: _deleteAccount,
+                    onTap: _showDeleteAccountDialog,
                   ),
                 ],
                 w: w,
@@ -497,7 +527,12 @@ class _ProfileTabState extends State<ProfileTab> {
         if (_isLoading)
           Container(
             color: colorScheme.surface.withValues(alpha: 0.5),
-            child: Center(child: CupertinoActivityIndicator(radius: 15, color: colorScheme.primary)),
+            child: Center(
+              child: CupertinoActivityIndicator(
+                radius: 15,
+                color: colorScheme.primary,
+              ),
+            ),
           ),
       ],
     );
@@ -565,6 +600,199 @@ class _ScaleFeedbackWrapperState extends State<ScaleFeedbackWrapper>
       onTapCancel: _handleTapCancel,
       behavior: HitTestBehavior.opaque,
       child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// Language Selection Bottom Sheet
+// ─────────────────────────────────────────────
+
+class _Language {
+  final String flag;
+  final String name;
+  const _Language(this.flag, this.name);
+}
+
+const List<_Language> _kLanguages = [
+  _Language('🇺🇸', 'English'),
+  _Language('🇪🇬', 'العربية'),
+  _Language('🇨🇳', '中国人'),
+  _Language('🇮🇳', 'हिन्दी'),
+  _Language('🇪🇸', 'Español'),
+  _Language('🇫🇷', 'Français'),
+  _Language('🇩🇪', 'Deutsch'),
+  _Language('🇷🇺', 'Русский'),
+  _Language('🇧🇷', 'Português'),
+  _Language('🇮🇹', 'Italiano'),
+  _Language('🇷🇴', 'Română'),
+  _Language('🇦🇿', 'Azərbaycanca'),
+  _Language('🇳🇱', 'Nederlands'),
+  _Language('🇯🇵', '日本語'),
+  _Language('🇰🇷', '한국어'),
+];
+
+class LanguageSelectionSheet extends StatefulWidget {
+  final String selectedLanguage;
+  final ValueChanged<String> onLanguageSelected;
+
+  const LanguageSelectionSheet({
+    super.key,
+    required this.selectedLanguage,
+    required this.onLanguageSelected,
+  });
+
+  @override
+  State<LanguageSelectionSheet> createState() => _LanguageSelectionSheetState();
+}
+
+class _LanguageSelectionSheetState extends State<LanguageSelectionSheet> {
+  late String _current;
+
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.selectedLanguage;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Container(
+      constraints: BoxConstraints(maxHeight: screenHeight * 0.85),
+      decoration: BoxDecoration(
+        color: isDark ? colorScheme.surfaceContainerHighest : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 4),
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colorScheme.onSurface.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+            child: Row(
+              children: [
+                Text(
+                  AppLocalizations.of(context).selectLanguage,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colorScheme.onSurface.withValues(alpha: 0.08),
+                    ),
+                    child: Icon(
+                      Icons.close,
+                      size: 18,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Divider(
+            height: 1,
+            color: colorScheme.onSurface.withValues(alpha: 0.08),
+          ),
+
+          // Language list
+          Flexible(
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const BouncingScrollPhysics(),
+              itemCount: _kLanguages.length,
+              separatorBuilder: (_, __) => Divider(
+                height: 1,
+                indent: 20,
+                endIndent: 20,
+                color: colorScheme.onSurface.withValues(alpha: 0.08),
+              ),
+              itemBuilder: (context, index) {
+                final lang = _kLanguages[index];
+                final isSelected = lang.name == _current;
+
+                return InkWell(
+                  onTap: () {
+                    setState(() => _current = lang.name);
+                    widget.onLanguageSelected(lang.name);
+                    Future.delayed(const Duration(milliseconds: 180), () {
+                      if (context.mounted) Navigator.pop(context);
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(lang.flag, style: const TextStyle(fontSize: 26)),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            lang.name,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        if (isSelected)
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.black,
+                            ),
+                            child: const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 12),
+        ],
+      ),
     );
   }
 }

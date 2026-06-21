@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:test_splash/models/food_model.dart';
 import 'package:test_splash/models/nutrition_models.dart';
 import 'package:test_splash/services/nutrition_service.dart';
@@ -39,19 +40,23 @@ class MealTile extends StatelessWidget {
               ),
               child: (food.imageUrl != null && food.imageUrl!.isNotEmpty)
                   ? (food.imageUrl!.startsWith('http') || food.imageUrl!.startsWith('https')
-                      ? Image.network(
-                          food.imageUrl!,
-                          width: 110 * scale,
-                          height: 90 * scale,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              _buildPlaceholder(context, scale, width: 110, height: 90),
-                        )
+                        ? CachedNetworkImage(
+                            imageUrl: food.imageUrl!,
+                            width: 110 * scale,
+                            height: 90 * scale,
+                            fit: BoxFit.cover,
+                            memCacheWidth: (110 * scale * MediaQuery.of(context).devicePixelRatio).round(),
+                            memCacheHeight: (90 * scale * MediaQuery.of(context).devicePixelRatio).round(),
+                            placeholder: (context, url) => _buildPlaceholder(context, scale, width: 110, height: 90),
+                            errorWidget: (context, url, error) => _buildPlaceholder(context, scale, width: 110, height: 90),
+                          )
                       : Image.file(
                           File(food.imageUrl!),
                           width: 110 * scale,
                           height: 90 * scale,
                           fit: BoxFit.cover,
+                          cacheWidth: (110 * scale * MediaQuery.of(context).devicePixelRatio).round(),
+                          cacheHeight: (90 * scale * MediaQuery.of(context).devicePixelRatio).round(),
                           errorBuilder: (context, error, stackTrace) =>
                               _buildPlaceholder(context, scale, width: 110, height: 90),
                         ))
@@ -352,17 +357,19 @@ class _MealDetailsSheetState extends State<_MealDetailsSheet> {
                               widget.food.imageUrl!.isNotEmpty)
                           ? (widget.food.imageUrl!.startsWith('http') ||
                                   widget.food.imageUrl!.startsWith('https')
-                              ? Image.network(
-                                  widget.food.imageUrl!,
+                              ? CachedNetworkImage(
+                                  imageUrl: widget.food.imageUrl!,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _buildPlaceholder(context, scale),
+                                  memCacheWidth: (MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio).round(),
+                                  placeholder: (context, url) => _buildPlaceholder(context, scale),
+                                  errorWidget: (context, url, error) => _buildPlaceholder(context, scale),
                                 )
                               : Image.file(
                                   File(widget.food.imageUrl!),
                                   width: double.infinity,
                                   fit: BoxFit.cover,
+                                  cacheWidth: (MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio).round(),
                                   errorBuilder: (context, error, stackTrace) =>
                                       _buildPlaceholder(context, scale),
                                 ))

@@ -66,25 +66,28 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "HEALI",
-              style: TextStyle(
-                color: colorScheme.onSurface,
-                fontSize: 55,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "HEALI",
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: 55,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
               ),
-            ),
-            HealixLogo(
-              size: 55,
-              color: colorScheme.primary,
-              duration: const Duration(seconds: 3),
-              strokeWidth: 6,
-            ),
-          ],
+              HealixLogo(
+                size: 55,
+                color: colorScheme.primary,
+                duration: const Duration(seconds: 3),
+                strokeWidth: 6,
+              ),
+            ],
+          ),
         ),
       ),
     );

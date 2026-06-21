@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:test_splash/models/user_info_model.dart';
 import 'package:test_splash/views/home/views/home_tab.dart';
+import 'package:test_splash/l10n/app_localizations.dart';
 import 'package:test_splash/views/home/views/profile_tab.dart';
 import 'package:test_splash/views/home/views/progress_tab.dart';
 import 'package:test_splash/views/home/views/scan_meal_tab.dart';
@@ -97,12 +98,12 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 90,
             tint: isDark ? const Color.fromARGB(255, 141, 215, 225) : theme.colorScheme.primary,
             items: [
-              CNTabBarItem(label: 'Home', icon: CNSymbol('house.fill')),
-              CNTabBarItem(label: 'Search', icon: CNSymbol('magnifyingglass')),
-              CNTabBarItem(label: 'Scan', icon: CNSymbol('plus.circle.fill')),
-              CNTabBarItem(label: 'Progress', icon: CNSymbol('chart.bar.fill')),
+              CNTabBarItem(label: AppLocalizations.of(context).home, icon: CNSymbol('house.fill')),
+              CNTabBarItem(label: AppLocalizations.of(context).search, icon: CNSymbol('magnifyingglass')),
+              CNTabBarItem(label: AppLocalizations.of(context).scan, icon: CNSymbol('plus.circle.fill')),
+              CNTabBarItem(label: AppLocalizations.of(context).progress, icon: CNSymbol('chart.bar.fill')),
               CNTabBarItem(
-                label: 'Profile',
+                label: AppLocalizations.of(context).profile,
                 icon: CNSymbol('person.crop.circle'),
               ),
             ],
@@ -159,11 +160,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   items: [
                     BottomNavigationBarItem(
                       icon: Icon(Icons.home, size: 30 * scale),
-                      label: "Home",
+                      label: AppLocalizations.of(context).home,
                     ),
                     BottomNavigationBarItem(
                       icon: Icon(Icons.search, size: 30 * scale),
-                      label: "Search",
+                      label: AppLocalizations.of(context).search,
                     ),
                     BottomNavigationBarItem(
                       icon: Padding(
@@ -174,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     BottomNavigationBarItem(
                       icon: Icon(Icons.insights_sharp, size: 30 * scale),
-                      label: "Progress",
+                      label: AppLocalizations.of(context).progress,
                     ),
                     BottomNavigationBarItem(
                       // CircleAvatar صورة المستخدم في التاب الخامس (Profile)
@@ -230,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
-                      label: "Profile",
+                      label: AppLocalizations.of(context).profile,
                     ),
                   ],
                 ),

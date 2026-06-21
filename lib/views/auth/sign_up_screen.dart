@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -35,99 +36,79 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final String? clientId =
       '664346993317-p759gclcv2jt2avu18tg0efkdkv28i21.apps.googleusercontent.com';
 
-  // دالة التسجيل ومعالجة حالة 400 - تعرض الرسالة للمستخدم
-  Future<void> _handleGoogleSignUp(GoogleSignInAccount user) async {
+  Future<void> _handleGoogleSignUp(GoogleSignInAccount googleUser) async {
     setState(() => _loading = true);
     try {
-      // إعداد الـpayload بشكل يلبي متطلبات الـAPI
-      final username = user.email.split('@').first;
-      final password = "GoogleSignInP@ss1"; // بطول مناسب وشروط قوية
-      final fullName =
-          (user.displayName != null && user.displayName!.length >= 3)
-          ? user.displayName!
-          : "Google User";
-
+      // Use external-login for both new and existing Google users.
+      // The server returns isNewUser=true when it creates a brand-new account.
       final payload = {
-        "username": username.length > 50
-            ? username.substring(0, 50)
-            : username, // بطول مناسب
-        "email": user.email,
-        "password": password,
-        "fullName": fullName,
-        "profilePictureUrl": user.photoUrl ?? "",
+        "provider": "Google",
+        "externalId": googleUser.id,
+        "email": googleUser.email,
+        "fullName": googleUser.displayName ?? "Unknown",
+        "profilePictureUrl": googleUser.photoUrl ?? "",
       };
 
-      final response = await dio.post('/Auth/signup', data: payload);
+      final response = await dio.post(
+        '/Auth/external-login',
+        data: payload,
+        options: Options(
+          validateStatus: (status) => status != null && status < 600,
+        ),
+      );
 
       if (response.statusCode == 200 && response.data['user'] != null) {
         final userJson = response.data['user'];
-        // ✅ الـ API بيرجع accessToken مش token
         final token =
             response.data['accessToken'] ?? response.data['token'] ?? "";
         final refreshToken = response.data['refreshToken'] ?? "";
+        
+        UserInfo userObj = UserInfo.fromJson(userJson);
+        
+        bool isNewUser = response.data['isNewUser'] == true;
+        // Fallback: If backend doesn't flag isNewUser, check if essential profile info is missing
+        if (!isNewUser && (userObj.userHeight == null || userObj.userHeight == 0 || userObj.userWeight == null || userObj.userWeight == 0)) {
+          isNewUser = true;
+        }
 
         await AuthService.saveTokens(token, refreshToken);
-        UserInfo userObj = UserInfo.fromJson(userJson);
         await AuthService.saveUserInfo(userObj);
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => MultiStepSignUpPage(user: userObj)),
-        );
-      } else {
-        _showCupertinoDialog("حدث خطأ غير متوقع أثناء التسجيل.");
-      }
-    } on DioException catch (dioError) {
-      // هنا نطبع رسالة الخطأ للتصحيح على أساسها
-      print("RESPONSE ERROR DATA: ${dioError.response?.data}");
-      final apiError = dioError.response?.data;
-      if (dioError.response?.statusCode == 400 ||
-          dioError.response?.statusCode == 409) {
-        // غالباً الإيميل مستخدم من قبل - جرب تسجيل الدخول الخارجي بنفس بيانات جوجل
-        final externalLoginPayload = {
-          "provider": "Google",
-          "externalId": user.id,
-          "email": user.email,
-          "fullName": user.displayName ?? "Unknown",
-          "profilePictureUrl": user.photoUrl ?? "",
-        };
-        final loginResponse = await dio.post(
-          '/Auth/external-login',
-          data: externalLoginPayload,
-        );
-        if (loginResponse.statusCode == 200 &&
-            loginResponse.data['user'] != null) {
-          final userJson = loginResponse.data['user'];
-          // ✅ الـ API بيرجع accessToken مش token
-          final token =
-              loginResponse.data['accessToken'] ??
-              loginResponse.data['token'] ??
-              "";
-          final refreshToken = loginResponse.data['refreshToken'] ?? "";
+        if (!mounted) return;
 
-          await AuthService.saveTokens(token, refreshToken);
-          UserInfo userObj = UserInfo.fromJson(userJson);
-          await AuthService.saveUserInfo(userObj);
-
-          // يدخل مباشرة للـHome
+        if (isNewUser) {
+          // New account — go to multi-step onboarding with pre-filled fields
+          Navigator.pushReplacement(
+            context,
+            CupertinoPageRoute(
+              builder: (_) => MultiStepSignUpPage(
+                isSocialSignup: true,
+                prefillName: googleUser.displayName,
+                prefillEmail: googleUser.email,
+                prefillProfileUrl: googleUser.photoUrl,
+              ),
+            ),
+          );
+        } else {
+          // Already has an account — go home
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => HomeScreen(user: userObj)),
             (route) => false,
           );
-        } else {
-          _showCupertinoDialog("فشل تسجيل الدخول بحساب جوجل.");
         }
       } else {
-        // عرض الرسالة من الرد للـuser أو للمطور
-        _showCupertinoDialog("خطأ في التسجيل بحساب جوجل: $apiError");
+        _showCupertinoDialog(
+          "Google Sign-Up failed. Status: ${response.statusCode}\n${response.data}",
+        );
       }
     } catch (e) {
-      _showCupertinoDialog("فشل التسجيل بواسطة جوجل: $e");
+      _showCupertinoDialog("Google Sign-Up failed: $e");
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
+
 
   Future<void> _signUpWithGoogle() async {
     setState(() => _loading = true);
@@ -152,6 +133,44 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _showCupertinoDialog("فشل التسجيل بواسطة جوجل: $e");
     } finally {
       setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _signUpWithApple() async {
+    setState(() => _loading = true);
+    try {
+      final result = await AuthService.signInWithApple();
+
+      if (!mounted) return;
+
+      if (result.isNewUser) {
+        // New user — go to onboarding with pre-filled name & email
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(
+            builder: (_) => MultiStepSignUpPage(
+              appleIdentityToken: result.identityToken,
+              prefillName: result.appleFullName,
+              prefillEmail: result.appleEmail,
+            ),
+          ),
+        );
+      } else {
+        // Already has an account — go home
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => HomeScreen(user: result.user)),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (e.toString().contains('AuthorizationErrorCode.canceled') ||
+          e.toString().contains('canceled')) {
+        return;
+      }
+      _showCupertinoDialog('Apple Sign Up failed: $e');
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -268,14 +287,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     onPressed: _signUpWithGoogle,
                   ),
                   Gap(15 * h),
+                  if (!kIsWeb && Platform.isIOS)
                   SocialElevatedButton(
-                    text: "Sign in with Apple",
+                    text: "Sign up with Apple",
                     imagePath: "assets/icons/apple.png",
                     size: scale,
                     backgroundColor: theme.brightness == Brightness.dark ? const Color(0xFF16313B).withValues(alpha: 0.69) : Colors.black,
-                    onPressed: () {
-                      // TODO SIGN IN WITH APPLE LOGIC HERE
-                    },
+                    onPressed: _signUpWithApple,
                   ),
                   Gap(80 * h),
                   RichText(

@@ -128,6 +128,9 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
       if (_imageBytes != null) {
         avatarBG = MemoryImage(_imageBytes!);
         avatarChild = null;
+      } else if (widget.selectedImage is String && widget.selectedImage.isNotEmpty) {
+        avatarBG = NetworkImage(widget.selectedImage);
+        avatarChild = null;
       } else {
         avatarBG = null;
         avatarChild = Icon(
@@ -140,6 +143,9 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
       // mobile
       if (_imageFile != null && _imageFile!.existsSync()) {
         avatarBG = FileImage(_imageFile!);
+        avatarChild = null;
+      } else if (widget.selectedImage is String && widget.selectedImage.isNotEmpty) {
+        avatarBG = NetworkImage(widget.selectedImage);
         avatarChild = null;
       } else {
         avatarBG = null;
@@ -205,7 +211,7 @@ class _StepProfilePhotoState extends State<StepProfilePhoto> {
                 }),
               ],
             ),
-            if (_imageFile != null || _imageBytes != null)
+            if (_imageFile != null || _imageBytes != null || (widget.selectedImage is String && widget.selectedImage.isNotEmpty))
               Padding(
                 padding: EdgeInsets.only(top: 40.0 * h),
                 child: TextButton(

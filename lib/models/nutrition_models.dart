@@ -13,6 +13,14 @@ class NutritionLog {
   final double calories;
   final String date;
 
+  // ── AI meal sync fields (original per-100g values for server food creation) ──
+  final double? originalProteinPer100;
+  final double? originalCarbsPer100;
+  final double? originalFatsPer100;
+  final String? category;
+  final double? weightPerUnit;
+  final String? description;
+
   NutritionLog({
     required this.id,
     required this.foodId,
@@ -26,6 +34,12 @@ class NutritionLog {
     required this.fats,
     required this.calories,
     required this.date,
+    this.originalProteinPer100,
+    this.originalCarbsPer100,
+    this.originalFatsPer100,
+    this.category,
+    this.weightPerUnit,
+    this.description,
   });
 
   factory NutritionLog.fromJson(Map<String, dynamic> json) {
@@ -114,6 +128,13 @@ class NutritionLog {
         'calories_consumed',
       ]),
       date: first(['date', 'logDate', 'log_date'])?.toString() ?? '',
+      // AI sync fields
+      originalProteinPer100: (g('originalProteinPer100') as num?)?.toDouble(),
+      originalCarbsPer100: (g('originalCarbsPer100') as num?)?.toDouble(),
+      originalFatsPer100: (g('originalFatsPer100') as num?)?.toDouble(),
+      category: g('category')?.toString(),
+      weightPerUnit: (g('weightPerUnit') as num?)?.toDouble(),
+      description: g('description')?.toString(),
     );
   }
 
@@ -131,6 +152,13 @@ class NutritionLog {
       'fats': fats,
       'calories': calories,
       'date': date,
+      // AI sync fields (only present for scanned meals)
+      if (originalProteinPer100 != null) 'originalProteinPer100': originalProteinPer100,
+      if (originalCarbsPer100 != null) 'originalCarbsPer100': originalCarbsPer100,
+      if (originalFatsPer100 != null) 'originalFatsPer100': originalFatsPer100,
+      if (category != null) 'category': category,
+      if (weightPerUnit != null) 'weightPerUnit': weightPerUnit,
+      if (description != null) 'description': description,
     };
   }
 }
